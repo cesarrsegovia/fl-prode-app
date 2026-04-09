@@ -1,0 +1,49 @@
+{
+  "name": "@prode/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "nest build",
+    "dev": "nest start --watch",
+    "start": "nest start",
+    "start:prod": "node dist/main",
+    "lint": "eslint \"{src,test}/**/*.ts\"",
+    "test": "jest",
+    "test:e2e": "jest --config ./test/jest-e2e.json"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11",
+    "@nestjs/core": "^11",
+    "@nestjs/jwt": "^11",
+    "@nestjs/passport": "^11",
+    "@nestjs/platform-express": "^11",
+    "@nestjs/platform-socket.io": "^11",
+    "@nestjs/schedule": "^5",
+    "@nestjs/websockets": "^11",
+    "@prisma/client": "^6",
+    "@prode/shared": "workspace:*",
+    "@socket.io/redis-adapter": "^8.3.0",
+    "axios": "^1",
+    "class-transformer": "^0.5",
+    "class-validator": "^0.14",
+    "ioredis": "^5",
+    "passport": "^0.7",
+    "passport-jwt": "^4",
+    "reflect-metadata": "^0.2",
+    "rxjs": "^7",
+    "socket.io": "^4"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11",
+    "@nestjs/schematics": "^11",
+    "@nestjs/testing": "^11",
+    "@types/express": "^5",
+    "@types/node": "^22",
+    "@types/passport-jwt": "^4",
+    "prisma": "^6",
+    "ts-loader": "^9",
+    "ts-node": "^10",
+    "tsconfig-paths": "^4",
+    "typescript": "^5.7"
+  }
+}

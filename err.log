@@ -1,0 +1,32 @@
+
+> @prode/web@0.1.0 build D:\Work\fl-prode-app\apps\web
+> next build
+
+   ▲ Next.js 15.5.14
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 2.9s
+   Linting and checking validity of types ...
+D:\Work\fl-prode-app\apps\web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @prode/web@0.1.0 build: `next build`
+Exit status 1
+ ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of D:\Work\package-lock.json as the root directory.
+ To silence this warning, set `outputFileTracingRoot` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/output#caveats for more information.
+ Detected additional lockfiles: 
+   * D:\Work\fl-prode-app\pnpm-lock.yaml
+
+Failed to compile.
+
+./src/app/(main)/prode/page.tsx:142:123
+Type error: Type 'string' is not assignable to type 'boolean | undefined'.
+
+[0m [90m 140 |[39m [33m<[39m[33m/[39m[33mdiv[39m[33m>[39m
+ [90m 141 |[39m [33m<[39m[33mdiv[39m className[33m=[39m[32m"flex items-center gap-2"[39m[33m>[39m
+[31m[1m>[22m[39m[90m 142 |[39m [33m<[39m[33mbutton[39m className[33m=[39m[32m"w-12 h-12 rounded-lg bg-surface-container-highest text-gray-500 font-black text-lg cursor-not-allowed"[39m disabled[33m=[39m[32m""[39m[33m>[39m[35m1[39m[33m<[39m[33m/[39m[33mbutton[39m[33m>[39m
+ [90m     |[39m                                                                                                                           [31m[1m^[22m[39m
+ [90m 143 |[39m [33m<[39m[33mbutton[39m className[33m=[39m[32m"w-12 h-12 rounded-lg bg-surface-container-highest text-gray-500 font-black text-lg cursor-not-allowed"[39m disabled[33m=[39m[32m""[39m[33m>[39m[33mX[39m[33m<[39m[33m/[39m[33mbutton[39m[33m>[39m
+ [90m 144 |[39m [33m<[39m[33mbutton[39m className[33m=[39m[32m"w-12 h-12 rounded-lg bg-surface-container-highest text-gray-500 font-black text-lg cursor-not-allowed"[39m disabled[33m=[39m[32m""[39m[33m>[39m[35m2[39m[33m<[39m[33m/[39m[33mbutton[39m[33m>[39m
+ [90m 145 |[39m [33m<[39m[33m/[39m[33mdiv[39m[33m>[39m[0m
+Next.js build worker exited with code: 1 and signal: null

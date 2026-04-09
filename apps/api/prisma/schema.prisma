@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String            @id @default(cuid())
+  email        String            @unique
+  username     String            @unique
+  avatarUrl    String?
+  bio          String?
+  createdAt    DateTime          @default(now())
+  memberships  GroupMember[]
+  predictions  Prediction[]
+  notifications Notification[]
+  achievements UserAchievement[]
+}
+
+model Group {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  inviteCode  String        @unique @default(cuid())
+  isPrivate   Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  members     GroupMember[]
+  scores      GroupScore[]
+}
+
+model GroupMember {
+  id       String   @id @default(cuid())
+  userId   String
+  groupId  String
+  role     Role     @default(MEMBER)
+  joinedAt DateTime @default(now())
+  user     User     @relation(fields: [userId], references: [id])
+  group    Group    @relation(fields: [groupId], references: [id])
+
+  @@unique([userId, groupId])
+}
+
+model Season {
+  id       String    @id @default(cuid())
+  name     String
+  isActive Boolean   @default(true)
+  fixtures Fixture[]
+}
+
+model Fixture {
+  id          String       @id @default(cuid())
+  seasonId    String
+  round       Int
+  closeAt     DateTime
+  season      Season       @relation(fields: [seasonId], references: [id])
+  matches     Match[]
+  predictions Prediction[]
+}
+
+model Match {
+  id          String      @id @default(cuid())
+  fixtureId   String
+  homeTeam    String
+  awayTeam    String
+  homeScore   Int?
+  awayScore   Int?
+  startTime   DateTime
+  status      MatchStatus @default(PENDING)
+  fixture     Fixture     @relation(fields: [fixtureId], references: [id])
+  predictions Prediction[]
+}
+
+model Prediction {
+  id             String   @id @default(cuid())
+  userId         String
+  matchId        String
+  fixtureId      String
+  result         Result
+  homeScoreGuess Int?
+  awayScoreGuess Int?
+  isCaptain      Boolean  @default(false)
+  pointsEarned   Int?
+  createdAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id])
+  match          Match    @relation(fields: [matchId], references: [id])
+  fixture        Fixture  @relation(fields: [fixtureId], references: [id])
+
+  @@unique([userId, matchId])
+}
+
+model GroupScore {
+  id       String @id @default(cuid())
+  groupId  String
+  userId   String
+  seasonId String
+  total    Int    @default(0)
+  streak   Int    @default(0)
+  group    Group  @relation(fields: [groupId], references: [id])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  message   String
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id])
+}
+
+model Achievement {
+  id          String            @id @default(cuid())
+  key         String            @unique
+  name        String
+  description String
+  users       UserAchievement[]
+}
+
+model UserAchievement {
+  id            String      @id @default(cuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime    @default(now())
+  user          User        @relation(fields: [userId], references: [id])
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+
+  @@unique([userId, achievementId])
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum MatchStatus {
+  PENDING
+  LIVE
+  FINISHED
+  CANCELLED
+}
+
+enum Result {
+  HOME
+  DRAW
+  AWAY
+}
+
+enum NotificationType {
+  FIXTURE_CLOSING
+  RESULT_CALCULATED
+  RANKING_CHANGE
+  GROUP_INVITE
+  ACHIEVEMENT_UNLOCKED
+}
