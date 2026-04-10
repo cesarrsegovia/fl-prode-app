@@ -4,6 +4,8 @@ import { Space_Grotesk, Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { AuthProvider } from "@/components/providers/AuthProvider";
+import { RealtimeProvider } from "@/components/providers/RealtimeProvider";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -33,9 +35,13 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
       </head>
       <body>
-        <Navbar />
-        {children}
-        <Footer />
+        <AuthProvider>
+          <RealtimeProvider>
+            <Navbar />
+            {children}
+            <Footer />
+          </RealtimeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

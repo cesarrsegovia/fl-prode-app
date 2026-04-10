@@ -1,16 +1,44 @@
 import type { NextAuthOptions } from 'next-auth';
-import GoogleProvider from 'next-auth/providers/google';
-import GitHubProvider from 'next-auth/providers/github';
+import CredentialsProvider from 'next-auth/providers/credentials';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:4000/api';
 
 export const authOptions: NextAuthOptions = {
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-    }),
-    GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID || '',
-      clientSecret: process.env.GITHUB_CLIENT_SECRET || '',
+    CredentialsProvider({
+      name: 'Credentials',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
+
+        try {
+          const res = await fetch(`${API_URL}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: credentials.email,
+              password: credentials.password,
+            }),
+          });
+
+          if (!res.ok) return null;
+
+          const data = await res.json();
+          // data = { accessToken, user: { id, email, username } }
+
+          return {
+            id: data.user.id,
+            email: data.user.email,
+            name: data.user.username,
+            accessToken: data.accessToken,
+          };
+        } catch {
+          return null;
+        }
+      },
     }),
   ],
   session: {
@@ -20,14 +48,26 @@ export const authOptions: NextAuthOptions = {
     signIn: '/auth',
   },
   callbacks: {
-    async jwt({ token, account }) {
-      if (account) {
-        token.accessToken = account.access_token;
+    async jwt({ token, user }) {
+      // On first sign-in, persist the backend accessToken and user info
+      if (user) {
+        token.accessToken = user.accessToken;
+        token.userId = user.id;
+        token.username = user.name ?? undefined;
       }
       return token;
     },
     async session({ session, token }) {
-      return { ...session, accessToken: token.accessToken };
+      return {
+        ...session,
+        accessToken: token.accessToken as string,
+        user: {
+          ...session.user,
+          id: token.userId as string,
+          username: token.username as string,
+        },
+      };
     },
   },
+  secret: process.env.NEXTAUTH_SECRET || 'dev-secret-change-me',
 };
