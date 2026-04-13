@@ -1,5 +1,7 @@
-import { Controller, Get, Patch, Param, Body } from '@nestjs/common';
+import { Controller, Get, Patch, Param, Body, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { UsuariosService } from './usuarios.service';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 @Controller('users')
 export class UsuariosController {
@@ -10,9 +12,12 @@ export class UsuariosController {
     return this.usuariosService.findOne(id);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Patch('me')
-  async updateMe(@Body() body: Record<string, unknown>) {
-    // TODO: extract userId from JWT
-    return this.usuariosService.update('userId', body);
+  async updateMe(
+    @CurrentUser() user: { userId: string },
+    @Body() body: Record<string, unknown>,
+  ) {
+    return this.usuariosService.update(user.userId, body);
   }
 }

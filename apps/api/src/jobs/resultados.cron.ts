@@ -1,19 +1,23 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { ResultadosService } from '../modules/resultados/resultados.service';
 
 @Injectable()
 export class ResultadosCron {
   private readonly logger = new Logger(ResultadosCron.name);
 
+  constructor(private readonly resultadosService: ResultadosService) {}
+
   @Cron(CronExpression.EVERY_MINUTE)
   async handleFixtureClose() {
-    // TODO: check if any fixture needs to be closed based on closeAt
     this.logger.debug('Checking for fixtures to close...');
+    // closeAt is enforced by FixturesService.findActive() (where closeAt > now)
+    // No extra action needed here unless sending closing notifications
   }
 
   @Cron('*/2 * * * *')
   async handleResultPolling() {
-    // TODO: poll external sports API for live match results
     this.logger.debug('Polling external API for results...');
+    await this.resultadosService.fetchAndUpdateResults();
   }
 }

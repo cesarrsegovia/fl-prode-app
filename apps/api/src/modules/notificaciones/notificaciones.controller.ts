@@ -1,6 +1,9 @@
-import { Controller, Get, Patch } from '@nestjs/common';
+import { Controller, Get, Patch, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { NotificacionesService } from './notificaciones.service';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
+@UseGuards(AuthGuard('jwt'))
 @Controller('notificaciones')
 export class NotificacionesController {
   constructor(
@@ -8,14 +11,12 @@ export class NotificacionesController {
   ) {}
 
   @Get()
-  async findAll() {
-    // TODO: extract userId from JWT
-    return this.notificacionesService.findByUser('userId');
+  async findAll(@CurrentUser() user: { userId: string }) {
+    return this.notificacionesService.findByUser(user.userId);
   }
 
   @Patch('read')
-  async markAllRead() {
-    // TODO: extract userId from JWT
-    return this.notificacionesService.markAllRead('userId');
+  async markAllRead(@CurrentUser() user: { userId: string }) {
+    return this.notificacionesService.markAllRead(user.userId);
   }
 }
