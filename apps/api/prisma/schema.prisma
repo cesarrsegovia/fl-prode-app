@@ -8,17 +8,18 @@ datasource db {
 }
 
 model User {
-  id           String            @id @default(cuid())
-  email        String            @unique
-  username     String            @unique
-  passwordHash String
-  avatarUrl    String?
-  bio          String?
-  createdAt    DateTime          @default(now())
-  memberships  GroupMember[]
-  predictions  Prediction[]
+  id            String            @id @default(cuid())
+  email         String            @unique
+  username      String            @unique
+  passwordHash  String
+  avatarUrl     String?
+  bio           String?
+  isAdmin       Boolean           @default(false)
+  createdAt     DateTime          @default(now())
+  memberships   GroupMember[]
+  predictions   Prediction[]
   notifications Notification[]
-  achievements UserAchievement[]
+  achievements  UserAchievement[]
 }
 
 model Group {
@@ -45,10 +46,11 @@ model GroupMember {
 }
 
 model Season {
-  id       String    @id @default(cuid())
-  name     String
-  isActive Boolean   @default(true)
-  fixtures Fixture[]
+  id         String    @id @default(cuid())
+  name       String
+  isActive   Boolean   @default(true)
+  externalId String?   @unique
+  fixtures   Fixture[]
 }
 
 model Fixture {
@@ -59,18 +61,21 @@ model Fixture {
   season      Season       @relation(fields: [seasonId], references: [id])
   matches     Match[]
   predictions Prediction[]
+
+  @@unique([seasonId, round])
 }
 
 model Match {
-  id          String      @id @default(cuid())
+  id          String       @id @default(cuid())
   fixtureId   String
   homeTeam    String
   awayTeam    String
   homeScore   Int?
   awayScore   Int?
   startTime   DateTime
-  status      MatchStatus @default(PENDING)
-  fixture     Fixture     @relation(fields: [fixtureId], references: [id])
+  status      MatchStatus  @default(PENDING)
+  externalId  String?      @unique
+  fixture     Fixture      @relation(fields: [fixtureId], references: [id])
   predictions Prediction[]
 }
 

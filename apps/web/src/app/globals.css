@@ -170,6 +170,24 @@
   }
 }
 
+/* Cursor pointer global — fuera de @layer para ganarle al Preflight de Tailwind v4
+   que pone cursor: default en buttons por defecto. */
+button:not(:disabled),
+a[href],
+[role="button"]:not([aria-disabled="true"]),
+label[for],
+summary,
+select:not(:disabled) {
+  cursor: pointer;
+}
+button:disabled,
+[aria-disabled="true"],
+input:disabled,
+select:disabled,
+textarea:disabled {
+  cursor: not-allowed;
+}
+
 @layer utilities {
   .font-headline {
     @apply font-heading tracking-tight;

@@ -10,13 +10,14 @@ import { ResultadosModule } from './modules/resultados/resultados.module';
 import { RankingModule } from './modules/ranking/ranking.module';
 import { NotificacionesModule } from './modules/notificaciones/notificaciones.module';
 import { GamificacionModule } from './modules/gamificacion/gamificacion.module';
-import { EventsGateway } from './websocket/events.gateway';
+import { WebsocketModule } from './websocket/websocket.module';
 import { ResultadosCron } from './jobs/resultados.cron';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
     PrismaModule,
+    WebsocketModule,
     AuthModule,
     UsuariosModule,
     GruposModule,
@@ -27,6 +28,6 @@ import { ResultadosCron } from './jobs/resultados.cron';
     NotificacionesModule,
     GamificacionModule,
   ],
-  providers: [EventsGateway, ResultadosCron],
+  providers: [ResultadosCron],
 })
 export class AppModule {}

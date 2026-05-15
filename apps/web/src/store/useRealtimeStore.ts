@@ -5,23 +5,24 @@ import { WS_EVENTS } from '@prode/shared';
 interface RealtimeState {
   socket: Socket | null;
   isConnected: boolean;
-  connect: (token?: string) => void;
+  joinedUserId: string | null;
+  connect: (token?: string, userId?: string) => void;
   disconnect: () => void;
   joinGroup: (groupId: string) => void;
   leaveGroup: (groupId: string) => void;
+  joinUser: (userId: string) => void;
 }
 
 export const useRealtimeStore = create<RealtimeState>((set, get) => ({
   socket: null,
   isConnected: false,
+  joinedUserId: null,
 
-  connect: (token?: string) => {
-    const existingSocket = get().socket;
-    if (existingSocket?.connected) return;
+  connect: (token?: string, userId?: string) => {
+    const existing = get().socket;
+    if (existing?.connected) return;
 
     const socketUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:4000';
-    
-    // Applying websocket-engineer skill exponential backoff
     const socket = io(socketUrl, {
       auth: { token },
       reconnection: true,
@@ -33,44 +34,42 @@ export const useRealtimeStore = create<RealtimeState>((set, get) => ({
     });
 
     socket.on(WS_EVENTS.CONNECT, () => {
-      console.log('Connected to realtime server', socket.id);
       set({ isConnected: true });
+      const uid = userId ?? get().joinedUserId;
+      if (uid) socket.emit(WS_EVENTS.JOIN_USER_ROOM, uid);
     });
 
     socket.on(WS_EVENTS.DISCONNECT, (reason) => {
-      console.warn('Disconnected from realtime server:', reason);
       set({ isConnected: false });
-      if (reason === 'io server disconnect') {
-        socket.connect();
-      }
+      if (reason === 'io server disconnect') socket.connect();
     });
 
     socket.on(WS_EVENTS.CONNECT_ERROR, (err) => {
       console.error('Realtime connection error:', err.message);
     });
 
-    set({ socket });
+    set({ socket, joinedUserId: userId ?? null });
   },
 
   disconnect: () => {
     const socket = get().socket;
     if (socket) {
       socket.disconnect();
-      set({ socket: null, isConnected: false });
+      set({ socket: null, isConnected: false, joinedUserId: null });
     }
   },
 
-  joinGroup: (groupId: string) => {
+  joinGroup: (groupId) => {
     const { socket, isConnected } = get();
-    if (socket && isConnected) {
-      socket.emit(WS_EVENTS.JOIN_ROOM, groupId);
-    }
+    if (socket && isConnected) socket.emit(WS_EVENTS.JOIN_ROOM, groupId);
   },
-
-  leaveGroup: (groupId: string) => {
+  leaveGroup: (groupId) => {
     const { socket, isConnected } = get();
-    if (socket && isConnected) {
-      socket.emit(WS_EVENTS.LEAVE_ROOM, groupId);
-    }
+    if (socket && isConnected) socket.emit(WS_EVENTS.LEAVE_ROOM, groupId);
+  },
+  joinUser: (userId) => {
+    const { socket, isConnected } = get();
+    set({ joinedUserId: userId });
+    if (socket && isConnected) socket.emit(WS_EVENTS.JOIN_USER_ROOM, userId);
   },
 }));

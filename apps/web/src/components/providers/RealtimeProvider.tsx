@@ -11,11 +11,9 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (status === 'authenticated' && session) {
       const token = session.accessToken;
-      if (token) {
-        connect(token);
-      }
+      const userId = (session.user as { id?: string } | undefined)?.id;
+      if (token) connect(token, userId);
     }
-
     return () => {
       disconnect();
     };

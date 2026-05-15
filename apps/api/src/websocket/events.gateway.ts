@@ -34,7 +34,6 @@ export class EventsGateway
   @SubscribeMessage(WS_EVENTS.JOIN_ROOM)
   handleJoinGroup(client: Socket, groupId: string) {
     client.join(`group:${groupId}`);
-    this.logger.log(`Client ${client.id} joined group:${groupId}`);
   }
 
   @SubscribeMessage(WS_EVENTS.LEAVE_ROOM)
@@ -42,11 +41,20 @@ export class EventsGateway
     client.leave(`group:${groupId}`);
   }
 
-  broadcastToGroup(groupId: string, event: string, data: unknown) {
+  @SubscribeMessage(WS_EVENTS.JOIN_USER_ROOM)
+  handleJoinUser(client: Socket, userId: string) {
+    client.join(`user:${userId}`);
+  }
+
+  emitToUser(userId: string, event: string, data: unknown) {
+    this.server.to(`user:${userId}`).emit(event, data);
+  }
+
+  emitToGroup(groupId: string, event: string, data: unknown) {
     this.server.to(`group:${groupId}`).emit(event, data);
   }
 
-  broadcastToAll(event: string, data: unknown) {
+  emitToAll(event: string, data: unknown) {
     this.server.emit(event, data);
   }
 }

@@ -1,9 +1,226 @@
 'use client';
 
-export function ProdeForm() {
+import { useEffect, useMemo, useState } from 'react';
+import type { FixtureWithMatches, Prediction, Result } from '@prode/shared';
+import { pronosticos } from '@/lib/endpoints';
+import { MatchCard, type MatchPick } from './MatchCard';
+import { Countdown } from './Countdown';
+
+interface Props {
+  fixture: FixtureWithMatches;
+  initialPredictions?: Prediction[];
+}
+
+type PickMap = Record<string, MatchPick>;
+
+function buildInitialPicks(preds?: Prediction[]): PickMap {
+  if (!preds?.length) return {};
+  return preds.reduce<PickMap>((acc, p) => {
+    acc[p.matchId] = {
+      result: p.result,
+      homeScoreGuess: p.homeScoreGuess ?? undefined,
+      awayScoreGuess: p.awayScoreGuess ?? undefined,
+      isCaptain: p.isCaptain,
+    };
+    return acc;
+  }, {});
+}
+
+export function ProdeForm({ fixture, initialPredictions }: Props) {
+  const [picks, setPicks] = useState<PickMap>(() =>
+    buildInitialPicks(initialPredictions),
+  );
+  const [savingMatchId, setSavingMatchId] = useState<string | null>(null);
+  const [captainId, setCaptainId] = useState<string | null>(
+    () =>
+      initialPredictions?.find((p) => p.isCaptain)?.matchId ?? null,
+  );
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  const closeAt = useMemo(() => new Date(fixture.closeAt), [fixture.closeAt]);
+  const isClosed = closeAt.getTime() <= Date.now();
+
+  const totalMatches = fixture.matches.length;
+  const filledCount = useMemo(
+    () =>
+      Object.values(picks).filter((p) => p.result !== undefined).length,
+    [picks],
+  );
+
+  useEffect(() => {
+    if (captainId) {
+      setPicks((prev) => {
+        const next: PickMap = {};
+        for (const [matchId, p] of Object.entries(prev)) {
+          next[matchId] = { ...p, isCaptain: matchId === captainId };
+        }
+        return next;
+      });
+    }
+  }, [captainId]);
+
+  const updatePick = (matchId: string, next: MatchPick) => {
+    setPicks((prev) => ({ ...prev, [matchId]: next }));
+    if (next.isCaptain) setCaptainId(matchId);
+    else if (captainId === matchId && next.isCaptain === false)
+      setCaptainId(null);
+  };
+
+  const savePick = async (matchId: string) => {
+    const pick = picks[matchId];
+    if (!pick?.result) return;
+    setSavingMatchId(matchId);
+    setSubmitError(null);
+    try {
+      await pronosticos.upsert({
+        matchId,
+        fixtureId: fixture.id,
+        result: pick.result,
+        homeScoreGuess: pick.homeScoreGuess,
+        awayScoreGuess: pick.awayScoreGuess,
+        isCaptain: pick.isCaptain,
+      });
+      setSuccessMsg('Pronóstico guardado');
+      setTimeout(() => setSuccessMsg(null), 1500);
+    } catch (err: any) {
+      setSubmitError(
+        err?.response?.data?.message ?? 'No se pudo guardar el pronóstico',
+      );
+    } finally {
+      setSavingMatchId(null);
+    }
+  };
+
+  const saveAll = async () => {
+    setSubmitError(null);
+    const entries = Object.entries(picks).filter(([, p]) => p.result);
+    if (!entries.length) {
+      setSubmitError('Marcá al menos un resultado antes de guardar.');
+      return;
+    }
+    try {
+      for (const [matchId, pick] of entries) {
+        await pronosticos.upsert({
+          matchId,
+          fixtureId: fixture.id,
+          result: pick.result as Result,
+          homeScoreGuess: pick.homeScoreGuess,
+          awayScoreGuess: pick.awayScoreGuess,
+          isCaptain: pick.isCaptain,
+        });
+      }
+      setSuccessMsg(`${entries.length} pronósticos guardados`);
+      setTimeout(() => setSuccessMsg(null), 2000);
+    } catch (err: any) {
+      setSubmitError(
+        err?.response?.data?.message ?? 'Hubo un problema al guardar',
+      );
+    }
+  };
+
   return (
-    <form>
-      {/* TODO: List of MatchCard components, captain selector, submit */}
-    </form>
+    <div className="space-y-6">
+      <div
+        className="rounded-xl p-4 flex items-center justify-between"
+        style={{ background: 'var(--surface-container-low)' }}
+      >
+        <div>
+          <p className="text-xs uppercase tracking-widest text-on-surface-variant font-bold">
+            Cierra en
+          </p>
+          <Countdown targetDate={closeAt} />
+        </div>
+        <div className="text-right">
+          <p className="text-xs uppercase tracking-widest text-on-surface-variant font-bold">
+            Progreso
+          </p>
+          <p className="text-sm font-bold text-white">
+            {filledCount} de {totalMatches} partidos
+          </p>
+          <div className="w-40 bg-surface-container-highest rounded-full h-1.5 mt-1">
+            <div
+              className="bg-primary h-full rounded-full transition-all"
+              style={{
+                width: `${totalMatches ? (filledCount / totalMatches) * 100 : 0}%`,
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {!isClosed && (
+        <div
+          className="rounded-xl p-4 flex items-center justify-between gap-4"
+          style={{ background: 'var(--surface-container-low)' }}
+        >
+          <div>
+            <p className="text-xs uppercase tracking-widest text-on-surface-variant font-bold">
+              Capitán de la fecha
+            </p>
+            <p className="text-sm font-bold text-white">
+              Dobla los puntos del partido elegido
+            </p>
+          </div>
+          <select
+            className="bg-surface-container-highest text-white text-sm rounded-lg py-2 px-3 font-medium"
+            value={captainId ?? ''}
+            onChange={(e) => setCaptainId(e.target.value || null)}
+          >
+            <option value="">Sin capitán</option>
+            {fixture.matches.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.homeTeam} vs {m.awayTeam}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      <div className="space-y-4">
+        {fixture.matches.map((match) => (
+          <div key={match.id}>
+            <MatchCard
+              match={match}
+              pick={picks[match.id]}
+              isCaptainOption={false}
+              disabled={isClosed}
+              onChange={(next) => updatePick(match.id, next)}
+            />
+            {!isClosed && picks[match.id]?.result && (
+              <div className="mt-1 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => savePick(match.id)}
+                  disabled={savingMatchId === match.id}
+                  className="text-xs font-bold text-primary hover:underline disabled:opacity-50"
+                >
+                  {savingMatchId === match.id
+                    ? 'Guardando…'
+                    : 'Guardar este'}
+                </button>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {submitError && (
+        <p className="text-sm font-bold text-red-400">{submitError}</p>
+      )}
+      {successMsg && (
+        <p className="text-sm font-bold text-primary">{successMsg}</p>
+      )}
+
+      {!isClosed && (
+        <button
+          type="button"
+          onClick={saveAll}
+          className="w-full h-14 bg-primary text-black font-extrabold text-lg rounded-xl active:scale-[0.98] transition-transform"
+        >
+          Guardar todos los pronósticos
+        </button>
+      )}
+    </div>
   );
 }

@@ -1,8 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MatchStatus, Result } from '@prisma/client';
+import { MatchStatus, NotificationType, Result } from '@prisma/client';
 import axios from 'axios';
+import { WS_EVENTS } from '@prode/shared';
 import { PrismaService } from '../../prisma/prisma.service';
+import { EventsGateway } from '../../websocket/events.gateway';
 import { GamificacionService } from '../gamificacion/gamificacion.service';
+import { NotificacionesService } from '../notificaciones/notificaciones.service';
 import {
   POINTS_CORRECT_RESULT,
   POINTS_EXACT_SCORE,
@@ -16,6 +19,8 @@ export class ResultadosService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly gamificacion: GamificacionService,
+    private readonly notificaciones: NotificacionesService,
+    private readonly events: EventsGateway,
   ) {}
 
   async fetchAndUpdateResults() {
@@ -28,7 +33,10 @@ export class ResultadosService {
     }
 
     const activeMatches = await this.prisma.match.findMany({
-      where: { status: { in: [MatchStatus.LIVE, MatchStatus.PENDING] } },
+      where: {
+        status: { in: [MatchStatus.LIVE, MatchStatus.PENDING] },
+        externalId: { not: null },
+      },
     });
 
     if (!activeMatches.length) return;
@@ -37,7 +45,7 @@ export class ResultadosService {
       try {
         const res = await axios.get(`${apiUrl}/fixtures`, {
           headers: { 'x-apisports-key': apiKey },
-          params: { id: match.id },
+          params: { id: match.externalId },
           timeout: 5000,
         });
 
@@ -57,7 +65,7 @@ export class ResultadosService {
           newStatus = MatchStatus.PENDING;
         }
 
-        await this.prisma.match.update({
+        const updated = await this.prisma.match.update({
           where: { id: match.id },
           data: {
             homeScore: homeScore ?? undefined,
@@ -65,6 +73,22 @@ export class ResultadosService {
             status: newStatus,
           },
         });
+
+        const scoreChanged =
+          match.homeScore !== updated.homeScore || match.awayScore !== updated.awayScore;
+        if (scoreChanged && updated.homeScore !== null && updated.awayScore !== null) {
+          this.events.emitToAll(WS_EVENTS.MATCH_SCORE_UPDATE, {
+            matchId: updated.id,
+            homeScore: updated.homeScore,
+            awayScore: updated.awayScore,
+          });
+        }
+        if (match.status !== newStatus) {
+          this.events.emitToAll(WS_EVENTS.MATCH_STATUS_CHANGE, {
+            matchId: updated.id,
+            status: newStatus,
+          });
+        }
 
         if (newStatus === MatchStatus.FINISHED && homeScore !== null && awayScore !== null) {
           await this.calculatePoints(match.fixtureId);
@@ -120,9 +144,31 @@ export class ResultadosService {
 
     for (const userId of affectedUsers) {
       await this.gamificacion.evaluateAchievements(userId);
+      await this.notificaciones.create(
+        userId,
+        NotificationType.RESULT_CALCULATED,
+        'Se calcularon tus puntos de la última fecha.',
+      );
     }
 
-    this.logger.log(`Calculated points for ${finished.length} predictions in fixture ${fixtureId}`);
+    // Notify everyone that global ranking may have moved
+    this.events.emitToAll(WS_EVENTS.RANKING_UPDATE, { fixtureId });
+
+    // Notify each affected group so leaderboards refresh
+    const affectedGroups = await this.prisma.groupMember.findMany({
+      where: { userId: { in: [...affectedUsers] } },
+      select: { groupId: true },
+      distinct: ['groupId'],
+    });
+    for (const g of affectedGroups) {
+      this.events.emitToGroup(g.groupId, WS_EVENTS.RANKING_UPDATE, {
+        groupId: g.groupId,
+      });
+    }
+
+    this.logger.log(
+      `Calculated points for ${finished.length} predictions in fixture ${fixtureId}`,
+    );
   }
 
   private async updateGroupScores(userId: string, points: number) {

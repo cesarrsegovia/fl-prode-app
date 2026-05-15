@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Param, Body, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { PronosticosService } from './pronosticos.service';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -17,11 +25,24 @@ export class PronosticosController {
     return this.pronosticosService.create({ ...body, userId: user.userId });
   }
 
+  @Get('me')
+  async myFixtures(@CurrentUser() user: { userId: string }) {
+    return this.pronosticosService.findMyFixtures(user.userId);
+  }
+
   @Get('me/:fechaId')
   async findMyPredictions(
     @CurrentUser() user: { userId: string },
     @Param('fechaId') fechaId: string,
   ) {
     return this.pronosticosService.findByUserAndFixture(user.userId, fechaId);
+  }
+
+  @Delete(':id')
+  async remove(
+    @CurrentUser() user: { userId: string },
+    @Param('id') id: string,
+  ) {
+    return this.pronosticosService.remove(user.userId, id);
   }
 }
