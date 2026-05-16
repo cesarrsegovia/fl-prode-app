@@ -4,6 +4,59 @@ Registro de cambios del monorepo fl-prode-app. Formato inspirado en [Keep a Chan
 
 ## [Unreleased]
 
+### Fase 4 — Mundial 2026 (Backend, 2026-05-16)
+
+Hito grande: **schema reescrito** para soportar torneos internacionales con grupos + eliminatorias, e **importador desde API-Football**.
+
+#### Schema (BREAKING — requiere `pnpm db:reset`)
+- Nuevos modelos:
+  - `Tournament` (reemplaza `Season`): name, type (LEAGUE|CUP|INTERNATIONAL), startDate/endDate, logoUrl, trophyUrl, externalId.
+  - `TournamentGroup`: grupos A→L del Mundial.
+  - `Team`: entidad real (antes era string), con flagUrl, code, confederation, colores.
+  - `TournamentTeam`: mapea qué equipos juegan qué torneo y en qué grupo.
+  - `Venue`: estadios con capacidad, ciudad, coords, imagen.
+  - `Player` + `SquadEntry`: plantillas por torneo/equipo.
+  - `GroupStanding`: cache de tablas de grupo (recalculable).
+  - `BracketPick`: predicción de campeón del torneo (bonus al final).
+- `Match` enriquecido: `stage` (GROUP/R32/R16/QF/SF/3RD/FINAL), `groupId`, `venueId`, FK a Team con `homeTeamId`/`awayTeamId` + denormalizado `homeTeamName`/`awayTeamName` (sirve para placeholders pre-bracket tipo "Ganador Grupo A"), `homeScoreET`/`awayScoreET`/`homePens`/`awayPens` para alargue y penales.
+- `Fixture` se queda como "matchday" (round 1-3 grupos, 4 R32, 5 R16, 6 QF, 7 SF, 8 3rd, 9 Final) con `name` legible.
+- `GroupScore.seasonId` → `tournamentId`.
+- Seed limpiado: solo admin + achievements + achievement nuevo `BRACKET_CHAMPION`. Sin Liga Argentina.
+
+#### Importador (`pnpm db:import-worldcup`)
+- Servicio `WorldCupImporterService` ([apps/api/src/modules/importer/worldcup-importer.service.ts](apps/api/src/modules/importer/worldcup-importer.service.ts)) consume API-Football v3 (`league=1`, `season=2026`).
+- Cliente HTTP tipado `ApiFootballClient`.
+- CLI standalone `apps/api/prisma/import-worldcup.ts` carga `.env` manualmente (sin dependencia extra de dotenv).
+- Endpoint admin: `POST /api/tournaments/worldcup/import` (alternativa al CLI).
+- Etapas: tournament metadata → teams (48) → standings/grupos → tournament-team links → venues (~16) → fixtures (matchdays) → matches (104) → squads (opcional via `IMPORT_SQUADS=1`).
+- **Idempotente**: re-ejecutar no duplica.
+- ~7 requests sin plantillas, ~55 con plantillas (cabe en el free tier de 100/día).
+
+#### Nuevos endpoints públicos
+- `GET /api/tournaments` — lista
+- `GET /api/tournaments/active` — torneo activo (Mundial una vez importado)
+- `GET /api/tournaments/:id/groups` — grupos con standings + equipos
+- `GET /api/tournaments/:id/schedule` — calendario completo por matchday
+- `GET /api/tournaments/:id/teams` — selecciones del torneo
+- `GET /api/tournaments/:id/venues` — estadios
+- `GET /api/tournaments/:id/bracket` — partidos de eliminación
+
+#### Quality (pasada `simplify`)
+- Util `statusFromApiFootball()` extraído ([apps/api/src/common/utils/api-football.util.ts](apps/api/src/common/utils/api-football.util.ts)); usado por ambos `ResultadosService` y `WorldCupImporterService`.
+- `ResultadosService.fetchAndUpdateResults()` ahora **batchea** (`ids=1-2-3`) con chunks de 20 → 1 req cada 20 partidos en vez de 1×N. Lógica extraída a `applyRemoteResult()` reusable.
+- Upserts del importer deduplicados: `data` object compartido entre `update` y `create`.
+- Loops independientes paralelizados con `Promise.all`/`Promise.allSettled`: teams, venues, standings, matches, squads. Import de ~104 partidos pasa de secuencial a en paralelo.
+- Fix de correctness: `teamByExternal.get(...) ?? ''` reemplazado por skip + warning (antes podía crear standings con `teamId` vacío).
+- `importWorldCup2026` split en 7 métodos privados con un `ImportContext` que viaja entre etapas.
+
+#### Migración a aplicar
+```bash
+pnpm db:reset                                       # destructivo: dropea Liga Argentina
+# (opcional) export SPORTS_API_KEY=...
+pnpm db:import-worldcup                             # sin plantillas
+IMPORT_SQUADS=1 pnpm db:import-worldcup             # con plantillas (48 reqs más)
+```
+
 ### Fase 3 — Frontend conectado (2026-04-23)
 
 #### Added

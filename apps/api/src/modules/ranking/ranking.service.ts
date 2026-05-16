@@ -5,9 +5,11 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class RankingService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getGlobalRanking() {
+  async getGlobalRanking(tournamentId?: string) {
+    const where = tournamentId ? { tournamentId } : {};
     const scores = await this.prisma.groupScore.groupBy({
       by: ['userId'],
+      where,
       _sum: { total: true },
       orderBy: { _sum: { total: 'desc' } },
       take: 100,
@@ -29,12 +31,16 @@ export class RankingService {
       username: userMap.get(s.userId)?.username,
       avatarUrl: userMap.get(s.userId)?.avatarUrl,
       total: s._sum.total ?? 0,
+      streak: 0,
+      positionChange: 0,
     }));
   }
 
-  async getGroupRanking(groupId: string) {
+  async getGroupRanking(groupId: string, tournamentId?: string) {
+    const where: { groupId: string; tournamentId?: string } = { groupId };
+    if (tournamentId) where.tournamentId = tournamentId;
     const scores = await this.prisma.groupScore.findMany({
-      where: { groupId },
+      where,
       orderBy: { total: 'desc' },
     });
 
@@ -55,6 +61,7 @@ export class RankingService {
       avatarUrl: userMap.get(s.userId)?.avatarUrl,
       total: s.total,
       streak: s.streak,
+      positionChange: 0,
     }));
   }
 }

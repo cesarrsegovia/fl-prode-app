@@ -27,7 +27,7 @@ export class CreateMatchInFixtureDto {
 
 export class CreateFixtureDto {
   @IsString()
-  seasonId!: string;
+  tournamentId!: string;
 
   @IsInt()
   @Min(1)

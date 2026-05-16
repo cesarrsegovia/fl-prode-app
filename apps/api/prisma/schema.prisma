@@ -7,6 +7,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ============================================================
+// USUARIOS Y GRUPOS SOCIALES
+// ============================================================
+
 model User {
   id            String            @id @default(cuid())
   email         String            @unique
@@ -18,6 +22,7 @@ model User {
   createdAt     DateTime          @default(now())
   memberships   GroupMember[]
   predictions   Prediction[]
+  bracketPicks  BracketPick[]
   notifications Notification[]
   achievements  UserAchievement[]
 }
@@ -45,39 +50,205 @@ model GroupMember {
   @@unique([userId, groupId])
 }
 
-model Season {
-  id         String    @id @default(cuid())
-  name       String
-  isActive   Boolean   @default(true)
-  externalId String?   @unique
-  fixtures   Fixture[]
+// ============================================================
+// TORNEOS (Mundial, ligas, copas, ...)
+// ============================================================
+
+model Tournament {
+  id          String            @id @default(cuid())
+  externalId  String?           @unique
+  name        String
+  type        TournamentType    @default(CUP)
+  country     String?
+  startDate   DateTime?
+  endDate     DateTime?
+  isActive    Boolean           @default(true)
+  logoUrl     String?
+  trophyUrl   String?
+  createdAt   DateTime          @default(now())
+
+  fixtures    Fixture[]
+  matches     Match[]
+  groups      TournamentGroup[]
+  teams       TournamentTeam[]
+  squads      SquadEntry[]
+  standings   GroupStanding[]
+  scores      GroupScore[]
+  bracketPicks BracketPick[]
 }
 
-model Fixture {
-  id          String       @id @default(cuid())
-  seasonId    String
-  round       Int
-  closeAt     DateTime
-  season      Season       @relation(fields: [seasonId], references: [id])
-  matches     Match[]
-  predictions Prediction[]
+model TournamentGroup {
+  id           String          @id @default(cuid())
+  tournamentId String
+  externalId   String?         @unique
+  name         String          // "A", "B", ..., "L"
 
-  @@unique([seasonId, round])
+  tournament   Tournament      @relation(fields: [tournamentId], references: [id])
+  teams        TournamentTeam[]
+  matches      Match[]
+  standings    GroupStanding[]
+
+  @@unique([tournamentId, name])
+}
+
+model Team {
+  id              String           @id @default(cuid())
+  externalId      String?          @unique
+  name            String
+  shortName       String?          // "ARG"
+  code            String?          // "AR" o ISO-2
+  flagUrl         String?
+  logoUrl         String?
+  founded         Int?
+  primaryColor    String?
+  secondaryColor  String?
+  confederation   String?          // "CONMEBOL", "UEFA", "CONCACAF", ...
+
+  tournamentTeams TournamentTeam[]
+  homeMatches     Match[]          @relation("HomeTeamMatches")
+  awayMatches     Match[]          @relation("AwayTeamMatches")
+  squad           SquadEntry[]
+  standings       GroupStanding[]
+  bracketPicks    BracketPick[]
+}
+
+model TournamentTeam {
+  id            String            @id @default(cuid())
+  tournamentId  String
+  teamId        String
+  groupId       String?           // null para torneos sin grupos
+  fifaRanking   Int?
+
+  tournament    Tournament        @relation(fields: [tournamentId], references: [id])
+  team          Team              @relation(fields: [teamId], references: [id])
+  group         TournamentGroup?  @relation(fields: [groupId], references: [id])
+
+  @@unique([tournamentId, teamId])
+}
+
+model Venue {
+  id          String   @id @default(cuid())
+  externalId  String?  @unique
+  name        String
+  city        String?
+  country     String?
+  capacity    Int?
+  imageUrl    String?
+  latitude    Float?
+  longitude   Float?
+  surface     String?
+
+  matches     Match[]
+}
+
+model Player {
+  id           String        @id @default(cuid())
+  externalId   String?       @unique
+  name         String
+  position     String?       // "Goalkeeper", "Defender", "Midfielder", "Attacker"
+  number       Int?
+  photoUrl     String?
+  age          Int?
+  nationality  String?
+
+  squad        SquadEntry[]
+}
+
+model SquadEntry {
+  id            String     @id @default(cuid())
+  tournamentId  String
+  teamId        String
+  playerId      String
+
+  tournament    Tournament @relation(fields: [tournamentId], references: [id])
+  team          Team       @relation(fields: [teamId], references: [id])
+  player        Player     @relation(fields: [playerId], references: [id])
+
+  @@unique([tournamentId, teamId, playerId])
+}
+
+// ============================================================
+// FIXTURES (matchdays) Y PARTIDOS
+// ============================================================
+
+model Fixture {
+  id           String       @id @default(cuid())
+  tournamentId String
+  round        Int          // matchday: 1, 2, 3 (grupos), 4 (R32), 5 (R16), 6 (QF), 7 (SF), 8 (3rd), 9 (Final)
+  name         String?      // "Fase de Grupos - Fecha 1", "Octavos", "Final", ...
+  closeAt      DateTime
+  tournament   Tournament   @relation(fields: [tournamentId], references: [id])
+  matches      Match[]
+  predictions  Prediction[]
+
+  @@unique([tournamentId, round])
 }
 
 model Match {
-  id          String       @id @default(cuid())
-  fixtureId   String
-  homeTeam    String
-  awayTeam    String
-  homeScore   Int?
-  awayScore   Int?
-  startTime   DateTime
-  status      MatchStatus  @default(PENDING)
-  externalId  String?      @unique
-  fixture     Fixture      @relation(fields: [fixtureId], references: [id])
-  predictions Prediction[]
+  id            String           @id @default(cuid())
+  externalId    String?          @unique
+  tournamentId  String
+  fixtureId     String
+  stage         MatchStage       @default(GROUP)
+  groupId       String?
+  venueId       String?
+
+  // Equipos: FK + denormalizado para UI rápida
+  homeTeamId    String?
+  awayTeamId    String?
+  homeTeamName  String           // copia denormalizada (puede ser "Ganador Grupo A" antes de definirse)
+  awayTeamName  String
+
+  startTime     DateTime
+  status        MatchStatus      @default(PENDING)
+
+  // Marcadores: 90', alargue, penales
+  homeScore     Int?
+  awayScore     Int?
+  homeScoreET   Int?
+  awayScoreET   Int?
+  homePens      Int?
+  awayPens      Int?
+
+  refereeName   String?
+  attendance    Int?
+  broadcasters  Json?
+
+  tournament    Tournament       @relation(fields: [tournamentId], references: [id])
+  fixture       Fixture          @relation(fields: [fixtureId], references: [id])
+  group         TournamentGroup? @relation(fields: [groupId], references: [id])
+  venue         Venue?           @relation(fields: [venueId], references: [id])
+  homeTeam      Team?            @relation("HomeTeamMatches", fields: [homeTeamId], references: [id])
+  awayTeam      Team?            @relation("AwayTeamMatches", fields: [awayTeamId], references: [id])
+  predictions   Prediction[]
 }
+
+// Standings de grupo (cacheado, recalculado al cerrar partidos)
+model GroupStanding {
+  id             String          @id @default(cuid())
+  tournamentId   String
+  groupId        String
+  teamId         String
+  played         Int             @default(0)
+  won            Int             @default(0)
+  drawn          Int             @default(0)
+  lost           Int             @default(0)
+  goalsFor       Int             @default(0)
+  goalsAgainst   Int             @default(0)
+  goalDiff       Int             @default(0)
+  points         Int             @default(0)
+  position       Int             @default(0)
+
+  tournament     Tournament      @relation(fields: [tournamentId], references: [id])
+  group          TournamentGroup @relation(fields: [groupId], references: [id])
+  team           Team            @relation(fields: [teamId], references: [id])
+
+  @@unique([groupId, teamId])
+}
+
+// ============================================================
+// PREDICCIONES
+// ============================================================
 
 model Prediction {
   id             String   @id @default(cuid())
@@ -90,6 +261,7 @@ model Prediction {
   isCaptain      Boolean  @default(false)
   pointsEarned   Int?
   createdAt      DateTime @default(now())
+
   user           User     @relation(fields: [userId], references: [id])
   match          Match    @relation(fields: [matchId], references: [id])
   fixture        Fixture  @relation(fields: [fixtureId], references: [id])
@@ -97,15 +269,43 @@ model Prediction {
   @@unique([userId, matchId])
 }
 
-model GroupScore {
-  id       String @id @default(cuid())
-  groupId  String
-  userId   String
-  seasonId String
-  total    Int    @default(0)
-  streak   Int    @default(0)
-  group    Group  @relation(fields: [groupId], references: [id])
+// Predicción de campeón del torneo (bonus al final)
+model BracketPick {
+  id             String     @id @default(cuid())
+  userId         String
+  tournamentId   String
+  champTeamId    String     // equipo que pickea como campeón
+  pointsEarned   Int?
+  createdAt      DateTime   @default(now())
+
+  user           User       @relation(fields: [userId], references: [id])
+  tournament     Tournament @relation(fields: [tournamentId], references: [id])
+  champTeam      Team       @relation(fields: [champTeamId], references: [id])
+
+  @@unique([userId, tournamentId])
 }
+
+// ============================================================
+// PUNTAJES POR GRUPO (social)
+// ============================================================
+
+model GroupScore {
+  id            String     @id @default(cuid())
+  groupId       String
+  userId        String
+  tournamentId  String
+  total         Int        @default(0)
+  streak        Int        @default(0)
+
+  group         Group      @relation(fields: [groupId], references: [id])
+  tournament    Tournament @relation(fields: [tournamentId], references: [id])
+
+  @@unique([groupId, userId, tournamentId])
+}
+
+// ============================================================
+// NOTIFICACIONES Y ACHIEVEMENTS
+// ============================================================
 
 model Notification {
   id        String           @id @default(cuid())
@@ -136,9 +336,29 @@ model UserAchievement {
   @@unique([userId, achievementId])
 }
 
+// ============================================================
+// ENUMS
+// ============================================================
+
 enum Role {
   ADMIN
   MEMBER
+}
+
+enum TournamentType {
+  LEAGUE
+  CUP
+  INTERNATIONAL
+}
+
+enum MatchStage {
+  GROUP
+  R32
+  R16
+  QUARTERFINAL
+  SEMIFINAL
+  THIRD_PLACE
+  FINAL
 }
 
 enum MatchStatus {

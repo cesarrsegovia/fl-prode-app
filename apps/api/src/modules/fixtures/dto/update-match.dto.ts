@@ -12,11 +12,11 @@ import { MatchStatus } from '@prisma/client';
 export class UpdateMatchDto {
   @IsOptional()
   @IsString()
-  homeTeam?: string;
+  homeTeamName?: string;
 
   @IsOptional()
   @IsString()
-  awayTeam?: string;
+  awayTeamName?: string;
 
   @IsOptional()
   @IsDate()
@@ -32,6 +32,26 @@ export class UpdateMatchDto {
   @IsInt()
   @Min(0)
   awayScore?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  homeScoreET?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  awayScoreET?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  homePens?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  awayPens?: number;
 
   @IsOptional()
   @IsEnum(MatchStatus)

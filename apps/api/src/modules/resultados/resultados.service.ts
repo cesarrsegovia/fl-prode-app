@@ -6,11 +6,24 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { EventsGateway } from '../../websocket/events.gateway';
 import { GamificacionService } from '../gamificacion/gamificacion.service';
 import { NotificacionesService } from '../notificaciones/notificaciones.service';
+import { statusFromApiFootball } from '../../common/utils/api-football.util';
 import {
   POINTS_CORRECT_RESULT,
   POINTS_EXACT_SCORE,
   CAPTAIN_MULTIPLIER,
 } from '@prode/shared';
+
+interface ApiFixtureResponse {
+  fixture: { id: number; status: { short: string } };
+  goals: { home: number | null; away: number | null };
+  score: {
+    extratime: { home: number | null; away: number | null };
+    penalty: { home: number | null; away: number | null };
+  };
+}
+
+// Chunk para que la URL no se desborde si hay muchísimos partidos activos.
+const BATCH_SIZE = 20;
 
 @Injectable()
 export class ResultadosService {
@@ -26,9 +39,8 @@ export class ResultadosService {
   async fetchAndUpdateResults() {
     const apiKey = process.env.SPORTS_API_KEY;
     const apiUrl = process.env.SPORTS_API_URL;
-
     if (!apiKey || !apiUrl) {
-      this.logger.warn('SPORTS_API_KEY/SPORTS_API_URL not configured. Skipping.');
+      this.logger.warn('SPORTS_API_KEY/SPORTS_API_URL no configurados. Skipping.');
       return;
     }
 
@@ -38,65 +50,82 @@ export class ResultadosService {
         externalId: { not: null },
       },
     });
-
     if (!activeMatches.length) return;
 
-    for (const match of activeMatches) {
+    const matchByExternalId = new Map(activeMatches.map((m) => [m.externalId!, m]));
+    const externalIds = activeMatches.map((m) => m.externalId!);
+
+    const affectedFixtureIds = new Set<string>();
+
+    for (let i = 0; i < externalIds.length; i += BATCH_SIZE) {
+      const chunk = externalIds.slice(i, i + BATCH_SIZE);
       try {
         const res = await axios.get(`${apiUrl}/fixtures`, {
           headers: { 'x-apisports-key': apiKey },
-          params: { id: match.externalId },
-          timeout: 5000,
+          params: { ids: chunk.join('-') },
+          timeout: 10_000,
         });
-
-        const fixtureData = res.data?.response?.[0];
-        if (!fixtureData) continue;
-
-        const homeScore: number | null = fixtureData.goals?.home ?? null;
-        const awayScore: number | null = fixtureData.goals?.away ?? null;
-        const statusShort: string = fixtureData.fixture?.status?.short ?? '';
-
-        let newStatus: MatchStatus;
-        if (statusShort === 'FT' || statusShort === 'AET' || statusShort === 'PEN') {
-          newStatus = MatchStatus.FINISHED;
-        } else if (['1H', '2H', 'HT', 'ET', 'BT', 'P', 'LIVE'].includes(statusShort)) {
-          newStatus = MatchStatus.LIVE;
-        } else {
-          newStatus = MatchStatus.PENDING;
-        }
-
-        const updated = await this.prisma.match.update({
-          where: { id: match.id },
-          data: {
-            homeScore: homeScore ?? undefined,
-            awayScore: awayScore ?? undefined,
-            status: newStatus,
-          },
-        });
-
-        const scoreChanged =
-          match.homeScore !== updated.homeScore || match.awayScore !== updated.awayScore;
-        if (scoreChanged && updated.homeScore !== null && updated.awayScore !== null) {
-          this.events.emitToAll(WS_EVENTS.MATCH_SCORE_UPDATE, {
-            matchId: updated.id,
-            homeScore: updated.homeScore,
-            awayScore: updated.awayScore,
-          });
-        }
-        if (match.status !== newStatus) {
-          this.events.emitToAll(WS_EVENTS.MATCH_STATUS_CHANGE, {
-            matchId: updated.id,
-            status: newStatus,
-          });
-        }
-
-        if (newStatus === MatchStatus.FINISHED && homeScore !== null && awayScore !== null) {
-          await this.calculatePoints(match.fixtureId);
+        const responses: ApiFixtureResponse[] = res.data?.response ?? [];
+        for (const fx of responses) {
+          const local = matchByExternalId.get(String(fx.fixture.id));
+          if (!local) continue;
+          const fixtureChanged = await this.applyRemoteResult(local, fx);
+          if (fixtureChanged) affectedFixtureIds.add(local.fixtureId);
         }
       } catch (err: any) {
-        this.logger.error(`Failed to fetch result for match ${match.id}: ${err.message}`);
+        this.logger.error(`Batch fetch failed: ${err.message}`);
       }
     }
+
+    for (const fixtureId of affectedFixtureIds) {
+      await this.calculatePoints(fixtureId);
+    }
+  }
+
+  /** Aplica el resultado remoto al match local. Devuelve true si quedó FINISHED por primera vez. */
+  private async applyRemoteResult(
+    local: { id: string; status: MatchStatus; homeScore: number | null; awayScore: number | null },
+    remote: ApiFixtureResponse,
+  ): Promise<boolean> {
+    const newStatus = statusFromApiFootball(remote.fixture.status.short);
+    const homeScore = remote.goals.home ?? null;
+    const awayScore = remote.goals.away ?? null;
+
+    const updated = await this.prisma.match.update({
+      where: { id: local.id },
+      data: {
+        homeScore: homeScore ?? undefined,
+        awayScore: awayScore ?? undefined,
+        homeScoreET: remote.score.extratime.home ?? undefined,
+        awayScoreET: remote.score.extratime.away ?? undefined,
+        homePens: remote.score.penalty.home ?? undefined,
+        awayPens: remote.score.penalty.away ?? undefined,
+        status: newStatus,
+      },
+    });
+
+    const scoreChanged =
+      local.homeScore !== updated.homeScore || local.awayScore !== updated.awayScore;
+    if (scoreChanged && updated.homeScore !== null && updated.awayScore !== null) {
+      this.events.emitToAll(WS_EVENTS.MATCH_SCORE_UPDATE, {
+        matchId: updated.id,
+        homeScore: updated.homeScore,
+        awayScore: updated.awayScore,
+      });
+    }
+    if (local.status !== newStatus) {
+      this.events.emitToAll(WS_EVENTS.MATCH_STATUS_CHANGE, {
+        matchId: updated.id,
+        status: newStatus,
+      });
+    }
+
+    const becameFinished =
+      local.status !== MatchStatus.FINISHED &&
+      newStatus === MatchStatus.FINISHED &&
+      homeScore !== null &&
+      awayScore !== null;
+    return becameFinished;
   }
 
   async calculatePoints(fixtureId: string) {
@@ -111,13 +140,14 @@ export class ResultadosService {
         p.match.homeScore !== null &&
         p.match.awayScore !== null,
     );
-
     if (!finished.length) return;
 
     const affectedUsers = new Set<string>();
+    let tournamentIdOfFixture: string | null = null;
 
     for (const pred of finished) {
       const { homeScore, awayScore } = pred.match;
+      tournamentIdOfFixture = pred.match.tournamentId;
 
       let actualResult: Result;
       if (homeScore! > awayScore!) actualResult = Result.HOME;
@@ -138,7 +168,7 @@ export class ResultadosService {
         data: { pointsEarned: points },
       });
 
-      await this.updateGroupScores(pred.userId, points);
+      await this.updateGroupScores(pred.userId, points, pred.match.tournamentId);
       affectedUsers.add(pred.userId);
     }
 
@@ -151,10 +181,11 @@ export class ResultadosService {
       );
     }
 
-    // Notify everyone that global ranking may have moved
-    this.events.emitToAll(WS_EVENTS.RANKING_UPDATE, { fixtureId });
+    this.events.emitToAll(WS_EVENTS.RANKING_UPDATE, {
+      fixtureId,
+      tournamentId: tournamentIdOfFixture,
+    });
 
-    // Notify each affected group so leaderboards refresh
     const affectedGroups = await this.prisma.groupMember.findMany({
       where: { userId: { in: [...affectedUsers] } },
       select: { groupId: true },
@@ -171,21 +202,18 @@ export class ResultadosService {
     );
   }
 
-  private async updateGroupScores(userId: string, points: number) {
-    const [memberships, activeSeason] = await Promise.all([
-      this.prisma.groupMember.findMany({
-        where: { userId },
-        include: {
-          group: { include: { scores: { where: { userId } } } },
-        },
-      }),
-      this.prisma.season.findFirst({ where: { isActive: true } }),
-    ]);
-
-    if (!activeSeason) return;
-
+  private async updateGroupScores(userId: string, points: number, tournamentId: string) {
+    const memberships = await this.prisma.groupMember.findMany({ where: { userId } });
     for (const membership of memberships) {
-      const existing = membership.group.scores[0];
+      const existing = await this.prisma.groupScore.findUnique({
+        where: {
+          groupId_userId_tournamentId: {
+            groupId: membership.groupId,
+            userId,
+            tournamentId,
+          },
+        },
+      });
       if (existing) {
         const newStreak = points > 0 ? existing.streak + 1 : 0;
         await this.prisma.groupScore.update({
@@ -197,7 +225,7 @@ export class ResultadosService {
           data: {
             userId,
             groupId: membership.groupId,
-            seasonId: activeSeason.id,
+            tournamentId,
             total: points,
             streak: points > 0 ? 1 : 0,
           },

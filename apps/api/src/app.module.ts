@@ -10,6 +10,8 @@ import { ResultadosModule } from './modules/resultados/resultados.module';
 import { RankingModule } from './modules/ranking/ranking.module';
 import { NotificacionesModule } from './modules/notificaciones/notificaciones.module';
 import { GamificacionModule } from './modules/gamificacion/gamificacion.module';
+import { TournamentsModule } from './modules/tournaments/tournaments.module';
+import { ImporterModule } from './modules/importer/importer.module';
 import { WebsocketModule } from './websocket/websocket.module';
 import { ResultadosCron } from './jobs/resultados.cron';
 
@@ -27,6 +29,8 @@ import { ResultadosCron } from './jobs/resultados.cron';
     RankingModule,
     NotificacionesModule,
     GamificacionModule,
+    TournamentsModule,
+    ImporterModule,
   ],
   providers: [ResultadosCron],
 })

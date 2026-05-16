@@ -4,6 +4,13 @@ import { CreateFixtureDto } from './dto/create-fixture.dto';
 import { UpdateFixtureDto } from './dto/update-fixture.dto';
 import { UpdateMatchDto } from './dto/update-match.dto';
 
+const MATCH_INCLUDE = {
+  homeTeam: true,
+  awayTeam: true,
+  venue: true,
+  group: true,
+} as const;
+
 @Injectable()
 export class FixturesService {
   constructor(private readonly prisma: PrismaService) {}
@@ -11,14 +18,14 @@ export class FixturesService {
   async findActive() {
     return this.prisma.fixture.findMany({
       where: { closeAt: { gt: new Date() } },
-      include: { matches: { orderBy: { startTime: 'asc' } } },
+      include: { matches: { include: MATCH_INCLUDE, orderBy: { startTime: 'asc' } } },
       orderBy: { closeAt: 'asc' },
     });
   }
 
   async findUpcoming(limit = 5) {
     return this.prisma.fixture.findMany({
-      include: { matches: { orderBy: { startTime: 'asc' } } },
+      include: { matches: { include: MATCH_INCLUDE, orderBy: { startTime: 'asc' } } },
       orderBy: { closeAt: 'asc' },
       take: limit,
     });
@@ -27,7 +34,7 @@ export class FixturesService {
   async findOne(id: string) {
     const fixture = await this.prisma.fixture.findUnique({
       where: { id },
-      include: { matches: { orderBy: { startTime: 'asc' } } },
+      include: { matches: { include: MATCH_INCLUDE, orderBy: { startTime: 'asc' } } },
     });
     if (!fixture) throw new NotFoundException('Fecha no encontrada');
     return fixture;
@@ -36,11 +43,19 @@ export class FixturesService {
   async create(data: CreateFixtureDto) {
     return this.prisma.fixture.create({
       data: {
-        seasonId: data.seasonId,
+        tournamentId: data.tournamentId,
         round: data.round,
         closeAt: data.closeAt,
         matches: data.matches?.length
-          ? { create: data.matches }
+          ? {
+              create: data.matches.map((m) => ({
+                homeTeamName: m.homeTeam,
+                awayTeamName: m.awayTeam,
+                startTime: m.startTime,
+                externalId: m.externalId,
+                tournamentId: data.tournamentId,
+              })),
+            }
           : undefined,
       },
       include: { matches: true },
