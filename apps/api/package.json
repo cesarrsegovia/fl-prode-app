@@ -11,7 +11,8 @@
     "test": "jest",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "db:seed": "ts-node -r tsconfig-paths/register prisma/seed.ts",
-    "db:import-worldcup": "ts-node -r tsconfig-paths/register prisma/import-worldcup.ts"
+    "db:import-worldcup": "ts-node -r tsconfig-paths/register prisma/import-worldcup.ts",
+    "db:seed-worldcup": "ts-node -r tsconfig-paths/register prisma/seed-worldcup.ts"
   },
   "prisma": {
     "seed": "ts-node -r tsconfig-paths/register prisma/seed.ts"

@@ -38,11 +38,12 @@ export class ResultadosService {
 
   async fetchAndUpdateResults() {
     const apiKey = process.env.SPORTS_API_KEY;
-    const apiUrl = process.env.SPORTS_API_URL;
-    if (!apiKey || !apiUrl) {
+    const rawUrl = process.env.SPORTS_API_URL;
+    if (!apiKey || !rawUrl) {
       this.logger.warn('SPORTS_API_KEY/SPORTS_API_URL no configurados. Skipping.');
       return;
     }
+    const apiUrl = (/^https?:\/\//i.test(rawUrl) ? rawUrl : `https://${rawUrl}`).replace(/\/+$/, '');
 
     const activeMatches = await this.prisma.match.findMany({
       where: {

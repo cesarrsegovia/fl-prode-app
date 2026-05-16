@@ -4,174 +4,278 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* =================================================================
+   Prode · Mundial 2026 · "Neón Cancha"
+   Sistema de diseño en OKLCH. Aesthetic editorial-deportivo:
+   verde estadio nocturno + acento cítrico + tipografía display
+   distintiva sobre body condensado.
+   ================================================================= */
+
 :root {
-  /* Chlorophyll Synth Design System */
-  --background: #041705;
-  --foreground: #d0eac8;
-  
-  --card: #0c200b;
-  --card-foreground: #d0eac8;
-  
-  --popover: #1a2f18;
-  --popover-foreground: #d0eac8;
-  
-  --primary: #45fc9b;
-  --primary-foreground: #00391d;
-  
-  --secondary: #51ddae;
-  --secondary-foreground: #003828;
-  
-  --muted: #0c200b;
-  --muted-foreground: #bacbbb;
-  
-  --accent: #1a2f18;
-  --accent-foreground: #45fc9b;
-  
-  --destructive: #ffb4ab;
-  --destructive-foreground: #690005;
-  
-  --border: #3b4a3f26; /* outline-variant at 15% opacity */
-  --input: #0c200b; /* surface-container-low recessed */
-  --ring: #45fc9b;
+  /* ----- Brand ----- */
+  --neon:          oklch(86% 0.25 152);      /* primary verde fluo */
+  --neon-bright:   oklch(92% 0.27 145);      /* glow / highlight */
+  --neon-deep:     oklch(45% 0.18 152);      /* contrast on light */
+  --citrus:        oklch(85% 0.22 100);      /* acento cítrico */
+  --grass:         oklch(40% 0.13 150);      /* mid-tone cancha */
+  --chalk:         oklch(96% 0.025 90);      /* off-white / cream */
 
-  --radius: 0.25rem; /* md or sm corner radius */
+  /* ----- Surfaces (dark stadium) ----- */
+  --bg:            oklch(11% 0.03 158);      /* fondo principal */
+  --surface-1:     oklch(15% 0.04 158);      /* cards */
+  --surface-2:     oklch(19% 0.05 158);      /* elevated */
+  --surface-3:     oklch(24% 0.06 158);      /* highest */
 
-  /* Missing tokens for Stitch UI */
-  --surface-container-lowest: #011202;
-  --surface-container-low: #0c200b;
-  --surface-container: #10240f;
-  --surface-container-high: #1a2f18;
-  --surface-container-highest: #253a22;
-  
-  --on-surface: #d0eac8;
-  --on-surface-variant: #bacbbb;
-  --outline-variant: #3b4a3f;
-  
-  --primary-container: #00df81;
-  --on-primary-container: #005d32;
-  --primary-fixed-dim: #13e384;
-  
-  --secondary-container: #003d2c;
-  --secondary-fixed: #72fac9;
-  --on-secondary-container: #003d2c;
+  /* ----- Ink / Text ----- */
+  --ink:           var(--chalk);              /* primary */
+  --ink-muted:     oklch(70% 0.03 100);      /* secondary */
+  --ink-dim:       oklch(55% 0.03 110);      /* tertiary */
+
+  /* ----- Lines ----- */
+  --line:          oklch(28% 0.05 158);
+  --line-strong:   oklch(35% 0.06 158);
+
+  /* ----- Status ----- */
+  --danger:        oklch(65% 0.22 28);
+  --warning:       oklch(80% 0.18 75);
+  --success:       var(--neon);
+
+  /* ----- shadcn semantic tokens ----- */
+  --background:           var(--bg);
+  --foreground:           var(--ink);
+  --card:                 var(--surface-1);
+  --card-foreground:      var(--ink);
+  --popover:              var(--surface-2);
+  --popover-foreground:   var(--ink);
+  --primary:              var(--neon);
+  --primary-foreground:   oklch(14% 0.05 158);
+  --secondary:            var(--surface-2);
+  --secondary-foreground: var(--ink);
+  --muted:                var(--surface-1);
+  --muted-foreground:     var(--ink-muted);
+  --accent:               var(--citrus);
+  --accent-foreground:    oklch(14% 0.04 100);
+  --destructive:          var(--danger);
+  --destructive-foreground: oklch(98% 0.01 0);
+  --border:               var(--line);
+  --input:                var(--surface-2);
+  --ring:                 var(--neon);
+
+  --radius:               0.625rem;
+
+  /* ----- Legacy aliases (compat con componentes existentes) ----- */
+  --surface-container-lowest:  var(--bg);
+  --surface-container-low:     var(--surface-1);
+  --surface-container:         var(--surface-2);
+  --surface-container-high:    var(--surface-2);
+  --surface-container-highest: var(--surface-3);
+  --on-surface:                var(--ink);
+  --on-surface-variant:        var(--ink-muted);
+  --outline-variant:           var(--line);
+  --primary-container:         var(--neon-bright);
+  --on-primary-container:      oklch(14% 0.04 158);
+  --primary-fixed-dim:         var(--neon);
+  --secondary-container:       var(--surface-2);
+  --secondary-fixed:           var(--surface-3);
+  --on-secondary-container:    var(--ink);
 }
 
+/* La app es dark-first; mantenemos .dark como variante en caso de
+   futura activación de light theme. */
 .dark {
-  /* Dark mode relies on the same core palette */
-  --background: #041705;
-  --foreground: #d0eac8;
-  --card: #0c200b;
-  --card-foreground: #d0eac8;
-  --popover: #1a2f18;
-  --popover-foreground: #d0eac8;
-  --primary: #45fc9b;
-  --primary-foreground: #00391d;
-  --secondary: #51ddae;
-  --secondary-foreground: #003828;
-  --muted: #0c200b;
-  --muted-foreground: #bacbbb;
-  --accent: #1a2f18;
-  --accent-foreground: #45fc9b;
-  --destructive: #ffb4ab;
-  --destructive-foreground: #690005;
-  --border: #3b4a3f26;
-  --input: #0c200b;
-  --ring: #45fc9b;
-
-  --surface-container-lowest: #011202;
-  --surface-container-low: #0c200b;
-  --surface-container: #10240f;
-  --surface-container-high: #1a2f18;
-  --surface-container-highest: #253a22;
-  
-  --on-surface: #d0eac8;
-  --on-surface-variant: #bacbbb;
-  --outline-variant: #3b4a3f;
-
-  --primary-container: #00df81;
-  --on-primary-container: #005d32;
-  --primary-fixed-dim: #13e384;
-
-  --secondary-container: #003d2c;
-  --secondary-fixed: #72fac9;
-  --on-secondary-container: #003d2c;
+  color-scheme: dark;
 }
 
 @theme inline {
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-
-  --color-secondary: var(--secondary);
+  /* shadcn semantic colors */
+  --color-background:           var(--background);
+  --color-foreground:           var(--foreground);
+  --color-card:                 var(--card);
+  --color-card-foreground:      var(--card-foreground);
+  --color-popover:              var(--popover);
+  --color-popover-foreground:   var(--popover-foreground);
+  --color-primary:              var(--primary);
+  --color-primary-foreground:   var(--primary-foreground);
+  --color-secondary:            var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-
-  --color-destructive: var(--destructive);
+  --color-muted:                var(--muted);
+  --color-muted-foreground:     var(--muted-foreground);
+  --color-accent:               var(--accent);
+  --color-accent-foreground:    var(--accent-foreground);
+  --color-destructive:          var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-border:               var(--border);
+  --color-input:                var(--input);
+  --color-ring:                 var(--ring);
 
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
+  /* Brand utilities */
+  --color-neon:                 var(--neon);
+  --color-neon-bright:          var(--neon-bright);
+  --color-neon-deep:            var(--neon-deep);
+  --color-citrus:               var(--citrus);
+  --color-grass:                var(--grass);
+  --color-chalk:                var(--chalk);
 
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
+  /* Surface scale */
+  --color-surface-1:            var(--surface-1);
+  --color-surface-2:            var(--surface-2);
+  --color-surface-3:            var(--surface-3);
 
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
+  /* Ink scale */
+  --color-ink:                  var(--ink);
+  --color-ink-muted:            var(--ink-muted);
+  --color-ink-dim:              var(--ink-dim);
 
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
+  /* Line scale */
+  --color-line:                 var(--line);
+  --color-line-strong:          var(--line-strong);
 
-  /* Missing MCP Output token definitions for Tailwind CSS */
-  --color-surface-container-lowest: var(--surface-container-lowest);
-  --color-surface-container-low: var(--surface-container-low);
-  --color-surface-container: var(--surface-container);
-  --color-surface-container-high: var(--surface-container-high);
+  /* Legacy (componentes ya escritos) */
+  --color-surface-container-lowest:  var(--surface-container-lowest);
+  --color-surface-container-low:     var(--surface-container-low);
+  --color-surface-container:         var(--surface-container);
+  --color-surface-container-high:    var(--surface-container-high);
   --color-surface-container-highest: var(--surface-container-highest);
-  
-  --color-on-surface: var(--on-surface);
-  --color-on-surface-variant: var(--on-surface-variant);
-  --color-outline-variant: var(--outline-variant);
-
-  --color-primary-container: var(--primary-container);
-  --color-on-primary-container: var(--on-primary-container);
-  --color-primary-fixed-dim: var(--primary-fixed-dim);
-  --color-primary-fixed: var(--primary);
-  --color-secondary-fixed: var(--secondary-fixed);
-
-  --color-secondary-container: var(--secondary-container);
-  --color-on-secondary-container: var(--on-secondary-container);
+  --color-on-surface:                var(--on-surface);
+  --color-on-surface-variant:        var(--on-surface-variant);
+  --color-outline-variant:           var(--outline-variant);
+  --color-primary-container:         var(--primary-container);
+  --color-on-primary-container:      var(--on-primary-container);
+  --color-primary-fixed-dim:         var(--primary-fixed-dim);
+  --color-primary-fixed:             var(--primary);
+  --color-secondary-fixed:           var(--secondary-fixed);
+  --color-secondary-container:       var(--secondary-container);
+  --color-on-secondary-container:    var(--on-secondary-container);
 
   --radius-sm: calc(var(--radius) * 0.5);
   --radius-md: calc(var(--radius) * 0.7);
-  --radius-lg: calc(var(--radius) * 0.9);
-  --radius-xl: var(--radius);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 2);
 
-  --font-sans: var(--font-inter), sans-serif;
-  --font-heading: var(--font-space-grotesk), sans-serif;
-  --font-display: var(--font-space-grotesk), sans-serif;
+  /* Fonts (cableadas en layout.tsx) */
+  --font-sans:    var(--font-body), system-ui, sans-serif;
+  --font-heading: var(--font-display), system-ui, sans-serif;
+  --font-display: var(--font-display), system-ui, sans-serif;
+
+  /* Glows reutilizables */
+  --shadow-neon:        0 0 32px oklch(86% 0.25 152 / 0.35);
+  --shadow-neon-strong: 0 0 48px oklch(86% 0.25 152 / 0.55);
+  --shadow-elev:        0 12px 32px oklch(0% 0 0 / 0.4);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground antialiased;
-  }
+
   html {
     @apply font-sans;
+    color-scheme: dark;
   }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    background-image:
+      /* Brillo radial central (luz de cancha) */
+      radial-gradient(
+        ellipse 80% 60% at 50% 0%,
+        oklch(86% 0.25 152 / 0.06) 0%,
+        transparent 60%
+      ),
+      /* Halo inferior izquierdo */
+      radial-gradient(
+        ellipse 50% 40% at 0% 100%,
+        oklch(85% 0.22 100 / 0.04) 0%,
+        transparent 50%
+      );
+    background-attachment: fixed;
+  }
+
+  /* Textura de césped fina como overlay global */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.27 0 0 0 0 0.98 0 0 0 0 0.61 0 0 0 0.04 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    opacity: 0.6;
+    mix-blend-mode: overlay;
+  }
+
+  /* Tipografía editorial */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-heading tracking-tight;
+    @apply font-display tracking-tight;
+    font-feature-settings: "ss01", "ss02";
+  }
+
+  h1 {
+    font-weight: 800;
+    letter-spacing: -0.035em;
+  }
+
+  /* Selección con vibe neón */
+  ::selection {
+    background: oklch(86% 0.25 152 / 0.4);
+    color: var(--chalk);
+  }
+
+  /* Scrollbar discreto */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--bg);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--line);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--line-strong);
   }
 }
 
-/* Cursor pointer global — fuera de @layer para ganarle al Preflight de Tailwind v4
-   que pone cursor: default en buttons por defecto. */
+@layer utilities {
+  .font-headline {
+    @apply font-display tracking-tight;
+  }
+  .font-label {
+    @apply font-sans tracking-wide;
+  }
+
+  /* Glow utilities */
+  .glow-neon {
+    box-shadow: var(--shadow-neon);
+  }
+  .glow-neon-strong {
+    box-shadow: var(--shadow-neon-strong);
+  }
+
+  /* Text con leve neon glow para títulos del torneo */
+  .text-neon-glow {
+    color: var(--neon);
+    text-shadow: 0 0 24px oklch(86% 0.25 152 / 0.6);
+  }
+
+  /* Borde-tarjeta destacado */
+  .ring-neon {
+    box-shadow: 0 0 0 1px var(--neon) inset;
+  }
+
+  .bg-primary-gradient {
+    background: linear-gradient(135deg, var(--neon-bright) 0%, var(--neon) 100%);
+    color: oklch(14% 0.05 158);
+  }
+  .bg-surface-bright {
+    background: var(--surface-3);
+  }
+}
+
+/* Cursor pointer global — fuera de @layer para ganarle al Preflight de
+   Tailwind v4 que pone cursor: default en buttons por defecto. */
 button:not(:disabled),
 a[href],
 [role="button"]:not([aria-disabled="true"]),
@@ -186,19 +290,4 @@ input:disabled,
 select:disabled,
 textarea:disabled {
   cursor: not-allowed;
-}
-
-@layer utilities {
-  .font-headline {
-    @apply font-heading tracking-tight;
-  }
-  .font-label {
-    @apply font-sans tracking-wide;
-  }
-  .bg-primary-gradient {
-    @apply bg-gradient-to-br from-[#45fc9b]/90 to-[#00df81]/90 text-[#00391d];
-  }
-  .bg-surface-bright {
-    @apply bg-[#293e26];
-  }
 }

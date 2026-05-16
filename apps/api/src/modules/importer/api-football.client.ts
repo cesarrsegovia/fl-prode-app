@@ -119,8 +119,12 @@ export class ApiFootballClient {
   private readonly http: AxiosInstance;
 
   constructor(apiKey: string, baseUrl: string) {
+    // Tolerá baseUrl sin protocolo (causa común de "Invalid URL" en axios).
+    const normalized = /^https?:\/\//i.test(baseUrl)
+      ? baseUrl
+      : `https://${baseUrl}`;
     this.http = axios.create({
-      baseURL: baseUrl,
+      baseURL: normalized.replace(/\/+$/, ''),
       timeout: 15_000,
       headers: { 'x-apisports-key': apiKey },
     });

@@ -13,7 +13,8 @@
     "db:push": "pnpm --filter @prode/api exec prisma db push",
     "db:seed": "pnpm --filter @prode/api run db:seed",
     "db:reset": "pnpm --filter @prode/api exec prisma migrate reset",
-    "db:import-worldcup": "pnpm --filter @prode/api run db:import-worldcup"
+    "db:import-worldcup": "pnpm --filter @prode/api run db:import-worldcup",
+    "db:seed-worldcup": "pnpm --filter @prode/api run db:seed-worldcup"
   },
   "devDependencies": {
     "turbo": "^2"

@@ -11,6 +11,12 @@
       "sourceType": "github",
       "computedHash": "ee53d65b163cd7eb953a930c95841cfe398cc2c0bd24c06508bbaa07c432be35"
     },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "516bd2154eb843a8240e43d5b285229129853114ad7075a5e141e1c08e408c84"
+    },
     "nestjs-best-practices": {
       "source": "kadajett/agent-nestjs-skills",
       "sourceType": "github",

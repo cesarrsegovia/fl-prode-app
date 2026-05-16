@@ -4,6 +4,32 @@ Registro de cambios del monorepo fl-prode-app. Formato inspirado en [Keep a Chan
 
 ## [Unreleased]
 
+### Fase 4.1 — Seed estático del Mundial 2026 (2026-05-16)
+
+Alternativa free al importador de API-Football: el plan gratuito de api-sports.io bloquea temporadas posteriores a 2024. Se agrega un sembrador estático con datos oficiales del torneo (sorteo realizado el 5 de diciembre 2025, cronograma publicado por FIFA).
+
+#### Added
+- **Dataset estático** ([apps/api/prisma/data/worldcup-2026.json](apps/api/prisma/data/worldcup-2026.json)):
+  - 1 tournament (FIFA World Cup 2026)
+  - 16 estadios con capacidad real
+  - 48 selecciones con código ISO-2 + flag URL servida desde `flagcdn.com` + confederación
+  - 12 grupos A→L con los 4 equipos sorteados
+  - 104 partidos:
+    - 72 de fase de grupos con equipos reales, fecha UTC, estadio y grupo
+    - 32 de eliminación con placeholders descriptivos (`"1° Grupo A"`, `"3° (A/B/C/D/F)"`, `"Ganador R32-1"`, etc.) según el bracket FIFA
+- **Servicio** [WorldCupSeederService](apps/api/src/modules/importer/worldcup-seeder.service.ts) idempotente, paralelizado, con upserts atómicos. Reusa los patrones del importer API.
+- **CLI** `pnpm db:seed-worldcup` (alias root). Carga `.env` manualmente igual que el importer.
+
+#### Fuente de datos
+Cruce de Wikipedia (grupos, estadios, capacidades) + ESPN public scoreboard API (fechas, sedes, kickoffs por partido). 2 partidos del matchday 1 (Suecia-Túnez, Colombia-Uzbekistán) usan horarios best-effort porque ESPN truncó la respuesta — se pueden ajustar después con `PATCH /api/fixtures/matches/:id`.
+
+#### Uso
+```bash
+pnpm db:reset                # destructivo
+pnpm db:seed-worldcup        # sin requerir SPORTS_API_KEY
+```
+Si más adelante se compra el plan Pro de api-sports.io, `pnpm db:import-worldcup` sigue funcionando y los `externalId` ya están preparados para que el cron de `ResultadosService` empiece a sincronizar resultados en vivo.
+
 ### Fase 4 — Mundial 2026 (Backend, 2026-05-16)
 
 Hito grande: **schema reescrito** para soportar torneos internacionales con grupos + eliminatorias, e **importador desde API-Football**.
