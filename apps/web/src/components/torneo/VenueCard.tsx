@@ -1,0 +1,60 @@
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import type { VenueDto } from '@/lib/server-endpoints';
+
+function formatCapacity(n: number | null) {
+  if (!n) return null;
+  return new Intl.NumberFormat('es-AR').format(n);
+}
+
+interface Props {
+  venue: VenueDto;
+}
+
+export function VenueCard({ venue }: Props) {
+  const capacity = formatCapacity(venue.capacity);
+  const matches = venue._count?.matches ?? 0;
+
+  return (
+    <Card className="bg-surface-1 border-line overflow-hidden">
+      <div className="relative aspect-[16/9] bg-gradient-to-br from-grass/30 to-surface-3 flex items-end p-4">
+        <div className="absolute inset-0 opacity-30 pointer-events-none"
+          style={{
+            backgroundImage:
+              'repeating-linear-gradient(0deg, transparent 0, transparent 8px, oklch(45% 0.13 150 / 0.4) 8px, oklch(45% 0.13 150 / 0.4) 9px)',
+          }}
+        />
+        <h3 className="relative font-display font-extrabold text-2xl text-foreground tracking-tight leading-tight">
+          {venue.name}
+        </h3>
+      </div>
+
+      <CardContent className="pt-4 space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          <p className="font-display text-sm text-ink-muted">
+            {venue.city}
+            {venue.country && (
+              <span className="text-ink-dim"> · {venue.country}</span>
+            )}
+          </p>
+          {matches > 0 && (
+            <Badge variant="outline" className="text-[10px]">
+              {matches} {matches === 1 ? 'partido' : 'partidos'}
+            </Badge>
+          )}
+        </div>
+
+        {capacity && (
+          <div className="flex items-baseline gap-2 pt-2 border-t border-line/40">
+            <span className="font-display font-extrabold text-2xl text-neon tabular-nums">
+              {capacity}
+            </span>
+            <span className="text-[10px] uppercase tracking-[0.2em] text-ink-dim font-display">
+              capacidad
+            </span>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}

@@ -1,9 +1,19 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { ProviderService } from '../provider/provider.service';
+import { ProviderClientError } from '../provider/provider.client';
 
 @Injectable()
 export class TournamentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly providerService: ProviderService,
+  ) {}
 
   /** Lista todos los torneos (con conteos básicos). */
   async findAll() {
@@ -118,5 +128,166 @@ export class TournamentsService {
         venue: true,
       },
     });
+  }
+
+  // ---------- BracketPick (predicción de campeón) ----------
+
+  async getMyBracketPick(tournamentId: string, userId: string) {
+    return this.prisma.bracketPick.findUnique({
+      where: { userId_tournamentId: { userId, tournamentId } },
+      include: { champTeam: true },
+    });
+  }
+
+  async setBracketPick(
+    tournamentId: string,
+    userId: string,
+    champTeamId: string,
+  ) {
+    const tournament = await this.prisma.tournament.findUnique({
+      where: { id: tournamentId },
+      select: { startDate: true },
+    });
+    if (!tournament) throw new NotFoundException('Torneo no encontrado');
+
+    // Permitir cambios solo antes del inicio del torneo.
+    if (tournament.startDate && tournament.startDate <= new Date()) {
+      throw new NotFoundException(
+        'El torneo ya comenzó, no se puede modificar el campeón.',
+      );
+    }
+
+    // Verificar que el team pertenezca al torneo.
+    const tt = await this.prisma.tournamentTeam.findUnique({
+      where: {
+        tournamentId_teamId: { tournamentId, teamId: champTeamId },
+      },
+    });
+    if (!tt) {
+      throw new NotFoundException('El equipo no participa en este torneo');
+    }
+
+    return this.prisma.bracketPick.upsert({
+      where: { userId_tournamentId: { userId, tournamentId } },
+      update: { champTeamId },
+      create: { userId, tournamentId, champTeamId },
+      include: { champTeam: true },
+    });
+  }
+
+  // ---------- TournamentEntry (inscripción + moveFunds Debit) ----------
+
+  async getMyEntry(tournamentId: string, userId: string) {
+    return this.prisma.tournamentEntry.findUnique({
+      where: { userId_tournamentId: { userId, tournamentId } },
+    });
+  }
+
+  /**
+   * Inscribe al usuario en el torneo. Si el torneo tiene entryFee, cobra contra
+   * el wallet del padre mediante moveFunds Debit y crea TournamentEntry como PAID.
+   * Si no hay entryFee, crea entry directa.
+   */
+  async joinTournament(tournamentId: string, userId: string) {
+    const tournament = await this.prisma.tournament.findUnique({
+      where: { id: tournamentId },
+      select: {
+        id: true,
+        name: true,
+        externalId: true,
+        entryFee: true,
+        entryCurrency: true,
+        startDate: true,
+      },
+    });
+    if (!tournament) throw new NotFoundException('Torneo no encontrado');
+
+    if (tournament.startDate && tournament.startDate <= new Date()) {
+      throw new BadRequestException(
+        'El torneo ya comenzó, las inscripciones están cerradas',
+      );
+    }
+
+    const existing = await this.prisma.tournamentEntry.findUnique({
+      where: { userId_tournamentId: { userId, tournamentId } },
+    });
+    if (existing && existing.status === 'PAID') {
+      throw new ConflictException('Ya estás inscripto en este torneo');
+    }
+
+    // Gratis: solo registramos la entry.
+    if (!tournament.entryFee || Number(tournament.entryFee) === 0) {
+      return this.prisma.tournamentEntry.upsert({
+        where: { userId_tournamentId: { userId, tournamentId } },
+        create: {
+          userId,
+          tournamentId,
+          amount: 0,
+          currency: tournament.entryCurrency || 'USD',
+          status: 'PAID',
+        },
+        update: { status: 'PAID' },
+      });
+    }
+
+    // Con costo: disparamos moveFunds Debit al padre. Esto crea la WalletTransaction
+    // y, vía ProviderService.syncTournamentEntry, también el TournamentEntry.
+    try {
+      await this.providerService.moveFunds({
+        userId,
+        direction: 'Debit',
+        amount: tournament.entryFee,
+        currency: tournament.entryCurrency || 'USD',
+        eventId: `tournament-entry:${tournamentId}`,
+        gameId: tournament.externalId || tournamentId,
+        gameType: 'ProdeTournament',
+        tournamentId,
+      });
+    } catch (err) {
+      if (err instanceof ProviderClientError) {
+        const code = err.providerErrors?.[0]?.code;
+        if (code === 'ERR-FUND-003') {
+          throw new BadRequestException(
+            'Saldo insuficiente para inscribirse al torneo',
+          );
+        }
+        throw new BadRequestException(
+          err.providerErrors?.[0]?.detail || 'No se pudo procesar la inscripción',
+        );
+      }
+      throw err;
+    }
+
+    return this.prisma.tournamentEntry.findUnique({
+      where: { userId_tournamentId: { userId, tournamentId } },
+    });
+  }
+
+  async getBracketPickAggregate(tournamentId: string) {
+    const grouped = await this.prisma.bracketPick.groupBy({
+      by: ['champTeamId'],
+      where: { tournamentId },
+      _count: { _all: true },
+    });
+    if (!grouped.length) return { total: 0, picks: [] };
+
+    const teamIds = grouped.map((g) => g.champTeamId);
+    const teams = await this.prisma.team.findMany({
+      where: { id: { in: teamIds } },
+      select: { id: true, name: true, shortName: true, flagUrl: true },
+    });
+    const teamMap = new Map(teams.map((t) => [t.id, t]));
+    const total = grouped.reduce((acc, g) => acc + g._count._all, 0);
+
+    return {
+      total,
+      picks: grouped
+        .map((g) => ({
+          team: teamMap.get(g.champTeamId),
+          count: g._count._all,
+          pct: Math.round((g._count._all / total) * 100),
+        }))
+        .sort((a, b) => b.count - a.count),
+    };
   }
 }

@@ -4,6 +4,7 @@ import { Bricolage_Grotesque, Inter_Tight } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
+import { BottomNav } from '@/components/layout/BottomNav';
 import { AuthProvider } from '@/components/providers/AuthProvider';
 import { RealtimeProvider } from '@/components/providers/RealtimeProvider';
 
@@ -47,8 +48,9 @@ export default function RootLayout({
         <AuthProvider>
           <RealtimeProvider>
             <Navbar />
-            <div className="flex-1 relative z-10">{children}</div>
+            <div className="flex-1 relative z-10 pb-16 md:pb-0">{children}</div>
             <Footer />
+            <BottomNav />
           </RealtimeProvider>
         </AuthProvider>
       </body>

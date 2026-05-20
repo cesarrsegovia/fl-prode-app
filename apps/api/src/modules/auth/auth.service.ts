@@ -5,6 +5,8 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../prisma/prisma.service';
+import { ProviderService } from '../provider/provider.service';
+import { ProviderClientError } from '../provider/provider.client';
 import * as bcrypt from 'bcrypt';
 
 const SALT_ROUNDS = 10;
@@ -14,6 +16,7 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly providerService: ProviderService,
   ) {}
 
   /**
@@ -58,7 +61,8 @@ export class AuthService {
       where: { email: body.email },
     });
 
-    if (!user) {
+    if (!user || !user.passwordHash) {
+      // user.passwordHash puede ser null si el usuario existe solo vía provider padre.
       throw new UnauthorizedException('Credenciales incorrectas');
     }
 
@@ -72,6 +76,43 @@ export class AuthService {
     }
 
     return this.buildTokenResponse(user);
+  }
+
+  /**
+   * Canjea un authorizationCode del padre por un JWT propio.
+   * Llama ProviderService.exchangeAuthorizationCode, que se encarga de hablar con el padre
+   * y de upsertar el User local. Acá solo emitimos el token.
+   */
+  async loginWithProviderCode(authorizationCode: string) {
+    if (!authorizationCode) {
+      throw new UnauthorizedException('Falta authorizationCode');
+    }
+    try {
+      const { user } = await this.providerService.exchangeAuthorizationCode(
+        authorizationCode,
+      );
+      const dbUser = await this.prisma.user.findUnique({
+        where: { id: user.id },
+        select: {
+          id: true,
+          email: true,
+          username: true,
+          isAdmin: true,
+        },
+      });
+      if (!dbUser) {
+        throw new UnauthorizedException('No se pudo crear el usuario');
+      }
+      return this.buildTokenResponse(dbUser);
+    } catch (err) {
+      if (err instanceof ProviderClientError) {
+        // Mensaje seguro al cliente; el detalle queda en logs del provider.
+        throw new UnauthorizedException(
+          'No se pudo validar la sesión con la plataforma',
+        );
+      }
+      throw err;
+    }
   }
 
   /**
@@ -99,8 +140,18 @@ export class AuthService {
 
   // ───────── Private helpers ─────────
 
-  private buildTokenResponse(user: { id: string; email: string; username: string }) {
-    const payload = { sub: user.id, email: user.email, username: user.username };
+  buildTokenResponse(user: {
+    id: string;
+    email: string | null;
+    username: string | null;
+    isAdmin?: boolean;
+  }) {
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      username: user.username,
+      isAdmin: !!user.isAdmin,
+    };
     const accessToken = this.jwtService.sign(payload);
 
     return {
@@ -109,6 +160,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         username: user.username,
+        isAdmin: !!user.isAdmin,
       },
     };
   }

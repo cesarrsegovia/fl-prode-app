@@ -6,6 +6,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:4000/api';
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
+      id: 'credentials',
       name: 'Credentials',
       credentials: {
         email: { label: 'Email', type: 'email' },
@@ -34,6 +35,37 @@ export const authOptions: NextAuthOptions = {
             email: data.user.email,
             name: data.user.username,
             accessToken: data.accessToken,
+            isAdmin: !!data.user.isAdmin,
+          };
+        } catch {
+          return null;
+        }
+      },
+    }),
+    CredentialsProvider({
+      id: 'provider-launch',
+      name: 'Provider Launch',
+      credentials: {
+        authorizationCode: { label: 'Authorization Code', type: 'text' },
+      },
+      async authorize(credentials) {
+        if (!credentials?.authorizationCode) return null;
+        try {
+          const res = await fetch(`${API_URL}/auth/provider-exchange`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              authorizationCode: credentials.authorizationCode,
+            }),
+          });
+          if (!res.ok) return null;
+          const data = await res.json();
+          return {
+            id: data.user.id,
+            email: data.user.email ?? null,
+            name: data.user.username ?? data.user.id,
+            accessToken: data.accessToken,
+            isAdmin: !!data.user.isAdmin,
           };
         } catch {
           return null;
@@ -49,11 +81,11 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async jwt({ token, user }) {
-      // On first sign-in, persist the backend accessToken and user info
       if (user) {
         token.accessToken = user.accessToken;
         token.userId = user.id;
         token.username = user.name ?? undefined;
+        token.isAdmin = (user as { isAdmin?: boolean }).isAdmin ?? false;
       }
       return token;
     },
@@ -65,6 +97,7 @@ export const authOptions: NextAuthOptions = {
           ...session.user,
           id: token.userId as string,
           username: token.username as string,
+          isAdmin: (token.isAdmin as boolean) ?? false,
         },
       };
     },

@@ -12,6 +12,12 @@ import { NotificacionesModule } from './modules/notificaciones/notificaciones.mo
 import { GamificacionModule } from './modules/gamificacion/gamificacion.module';
 import { TournamentsModule } from './modules/tournaments/tournaments.module';
 import { ImporterModule } from './modules/importer/importer.module';
+import { MatchesModule } from './modules/matches/matches.module';
+import { TeamsModule } from './modules/teams/teams.module';
+import { ActivityModule } from './modules/activity/activity.module';
+import { MessagesModule } from './modules/messages/messages.module';
+import { AdminModule } from './modules/admin/admin.module';
+import { ProviderModule } from './modules/provider/provider.module';
 import { WebsocketModule } from './websocket/websocket.module';
 import { ResultadosCron } from './jobs/resultados.cron';
 
@@ -31,6 +37,12 @@ import { ResultadosCron } from './jobs/resultados.cron';
     GamificacionModule,
     TournamentsModule,
     ImporterModule,
+    MatchesModule,
+    TeamsModule,
+    ActivityModule,
+    MessagesModule,
+    AdminModule,
+    ProviderModule,
   ],
   providers: [ResultadosCron],
 })

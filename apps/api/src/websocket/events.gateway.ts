@@ -9,9 +9,20 @@ import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { WS_EVENTS } from '@prode/shared';
 
+// Socket.IO admite array de orígenes o regex. Listamos los dev habituales
+// + lo que esté en FRONTEND_URL (puede ser CSV) para evitar mismatches
+// localhost/127.0.0.1.
+const SOCKET_ORIGINS = [
+  ...(process.env.FRONTEND_URL?.split(',').map((s) => s.trim()).filter(Boolean) ?? []),
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:3001',
+  'http://127.0.0.1:3001',
+];
+
 @WebSocketGateway({
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: SOCKET_ORIGINS,
     credentials: true,
   },
 })

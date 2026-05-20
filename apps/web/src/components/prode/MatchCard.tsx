@@ -3,6 +3,8 @@
 import { useMemo } from 'react';
 import type { Match } from '@prode/shared';
 import { MatchStatus, Result } from '@prode/shared';
+import { cn } from '@/lib/utils';
+import { TeamFlag } from '@/components/torneo/TeamFlag';
 
 export interface MatchPick {
   result?: Result;
@@ -24,6 +26,19 @@ const RESULT_LABELS: Record<Result, string> = {
   [Result.DRAW]: 'X',
   [Result.AWAY]: '2',
 };
+
+function teamFlag(match: Match, side: 'home' | 'away') {
+  return side === 'home'
+    ? (match.homeTeam?.flagUrl ?? null)
+    : (match.awayTeam?.flagUrl ?? null);
+}
+
+function teamName(match: Match, side: 'home' | 'away') {
+  if (side === 'home') {
+    return match.homeTeam?.shortName ?? match.homeTeam?.name ?? match.homeTeamName;
+  }
+  return match.awayTeam?.shortName ?? match.awayTeam?.name ?? match.awayTeamName;
+}
 
 export function MatchCard({
   match,
@@ -78,40 +93,46 @@ export function MatchCard({
 
   return (
     <div
-      className={`rounded-xl overflow-hidden border-l-4 transition-all ${
-        pick?.isCaptain ? 'border-primary' : 'border-transparent'
-      } ${isLocked ? 'opacity-60' : ''}`}
-      style={{ background: 'var(--surface)' }}
+      className={cn(
+        'rounded-xl overflow-hidden border-l-4 transition-all bg-surface-1',
+        pick?.isCaptain ? 'border-neon glow-neon' : 'border-line/40',
+        isLocked && 'opacity-60',
+      )}
     >
       <div className="p-5">
         <div className="flex justify-between items-center mb-4">
-          <span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+          <span className="text-[10px] font-display font-bold uppercase tracking-[0.18em] text-ink-muted">
             {kickoffLabel}
           </span>
           <span
-            className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 ${
-              statusBadge.tone === 'live'
-                ? 'bg-yellow-500/10 text-yellow-500 animate-pulse'
-                : statusBadge.tone === 'done'
-                  ? 'bg-gray-500/10 text-gray-400'
-                  : statusBadge.tone === 'cancelled'
-                    ? 'bg-red-500/10 text-red-400'
-                    : 'bg-primary-container/10 text-primary-container'
-            }`}
+            className={cn(
+              'px-3 py-1 rounded-full text-[10px] font-display font-extrabold uppercase tracking-[0.18em] flex items-center gap-1.5',
+              statusBadge.tone === 'live' &&
+                'bg-citrus/10 text-citrus animate-pulse',
+              statusBadge.tone === 'done' && 'bg-line/40 text-ink-dim',
+              statusBadge.tone === 'cancelled' &&
+                'bg-destructive/10 text-destructive',
+              statusBadge.tone === 'open' && 'bg-neon/10 text-neon',
+            )}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-current" />
+            <span className="size-1.5 rounded-full bg-current" />
             {statusBadge.text}
           </span>
         </div>
 
         <div className="flex items-center justify-between gap-4">
-          <div className="flex-1 text-center">
-            <p className="text-xs font-bold uppercase tracking-tight text-white">
-              {match.homeTeam}
+          <div className="flex-1 flex flex-col items-center gap-2">
+            <TeamFlag
+              size="lg"
+              src={teamFlag(match, 'home')}
+              alt={teamName(match, 'home')}
+            />
+            <p className="text-xs font-display font-bold uppercase tracking-tight text-foreground text-center">
+              {teamName(match, 'home')}
             </p>
             {match.status === MatchStatus.FINISHED &&
               match.homeScore !== null && (
-                <p className="text-2xl font-black text-primary mt-1">
+                <p className="text-2xl font-display font-extrabold text-neon mt-1 tabular-nums">
                   {match.homeScore}
                 </p>
               )}
@@ -126,11 +147,13 @@ export function MatchCard({
                   type="button"
                   disabled={isLocked}
                   onClick={() => setResult(r)}
-                  className={`w-12 h-12 rounded-lg font-black text-lg transition-all ${
+                  className={cn(
+                    'size-12 rounded-lg font-display font-extrabold text-lg transition-all',
                     active
-                      ? 'bg-primary text-black shadow-[0_0_20px_rgba(181,242,61,0.3)]'
-                      : 'bg-surface-container-highest text-white hover:bg-surface-bright'
-                  } ${isLocked ? 'cursor-not-allowed' : 'active:scale-90'}`}
+                      ? 'bg-neon text-primary-foreground glow-neon'
+                      : 'bg-surface-2 text-foreground hover:bg-surface-3',
+                    isLocked ? 'cursor-not-allowed' : 'active:scale-90',
+                  )}
                 >
                   {RESULT_LABELS[r]}
                 </button>
@@ -138,13 +161,18 @@ export function MatchCard({
             })}
           </div>
 
-          <div className="flex-1 text-center">
-            <p className="text-xs font-bold uppercase tracking-tight text-white">
-              {match.awayTeam}
+          <div className="flex-1 flex flex-col items-center gap-2">
+            <TeamFlag
+              size="lg"
+              src={teamFlag(match, 'away')}
+              alt={teamName(match, 'away')}
+            />
+            <p className="text-xs font-display font-bold uppercase tracking-tight text-foreground text-center">
+              {teamName(match, 'away')}
             </p>
             {match.status === MatchStatus.FINISHED &&
               match.awayScore !== null && (
-                <p className="text-2xl font-black text-primary mt-1">
+                <p className="text-2xl font-display font-extrabold text-neon mt-1 tabular-nums">
                   {match.awayScore}
                 </p>
               )}
@@ -152,24 +180,22 @@ export function MatchCard({
         </div>
 
         {!isLocked && (
-          <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">
-                Bonus marcador (+3 pts)
-              </span>
-            </div>
+          <div className="mt-6 pt-4 border-t border-line/40 flex items-center justify-between">
+            <span className="text-[10px] font-display font-extrabold uppercase tracking-[0.18em] text-ink-muted">
+              Bonus marcador (+3 pts)
+            </span>
             <div className="flex items-center gap-3">
               <input
-                className="w-10 h-8 bg-surface-container-lowest rounded text-center text-sm font-bold focus:ring-1 focus:ring-primary p-0"
+                className="w-10 h-8 bg-surface-2 rounded text-center text-sm font-display font-bold focus:ring-1 focus:ring-neon p-0 tabular-nums"
                 type="number"
                 min={0}
                 placeholder="0"
                 value={pick?.homeScoreGuess ?? ''}
                 onChange={(e) => setScore('home', e.target.value)}
               />
-              <span className="text-on-surface-variant font-bold">-</span>
+              <span className="text-ink-muted font-bold">-</span>
               <input
-                className="w-10 h-8 bg-surface-container-lowest rounded text-center text-sm font-bold focus:ring-1 focus:ring-primary p-0"
+                className="w-10 h-8 bg-surface-2 rounded text-center text-sm font-display font-bold focus:ring-1 focus:ring-neon p-0 tabular-nums"
                 type="number"
                 min={0}
                 placeholder="0"
@@ -182,7 +208,7 @@ export function MatchCard({
 
         {isCaptainOption && !isLocked && (
           <div className="mt-3 flex items-center justify-end">
-            <label className="flex items-center gap-2 text-xs font-bold text-on-surface-variant">
+            <label className="flex items-center gap-2 text-xs font-display font-bold text-ink-muted">
               <input
                 type="checkbox"
                 checked={pick?.isCaptain ?? false}

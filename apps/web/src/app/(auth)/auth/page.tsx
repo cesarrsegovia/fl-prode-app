@@ -2,12 +2,21 @@
 
 import React, { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+
+function safeNext(raw: string | null): string {
+  if (!raw) return '/home';
+  // Restringimos a paths internos para evitar open-redirect
+  if (!raw.startsWith('/') || raw.startsWith('//')) return '/home';
+  return raw;
+}
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:4000/api';
 
 export default function AuthPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = safeNext(searchParams.get('next'));
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,7 +40,7 @@ export default function AuthPage() {
       if (result?.error) {
         setError('Credenciales incorrectas. Por favor, intenta de nuevo.');
       } else {
-        router.push('/home');
+        router.push(next);
       }
     } catch {
       setError('Error de conexión. Intenta más tarde.');
@@ -68,7 +77,7 @@ export default function AuthPage() {
       if (result?.error) {
         setError('Registro exitoso, pero hubo un error al iniciar sesión.');
       } else {
-        router.push('/home');
+        router.push(next);
       }
     } catch {
       setError('Error de conexión. Intenta más tarde.');

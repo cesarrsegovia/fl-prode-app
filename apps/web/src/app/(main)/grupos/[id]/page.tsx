@@ -7,7 +7,10 @@ import { useSession } from 'next-auth/react';
 import type { RankingEntry } from '@prode/shared';
 import { grupos } from '@/lib/endpoints';
 import { useRanking } from '@/hooks/useRanking';
+import { useGroupActivity } from '@/hooks/useGroupActivity';
 import { RankingTable } from '@/components/ranking/RankingTable';
+import { ActivityFeed } from '@/components/grupos/ActivityFeed';
+import { Chat } from '@/components/grupos/Chat';
 
 interface GroupMemberDto {
   id: string;
@@ -26,7 +29,7 @@ interface GroupDetail {
   members: GroupMemberDto[];
 }
 
-type Tab = 'ranking' | 'members';
+type Tab = 'ranking' | 'activity' | 'chat' | 'members';
 
 export default function GrupoDetailPage({
   params,
@@ -45,6 +48,11 @@ export default function GrupoDetailPage({
   const [regenerating, setRegenerating] = useState(false);
 
   const { entries, isLoading: rankingLoading } = useRanking(id);
+  const {
+    items: activityItems,
+    isLoading: activityLoading,
+    error: activityError,
+  } = useGroupActivity(id);
 
   const load = useCallback(() => {
     grupos
@@ -60,10 +68,14 @@ export default function GrupoDetailPage({
   const isAdmin =
     !!group && group.members.some((m) => m.userId === myUserId && m.role === 'ADMIN');
 
+  const inviteUrl = group
+    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/invitacion/${group.inviteCode}`
+    : '';
+
   const copyInvite = async () => {
     if (!group) return;
     try {
-      await navigator.clipboard.writeText(group.inviteCode);
+      await navigator.clipboard.writeText(inviteUrl);
       setInviteCopied(true);
       setTimeout(() => setInviteCopied(false), 1500);
     } catch {
@@ -168,22 +180,39 @@ export default function GrupoDetailPage({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <div className="flex gap-2 mb-4">
+          <div className="flex gap-2 mb-4 flex-wrap">
             <TabButton active={tab === 'ranking'} onClick={() => setTab('ranking')}>
               Ranking
+            </TabButton>
+            <TabButton active={tab === 'activity'} onClick={() => setTab('activity')}>
+              Actividad
+            </TabButton>
+            <TabButton active={tab === 'chat'} onClick={() => setTab('chat')}>
+              Chat
             </TabButton>
             <TabButton active={tab === 'members'} onClick={() => setTab('members')}>
               Miembros ({group.members.length})
             </TabButton>
           </div>
 
-          {tab === 'ranking' ? (
+          {tab === 'ranking' && (
             <RankingTable
               entries={entries as RankingEntry[]}
               isLoading={rankingLoading}
               highlightUserId={myUserId}
             />
-          ) : (
+          )}
+          {tab === 'activity' && (
+            <ActivityFeed
+              items={activityItems}
+              isLoading={activityLoading}
+              error={activityError}
+            />
+          )}
+          {tab === 'chat' && (
+            <Chat groupId={id} myUserId={myUserId} />
+          )}
+          {tab === 'members' && (
             <MembersList members={group.members} myUserId={myUserId} />
           )}
         </div>
@@ -200,11 +229,14 @@ export default function GrupoDetailPage({
               Compartilo para sumar miembros al grupo.
             </p>
             <div
-              className="mt-4 p-3 rounded-lg font-mono text-sm break-all"
+              className="mt-4 p-3 rounded-lg font-mono text-xs break-all"
               style={{ background: 'var(--surface-container-highest)' }}
             >
-              {group.inviteCode}
+              {inviteUrl}
             </div>
+            <p className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant mt-2">
+              Código: <span className="font-mono normal-case tracking-normal">{group.inviteCode}</span>
+            </p>
             <div className="flex gap-2 mt-3">
               <button
                 onClick={copyInvite}

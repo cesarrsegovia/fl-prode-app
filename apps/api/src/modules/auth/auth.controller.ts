@@ -18,6 +18,15 @@ export class AuthController {
     return this.authService.register(body);
   }
 
+  /**
+   * Canjea un authorizationCode emitido por la plataforma padre por un JWT propio.
+   * El frontend llama este endpoint cuando aterriza con `?authorizationCode=...`.
+   */
+  @Post('provider-exchange')
+  async providerExchange(@Body() body: { authorizationCode: string }) {
+    return this.authService.loginWithProviderCode(body?.authorizationCode);
+  }
+
   @UseGuards(AuthGuard('jwt'))
   @Get('me')
   async me(@Request() req: any) {

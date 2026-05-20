@@ -23,6 +23,12 @@ export const WS_EVENTS = {
 
   // Predictions
   PREDICTION_UPDATED: 'prediction-updated',
+
+  // Activity feed
+  ACTIVITY_NEW: 'activity-new',
+
+  // Chat
+  MESSAGE_NEW: 'message-new',
 } as const;
 
 export type WsEvent = typeof WS_EVENTS[keyof typeof WS_EVENTS];

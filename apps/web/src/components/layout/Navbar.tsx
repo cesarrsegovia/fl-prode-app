@@ -29,12 +29,24 @@ const NAV_LINKS = [
   { href: '/prode', label: 'Mi Prode', match: (p: string) => p.startsWith('/prode') },
   { href: '/grupos', label: 'Grupos', match: (p: string) => p.startsWith('/grupos') },
   { href: '/ranking', label: 'Ranking', match: (p: string) => p.startsWith('/ranking') },
+  { href: '/mundial', label: 'Mundial', match: (p: string) => p.startsWith('/mundial') || p.startsWith('/torneo') },
 ];
 
 export function Navbar() {
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const isAuthed = status === 'authenticated';
+  const isAdmin = session?.user?.isAdmin === true;
+  const navLinks = isAdmin
+    ? [
+        ...NAV_LINKS,
+        {
+          href: '/admin',
+          label: 'Admin',
+          match: (p: string) => p.startsWith('/admin'),
+        },
+      ]
+    : NAV_LINKS;
 
   return (
     <nav className="fixed top-0 inset-x-0 z-50 h-16 px-6 flex justify-between items-center bg-background/70 backdrop-blur-xl border-b border-line/40">
@@ -48,7 +60,7 @@ export function Navbar() {
         </Link>
 
         <div className="hidden md:flex gap-6">
-          {NAV_LINKS.map((link) => {
+          {navLinks.map((link) => {
             const active = link.match(pathname);
             return (
               <Link
@@ -106,7 +118,7 @@ function AuthedActions({
   userId?: string;
   image?: string | null;
 }) {
-  const { unreadCount, markRead } = useNotifications();
+  const { unreadCount } = useNotifications();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -126,8 +138,8 @@ function AuthedActions({
 
   return (
     <>
-      <button
-        onClick={markRead}
+      <Link
+        href="/notificaciones"
         className="relative size-9 rounded-full flex items-center justify-center text-ink-muted hover:text-neon hover:bg-surface-1 transition-colors"
         aria-label="Notificaciones"
         title={unreadCount ? `${unreadCount} nuevas` : 'Sin notificaciones nuevas'}
@@ -141,7 +153,7 @@ function AuthedActions({
             {unreadCount > 9 ? '9+' : unreadCount}
           </Badge>
         )}
-      </button>
+      </Link>
 
       <div className="relative" ref={menuRef}>
         <button
@@ -160,7 +172,7 @@ function AuthedActions({
         </button>
 
         {menuOpen && (
-          <div className="absolute right-0 mt-2 w-48 rounded-xl border border-line bg-surface-2 shadow-elev overflow-hidden">
+          <div className="absolute right-0 mt-2 w-56 rounded-xl border border-line bg-surface-2 shadow-elev overflow-hidden">
             {userId && (
               <Link
                 href={`/perfil/${userId}`}
@@ -170,6 +182,20 @@ function AuthedActions({
                 Mi perfil
               </Link>
             )}
+            <Link
+              href="/mis-pronosticos"
+              onClick={() => setMenuOpen(false)}
+              className="block px-4 py-3 text-sm font-display font-semibold text-foreground hover:bg-surface-3 transition-colors border-t border-line"
+            >
+              Mis pronósticos
+            </Link>
+            <Link
+              href="/notificaciones"
+              onClick={() => setMenuOpen(false)}
+              className="block px-4 py-3 text-sm font-display font-semibold text-foreground hover:bg-surface-3 transition-colors border-t border-line"
+            >
+              Notificaciones
+            </Link>
             <button
               onClick={() => {
                 setMenuOpen(false);

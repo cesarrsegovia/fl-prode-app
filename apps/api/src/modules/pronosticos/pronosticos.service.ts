@@ -4,10 +4,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { MatchStatus, Result } from '@prisma/client';
+import { ActivityType, MatchStatus, Result } from '@prisma/client';
 import { WS_EVENTS } from '@prode/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EventsGateway } from '../../websocket/events.gateway';
+import { ActivityService } from '../activity/activity.service';
 
 interface CreatePronosticoInput {
   userId: string;
@@ -24,6 +25,7 @@ export class PronosticosService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly events: EventsGateway,
+    private readonly activity: ActivityService,
   ) {}
 
   async create(data: CreatePronosticoInput) {
@@ -56,6 +58,10 @@ export class PronosticosService {
       });
     }
 
+    const existingPredictionCount = await this.prisma.prediction.count({
+      where: { userId: data.userId, fixtureId: data.fixtureId },
+    });
+
     const prediction = await this.prisma.prediction.upsert({
       where: { userId_matchId: { userId: data.userId, matchId: data.matchId } },
       update: {
@@ -75,6 +81,21 @@ export class PronosticosService {
       },
     });
     this.events.emitToUser(data.userId, WS_EVENTS.PREDICTION_UPDATED, prediction);
+
+    if (existingPredictionCount === 0) {
+      const user = await this.prisma.user.findUnique({
+        where: { id: data.userId },
+        select: { username: true },
+      });
+      const fixtureName = fixture.name ?? `Fecha ${fixture.round}`;
+      await this.activity.emitToUserGroups(data.userId, () => ({
+        userId: data.userId,
+        type: ActivityType.PREDICTIONS_SUBMITTED,
+        message: `${user?.username ?? 'Alguien'} cargó pronósticos para ${fixtureName}`,
+        payload: { fixtureId: fixture.id, round: fixture.round },
+      }));
+    }
+
     return prediction;
   }
 

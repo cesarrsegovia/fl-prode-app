@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { UsuariosService } from './usuarios.service';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -15,6 +23,30 @@ export class UsuariosController {
     @Body() body: UpdateUserDto,
   ) {
     return this.usuariosService.update(user.userId, body);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('me/achievements')
+  achievements(@CurrentUser() user: { userId: string }) {
+    return this.usuariosService.getAchievements(user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('me/predictions')
+  predictionsHistory(
+    @CurrentUser() user: { userId: string },
+    @Query('cursor') cursor?: string,
+    @Query('take') take?: string,
+  ) {
+    return this.usuariosService.getPredictionsHistory(user.userId, {
+      cursor,
+      take: take ? Number(take) : undefined,
+    });
+  }
+
+  @Get(':id/stats')
+  stats(@Param('id') id: string) {
+    return this.usuariosService.getStats(id);
   }
 
   @Get(':id')

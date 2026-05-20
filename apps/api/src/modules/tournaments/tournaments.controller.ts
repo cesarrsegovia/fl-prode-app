@@ -10,6 +10,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { TournamentsService } from './tournaments.service';
 import { WorldCupImporterService } from '../importer/worldcup-importer.service';
 import { AdminGuard } from '../../common/guards/admin.guard';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { BracketPickDto } from './dto/bracket-pick.dto';
 
 @Controller('tournaments')
 export class TournamentsController {
@@ -58,7 +60,54 @@ export class TournamentsController {
     return this.service.getBracket(id);
   }
 
-  /** Admin: dispara el import del Mundial 2026 desde API-Football. */
+  // ---------- BracketPick ----------
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get(':id/bracket-pick/me')
+  myBracketPick(
+    @Param('id') id: string,
+    @CurrentUser() user: { userId: string },
+  ) {
+    return this.service.getMyBracketPick(id, user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post(':id/bracket-pick')
+  setBracketPick(
+    @Param('id') id: string,
+    @CurrentUser() user: { userId: string },
+    @Body() body: BracketPickDto,
+  ) {
+    return this.service.setBracketPick(id, user.userId, body.champTeamId);
+  }
+
+  @Get(':id/bracket-pick/aggregate')
+  bracketPickAggregate(@Param('id') id: string) {
+    return this.service.getBracketPickAggregate(id);
+  }
+
+  // ---------- TournamentEntry (wallet del padre) ----------
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get(':id/entry/me')
+  myEntry(
+    @Param('id') id: string,
+    @CurrentUser() user: { userId: string },
+  ) {
+    return this.service.getMyEntry(id, user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post(':id/entry')
+  joinTournament(
+    @Param('id') id: string,
+    @CurrentUser() user: { userId: string },
+  ) {
+    return this.service.joinTournament(id, user.userId);
+  }
+
+  // ---------- Admin ----------
+
   @UseGuards(AuthGuard('jwt'), AdminGuard)
   @Post('worldcup/import')
   async importWorldcup(@Body() body: { withSquads?: boolean }) {

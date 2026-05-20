@@ -12,19 +12,33 @@ datasource db {
 // ============================================================
 
 model User {
-  id            String            @id @default(cuid())
-  email         String            @unique
-  username      String            @unique
-  passwordHash  String
-  avatarUrl     String?
-  bio           String?
-  isAdmin       Boolean           @default(false)
-  createdAt     DateTime          @default(now())
-  memberships   GroupMember[]
-  predictions   Prediction[]
-  bracketPicks  BracketPick[]
-  notifications Notification[]
-  achievements  UserAchievement[]
+  id           String   @id @default(cuid())
+  email        String?  @unique
+  username     String?  @unique
+  passwordHash String?
+  avatarUrl    String?
+  bio          String?
+  isAdmin      Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  // Identidad del provider padre (cuando el usuario entra vía launch)
+  providerName   String?
+  providerUserId String?
+  currency       String?
+  locale         String?
+
+  memberships       GroupMember[]
+  predictions       Prediction[]
+  bracketPicks      BracketPick[]
+  notifications     Notification[]
+  achievements      UserAchievement[]
+  activities        Activity[]
+  messages          Message[]
+  providerSessions  ProviderSession[]
+  walletTxs         WalletTransaction[]
+  tournamentEntries TournamentEntry[]
+
+  @@unique([providerName, providerUserId])
 }
 
 model Group {
@@ -36,6 +50,8 @@ model Group {
   createdAt   DateTime      @default(now())
   members     GroupMember[]
   scores      GroupScore[]
+  activities  Activity[]
+  messages    Message[]
 }
 
 model GroupMember {
@@ -55,54 +71,58 @@ model GroupMember {
 // ============================================================
 
 model Tournament {
-  id          String            @id @default(cuid())
-  externalId  String?           @unique
-  name        String
-  type        TournamentType    @default(CUP)
-  country     String?
-  startDate   DateTime?
-  endDate     DateTime?
-  isActive    Boolean           @default(true)
-  logoUrl     String?
-  trophyUrl   String?
-  createdAt   DateTime          @default(now())
+  id            String         @id @default(cuid())
+  externalId    String?        @unique
+  name          String
+  type          TournamentType @default(CUP)
+  country       String?
+  startDate     DateTime?
+  endDate       DateTime?
+  isActive      Boolean        @default(true)
+  logoUrl       String?
+  trophyUrl     String?
+  entryFee      Decimal?       @db.Decimal(18, 4)
+  entryCurrency String?
+  createdAt     DateTime       @default(now())
 
-  fixtures    Fixture[]
-  matches     Match[]
-  groups      TournamentGroup[]
-  teams       TournamentTeam[]
-  squads      SquadEntry[]
-  standings   GroupStanding[]
-  scores      GroupScore[]
+  fixtures     Fixture[]
+  matches      Match[]
+  groups       TournamentGroup[]
+  teams        TournamentTeam[]
+  squads       SquadEntry[]
+  standings    GroupStanding[]
+  scores       GroupScore[]
   bracketPicks BracketPick[]
+  entries      TournamentEntry[]
+  walletTxs    WalletTransaction[]
 }
 
 model TournamentGroup {
-  id           String          @id @default(cuid())
+  id           String  @id @default(cuid())
   tournamentId String
-  externalId   String?         @unique
-  name         String          // "A", "B", ..., "L"
+  externalId   String? @unique
+  name         String // "A", "B", ..., "L"
 
-  tournament   Tournament      @relation(fields: [tournamentId], references: [id])
-  teams        TournamentTeam[]
-  matches      Match[]
-  standings    GroupStanding[]
+  tournament Tournament       @relation(fields: [tournamentId], references: [id])
+  teams      TournamentTeam[]
+  matches    Match[]
+  standings  GroupStanding[]
 
   @@unique([tournamentId, name])
 }
 
 model Team {
-  id              String           @id @default(cuid())
-  externalId      String?          @unique
-  name            String
-  shortName       String?          // "ARG"
-  code            String?          // "AR" o ISO-2
-  flagUrl         String?
-  logoUrl         String?
-  founded         Int?
-  primaryColor    String?
-  secondaryColor  String?
-  confederation   String?          // "CONMEBOL", "UEFA", "CONCACAF", ...
+  id             String  @id @default(cuid())
+  externalId     String? @unique
+  name           String
+  shortName      String? // "ARG"
+  code           String? // "AR" o ISO-2
+  flagUrl        String?
+  logoUrl        String?
+  founded        Int?
+  primaryColor   String?
+  secondaryColor String?
+  confederation  String? // "CONMEBOL", "UEFA", "CONCACAF", ...
 
   tournamentTeams TournamentTeam[]
   homeMatches     Match[]          @relation("HomeTeamMatches")
@@ -113,56 +133,56 @@ model Team {
 }
 
 model TournamentTeam {
-  id            String            @id @default(cuid())
-  tournamentId  String
-  teamId        String
-  groupId       String?           // null para torneos sin grupos
-  fifaRanking   Int?
+  id           String  @id @default(cuid())
+  tournamentId String
+  teamId       String
+  groupId      String? // null para torneos sin grupos
+  fifaRanking  Int?
 
-  tournament    Tournament        @relation(fields: [tournamentId], references: [id])
-  team          Team              @relation(fields: [teamId], references: [id])
-  group         TournamentGroup?  @relation(fields: [groupId], references: [id])
+  tournament Tournament       @relation(fields: [tournamentId], references: [id])
+  team       Team             @relation(fields: [teamId], references: [id])
+  group      TournamentGroup? @relation(fields: [groupId], references: [id])
 
   @@unique([tournamentId, teamId])
 }
 
 model Venue {
-  id          String   @id @default(cuid())
-  externalId  String?  @unique
-  name        String
-  city        String?
-  country     String?
-  capacity    Int?
-  imageUrl    String?
-  latitude    Float?
-  longitude   Float?
-  surface     String?
+  id         String  @id @default(cuid())
+  externalId String? @unique
+  name       String
+  city       String?
+  country    String?
+  capacity   Int?
+  imageUrl   String?
+  latitude   Float?
+  longitude  Float?
+  surface    String?
 
-  matches     Match[]
+  matches Match[]
 }
 
 model Player {
-  id           String        @id @default(cuid())
-  externalId   String?       @unique
-  name         String
-  position     String?       // "Goalkeeper", "Defender", "Midfielder", "Attacker"
-  number       Int?
-  photoUrl     String?
-  age          Int?
-  nationality  String?
+  id          String  @id @default(cuid())
+  externalId  String? @unique
+  name        String
+  position    String? // "Goalkeeper", "Defender", "Midfielder", "Attacker"
+  number      Int?
+  photoUrl    String?
+  age         Int?
+  nationality String?
 
-  squad        SquadEntry[]
+  squad SquadEntry[]
 }
 
 model SquadEntry {
-  id            String     @id @default(cuid())
-  tournamentId  String
-  teamId        String
-  playerId      String
+  id           String @id @default(cuid())
+  tournamentId String
+  teamId       String
+  playerId     String
 
-  tournament    Tournament @relation(fields: [tournamentId], references: [id])
-  team          Team       @relation(fields: [teamId], references: [id])
-  player        Player     @relation(fields: [playerId], references: [id])
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
+  team       Team       @relation(fields: [teamId], references: [id])
+  player     Player     @relation(fields: [playerId], references: [id])
 
   @@unique([tournamentId, teamId, playerId])
 }
@@ -174,8 +194,8 @@ model SquadEntry {
 model Fixture {
   id           String       @id @default(cuid())
   tournamentId String
-  round        Int          // matchday: 1, 2, 3 (grupos), 4 (R32), 5 (R16), 6 (QF), 7 (SF), 8 (3rd), 9 (Final)
-  name         String?      // "Fase de Grupos - Fecha 1", "Octavos", "Final", ...
+  round        Int // matchday: 1, 2, 3 (grupos), 4 (R32), 5 (R16), 6 (QF), 7 (SF), 8 (3rd), 9 (Final)
+  name         String? // "Fase de Grupos - Fecha 1", "Octavos", "Final", ...
   closeAt      DateTime
   tournament   Tournament   @relation(fields: [tournamentId], references: [id])
   matches      Match[]
@@ -185,63 +205,63 @@ model Fixture {
 }
 
 model Match {
-  id            String           @id @default(cuid())
-  externalId    String?          @unique
-  tournamentId  String
-  fixtureId     String
-  stage         MatchStage       @default(GROUP)
-  groupId       String?
-  venueId       String?
+  id           String     @id @default(cuid())
+  externalId   String?    @unique
+  tournamentId String
+  fixtureId    String
+  stage        MatchStage @default(GROUP)
+  groupId      String?
+  venueId      String?
 
   // Equipos: FK + denormalizado para UI rápida
-  homeTeamId    String?
-  awayTeamId    String?
-  homeTeamName  String           // copia denormalizada (puede ser "Ganador Grupo A" antes de definirse)
-  awayTeamName  String
+  homeTeamId   String?
+  awayTeamId   String?
+  homeTeamName String // copia denormalizada (puede ser "Ganador Grupo A" antes de definirse)
+  awayTeamName String
 
-  startTime     DateTime
-  status        MatchStatus      @default(PENDING)
+  startTime DateTime
+  status    MatchStatus @default(PENDING)
 
   // Marcadores: 90', alargue, penales
-  homeScore     Int?
-  awayScore     Int?
-  homeScoreET   Int?
-  awayScoreET   Int?
-  homePens      Int?
-  awayPens      Int?
+  homeScore   Int?
+  awayScore   Int?
+  homeScoreET Int?
+  awayScoreET Int?
+  homePens    Int?
+  awayPens    Int?
 
-  refereeName   String?
-  attendance    Int?
-  broadcasters  Json?
+  refereeName  String?
+  attendance   Int?
+  broadcasters Json?
 
-  tournament    Tournament       @relation(fields: [tournamentId], references: [id])
-  fixture       Fixture          @relation(fields: [fixtureId], references: [id])
-  group         TournamentGroup? @relation(fields: [groupId], references: [id])
-  venue         Venue?           @relation(fields: [venueId], references: [id])
-  homeTeam      Team?            @relation("HomeTeamMatches", fields: [homeTeamId], references: [id])
-  awayTeam      Team?            @relation("AwayTeamMatches", fields: [awayTeamId], references: [id])
-  predictions   Prediction[]
+  tournament  Tournament       @relation(fields: [tournamentId], references: [id])
+  fixture     Fixture          @relation(fields: [fixtureId], references: [id])
+  group       TournamentGroup? @relation(fields: [groupId], references: [id])
+  venue       Venue?           @relation(fields: [venueId], references: [id])
+  homeTeam    Team?            @relation("HomeTeamMatches", fields: [homeTeamId], references: [id])
+  awayTeam    Team?            @relation("AwayTeamMatches", fields: [awayTeamId], references: [id])
+  predictions Prediction[]
 }
 
 // Standings de grupo (cacheado, recalculado al cerrar partidos)
 model GroupStanding {
-  id             String          @id @default(cuid())
-  tournamentId   String
-  groupId        String
-  teamId         String
-  played         Int             @default(0)
-  won            Int             @default(0)
-  drawn          Int             @default(0)
-  lost           Int             @default(0)
-  goalsFor       Int             @default(0)
-  goalsAgainst   Int             @default(0)
-  goalDiff       Int             @default(0)
-  points         Int             @default(0)
-  position       Int             @default(0)
+  id           String @id @default(cuid())
+  tournamentId String
+  groupId      String
+  teamId       String
+  played       Int    @default(0)
+  won          Int    @default(0)
+  drawn        Int    @default(0)
+  lost         Int    @default(0)
+  goalsFor     Int    @default(0)
+  goalsAgainst Int    @default(0)
+  goalDiff     Int    @default(0)
+  points       Int    @default(0)
+  position     Int    @default(0)
 
-  tournament     Tournament      @relation(fields: [tournamentId], references: [id])
-  group          TournamentGroup @relation(fields: [groupId], references: [id])
-  team           Team            @relation(fields: [teamId], references: [id])
+  tournament Tournament      @relation(fields: [tournamentId], references: [id])
+  group      TournamentGroup @relation(fields: [groupId], references: [id])
+  team       Team            @relation(fields: [teamId], references: [id])
 
   @@unique([groupId, teamId])
 }
@@ -262,25 +282,25 @@ model Prediction {
   pointsEarned   Int?
   createdAt      DateTime @default(now())
 
-  user           User     @relation(fields: [userId], references: [id])
-  match          Match    @relation(fields: [matchId], references: [id])
-  fixture        Fixture  @relation(fields: [fixtureId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+  match   Match   @relation(fields: [matchId], references: [id])
+  fixture Fixture @relation(fields: [fixtureId], references: [id])
 
   @@unique([userId, matchId])
 }
 
 // Predicción de campeón del torneo (bonus al final)
 model BracketPick {
-  id             String     @id @default(cuid())
-  userId         String
-  tournamentId   String
-  champTeamId    String     // equipo que pickea como campeón
-  pointsEarned   Int?
-  createdAt      DateTime   @default(now())
+  id           String   @id @default(cuid())
+  userId       String
+  tournamentId String
+  champTeamId  String // equipo que pickea como campeón
+  pointsEarned Int?
+  createdAt    DateTime @default(now())
 
-  user           User       @relation(fields: [userId], references: [id])
-  tournament     Tournament @relation(fields: [tournamentId], references: [id])
-  champTeam      Team       @relation(fields: [champTeamId], references: [id])
+  user       User       @relation(fields: [userId], references: [id])
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
+  champTeam  Team       @relation(fields: [champTeamId], references: [id])
 
   @@unique([userId, tournamentId])
 }
@@ -290,15 +310,15 @@ model BracketPick {
 // ============================================================
 
 model GroupScore {
-  id            String     @id @default(cuid())
-  groupId       String
-  userId        String
-  tournamentId  String
-  total         Int        @default(0)
-  streak        Int        @default(0)
+  id           String @id @default(cuid())
+  groupId      String
+  userId       String
+  tournamentId String
+  total        Int    @default(0)
+  streak       Int    @default(0)
 
-  group         Group      @relation(fields: [groupId], references: [id])
-  tournament    Tournament @relation(fields: [tournamentId], references: [id])
+  group      Group      @relation(fields: [groupId], references: [id])
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
 
   @@unique([groupId, userId, tournamentId])
 }
@@ -334,6 +354,118 @@ model UserAchievement {
   achievement   Achievement @relation(fields: [achievementId], references: [id])
 
   @@unique([userId, achievementId])
+}
+
+// ============================================================
+// ACTIVITY FEED (social engagement)
+// ============================================================
+
+model Activity {
+  id        String       @id @default(cuid())
+  groupId   String
+  userId    String
+  type      ActivityType
+  message   String
+  payload   Json?
+  createdAt DateTime     @default(now())
+
+  group Group @relation(fields: [groupId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@index([groupId, createdAt])
+  @@index([userId, createdAt])
+}
+
+// ============================================================
+// CHAT DE GRUPO
+// ============================================================
+
+model Message {
+  id        String   @id @default(cuid())
+  groupId   String
+  userId    String
+  content   String   @db.VarChar(2000)
+  createdAt DateTime @default(now())
+
+  group Group @relation(fields: [groupId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@index([groupId, createdAt])
+}
+
+// ============================================================
+// INTEGRACIÓN PROVIDER PADRE (launch / wallet)
+// ============================================================
+
+model ProviderSession {
+  id                String    @id @default(cuid())
+  providerName      String
+  operatorName      String?
+  authorizationCode String    @unique
+  userId            String?
+  providerUserId    String?
+  currency          String?
+  locale            String?
+  isMobile          Boolean   @default(false)
+  demo              Boolean   @default(false)
+  referrer          String?
+  expiresAt         DateTime?
+  consumedAt        DateTime?
+  exchangedAt       DateTime?
+  createdAt         DateTime  @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([providerName, providerUserId])
+}
+
+model WalletTransaction {
+  id                   String          @id @default(cuid())
+  userId               String
+  providerName         String
+  direction            WalletDirection
+  amount               Decimal         @db.Decimal(18, 4)
+  currency             String
+  transactionRequestId String          @unique
+  eventId              String?
+  gameId               String?
+  gameType             String?
+  roundId              String?
+  refTransactionId     String?
+  status               WalletTxStatus  @default(PENDING)
+  errorCode            String?
+  errorDetail          String?
+  tournamentId         String?
+  fixtureId            String?
+  createdAt            DateTime        @default(now())
+
+  user          User             @relation(fields: [userId], references: [id])
+  tournament    Tournament?      @relation(fields: [tournamentId], references: [id])
+  entryAsDebit  TournamentEntry? @relation("EntryDebit")
+  entryAsCredit TournamentEntry? @relation("EntryCredit")
+
+  @@index([userId, createdAt])
+  @@index([tournamentId])
+  @@index([roundId])
+}
+
+model TournamentEntry {
+  id           String                @id @default(cuid())
+  userId       String
+  tournamentId String
+  debitTxId    String?               @unique
+  creditTxId   String?               @unique
+  amount       Decimal               @db.Decimal(18, 4)
+  currency     String
+  status       TournamentEntryStatus @default(PAID)
+  createdAt    DateTime              @default(now())
+
+  user       User               @relation(fields: [userId], references: [id])
+  tournament Tournament         @relation(fields: [tournamentId], references: [id])
+  debitTx    WalletTransaction? @relation("EntryDebit", fields: [debitTxId], references: [id])
+  creditTx   WalletTransaction? @relation("EntryCredit", fields: [creditTxId], references: [id])
+
+  @@unique([userId, tournamentId])
 }
 
 // ============================================================
@@ -380,4 +512,31 @@ enum NotificationType {
   RANKING_CHANGE
   GROUP_INVITE
   ACHIEVEMENT_UNLOCKED
+}
+
+enum ActivityType {
+  MEMBER_JOINED
+  PREDICTIONS_SUBMITTED
+  POINTS_EARNED
+  RANK_UP
+  BRACKET_PICK
+  ACHIEVEMENT_UNLOCKED
+}
+
+enum WalletDirection {
+  DEBIT
+  CREDIT
+}
+
+enum WalletTxStatus {
+  PENDING
+  OK
+  FAILED
+  REVERSED
+}
+
+enum TournamentEntryStatus {
+  PAID
+  REFUNDED
+  SETTLED
 }

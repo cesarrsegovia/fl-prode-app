@@ -5,6 +5,11 @@ import Link from 'next/link';
 import type { FixtureWithMatches, Match, Prediction } from '@prode/shared';
 import { MatchStatus, Result } from '@prode/shared';
 import { fixtures, pronosticos } from '@/lib/endpoints';
+import { TeamFlag } from '@/components/torneo/TeamFlag';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 
 function resultFrom(match: Match): Result | null {
   if (match.homeScore === null || match.awayScore === null) return null;
@@ -18,6 +23,13 @@ const RESULT_LABEL: Record<Result, string> = {
   [Result.DRAW]: 'Empate',
   [Result.AWAY]: 'Visitante',
 };
+
+function teamSide(match: Match, side: 'home' | 'away') {
+  const team = side === 'home' ? match.homeTeam : match.awayTeam;
+  const name =
+    team?.shortName ?? team?.name ?? (side === 'home' ? match.homeTeamName : match.awayTeamName);
+  return { name, flagUrl: team?.flagUrl ?? null };
+}
 
 export default function ResultadosPage({
   params,
@@ -49,7 +61,7 @@ export default function ResultadosPage({
   if (error) {
     return (
       <main className="pt-24 pb-12 px-4 max-w-3xl mx-auto">
-        <p className="text-sm text-red-400 font-bold">{error}</p>
+        <p className="text-sm text-destructive font-bold">{error}</p>
       </main>
     );
   }
@@ -57,10 +69,7 @@ export default function ResultadosPage({
   if (!fixture) {
     return (
       <main className="pt-24 pb-12 px-4 max-w-3xl mx-auto">
-        <div
-          className="h-64 rounded-2xl animate-pulse"
-          style={{ background: 'var(--surface-container-low)' }}
-        />
+        <Skeleton className="h-64 w-full" />
       </main>
     );
   }
@@ -71,22 +80,27 @@ export default function ResultadosPage({
     <main className="pt-24 pb-24 px-4 max-w-3xl mx-auto">
       <Link
         href={`/prode/${fixture.id}`}
-        className="text-xs font-bold text-on-surface-variant hover:text-primary uppercase tracking-widest"
+        className="text-[10px] font-display font-bold text-ink-muted hover:text-neon uppercase tracking-[0.18em]"
       >
         ← Volver a pronósticos
       </Link>
 
-      <header className="mt-2 mb-6 flex items-end justify-between">
+      <header className="mt-3 mb-8 flex items-end justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold text-white">
-            Resultados — Fecha {fixture.round}
+          <p className="font-display text-xs uppercase tracking-[0.2em] text-neon mb-2">
+            Resultados
+          </p>
+          <h1 className="font-display font-extrabold text-4xl text-foreground tracking-tight">
+            {fixture.name ?? `Fecha ${fixture.round}`}
           </h1>
         </div>
         <div className="text-right">
-          <p className="text-xs uppercase tracking-widest text-on-surface-variant font-bold">
+          <p className="text-[10px] font-display font-bold uppercase tracking-[0.18em] text-ink-muted">
             Tus puntos
           </p>
-          <p className="text-3xl font-black text-primary">{totalPoints}</p>
+          <p className="text-4xl font-display font-extrabold text-neon tabular-nums">
+            {totalPoints}
+          </p>
         </div>
       </header>
 
@@ -100,72 +114,91 @@ export default function ResultadosPage({
             hit &&
             pred.homeScoreGuess === match.homeScore &&
             pred.awayScoreGuess === match.awayScore;
+          const home = teamSide(match, 'home');
+          const away = teamSide(match, 'away');
 
           return (
-            <li
-              key={match.id}
-              className="rounded-xl p-4"
-              style={{ background: 'var(--surface-container-low)' }}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-sm font-bold text-white">
-                  {match.homeTeam} vs {match.awayTeam}
-                </p>
-                <span className="text-xs uppercase tracking-widest font-bold text-on-surface-variant">
-                  {finished
-                    ? `${match.homeScore} - ${match.awayScore}`
-                    : 'Pendiente'}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2 text-xs">
-                <div>
-                  <p className="text-on-surface-variant uppercase tracking-widest font-bold">
-                    Resultado real
-                  </p>
-                  <p className="text-white font-bold">
-                    {realResult ? RESULT_LABEL[realResult] : '—'}
-                  </p>
+            <Card key={match.id} className="bg-surface-1 border-line/60">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <TeamFlag size="sm" src={home.flagUrl} alt={home.name} />
+                    <span className="font-display font-bold text-sm text-foreground">
+                      {home.name}
+                    </span>
+                    <span className="font-display font-bold text-sm text-ink-dim">
+                      vs
+                    </span>
+                    <span className="font-display font-bold text-sm text-foreground">
+                      {away.name}
+                    </span>
+                    <TeamFlag size="sm" src={away.flagUrl} alt={away.name} />
+                  </div>
+                  <span className="text-xs uppercase tracking-[0.18em] font-display font-bold text-ink-muted tabular-nums">
+                    {finished
+                      ? `${match.homeScore} - ${match.awayScore}`
+                      : 'Pendiente'}
+                  </span>
                 </div>
-                <div>
-                  <p className="text-on-surface-variant uppercase tracking-widest font-bold">
-                    Tu pronóstico
-                  </p>
-                  <p className="text-white font-bold">
-                    {pred ? RESULT_LABEL[pred.result] : 'Sin cargar'}
-                    {pred?.isCaptain && (
-                      <span className="ml-2 text-primary">(C)</span>
+
+                <div className="grid grid-cols-3 gap-2 text-xs">
+                  <div>
+                    <p className="text-ink-dim uppercase tracking-[0.15em] font-display font-bold mb-1">
+                      Real
+                    </p>
+                    <p className="text-foreground font-bold">
+                      {realResult ? RESULT_LABEL[realResult] : '—'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-ink-dim uppercase tracking-[0.15em] font-display font-bold mb-1">
+                      Tu pick
+                    </p>
+                    <p className="text-foreground font-bold">
+                      {pred ? RESULT_LABEL[pred.result] : 'Sin cargar'}
+                      {pred?.isCaptain && (
+                        <span className="ml-2 text-neon">(C)</span>
+                      )}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-ink-dim uppercase tracking-[0.15em] font-display font-bold mb-1">
+                      Puntos
+                    </p>
+                    <p
+                      className={cn(
+                        'font-display font-extrabold text-xl tabular-nums',
+                        (pred?.pointsEarned ?? 0) > 0
+                          ? 'text-neon'
+                          : 'text-foreground',
+                      )}
+                    >
+                      {pred?.pointsEarned ?? '—'}
+                    </p>
+                  </div>
+                </div>
+
+                {finished && pred && (
+                  <div className="mt-3 flex gap-2 flex-wrap">
+                    {hit && (
+                      <Badge className="bg-neon/10 text-neon hover:bg-neon/15">
+                        +3 Resultado
+                      </Badge>
                     )}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-on-surface-variant uppercase tracking-widest font-bold">
-                    Puntos
-                  </p>
-                  <p
-                    className={`font-black text-lg ${
-                      (pred?.pointsEarned ?? 0) > 0
-                        ? 'text-primary'
-                        : 'text-white'
-                    }`}
-                  >
-                    {pred?.pointsEarned ?? '—'}
-                  </p>
-                </div>
-              </div>
-
-              {finished && pred && (
-                <div className="mt-2 flex gap-2 text-[10px] font-bold uppercase tracking-widest">
-                  {hit && (
-                    <span className="text-primary">+3 Resultado</span>
-                  )}
-                  {exact && <span className="text-primary">+3 Exacto</span>}
-                  {pred.isCaptain && (pred.pointsEarned ?? 0) > 0 && (
-                    <span className="text-primary">x2 Capitán</span>
-                  )}
-                </div>
-              )}
-            </li>
+                    {exact && (
+                      <Badge className="bg-neon/10 text-neon hover:bg-neon/15">
+                        +3 Marcador exacto
+                      </Badge>
+                    )}
+                    {pred.isCaptain && (pred.pointsEarned ?? 0) > 0 && (
+                      <Badge className="bg-citrus/10 text-citrus hover:bg-citrus/15">
+                        x2 Capitán
+                      </Badge>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           );
         })}
       </ul>

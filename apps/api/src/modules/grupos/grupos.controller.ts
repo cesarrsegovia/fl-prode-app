@@ -65,6 +65,11 @@ export class GruposController {
     return this.gruposService.regenerateInviteCode(id);
   }
 
+  @Get('preview/:inviteCode')
+  async preview(@Param('inviteCode') inviteCode: string) {
+    return this.gruposService.previewByInvite(inviteCode);
+  }
+
   @UseGuards(AuthGuard('jwt'))
   @Post('join')
   async join(

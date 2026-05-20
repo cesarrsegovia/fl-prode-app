@@ -4,15 +4,19 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Role } from '@prisma/client';
+import { ActivityType, Role } from '@prisma/client';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
+import { ActivityService } from '../activity/activity.service';
 import { CreateGrupoDto } from './dto/create-grupo.dto';
 import { UpdateGrupoDto } from './dto/update-grupo.dto';
 
 @Injectable()
 export class GruposService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly activity: ActivityService,
+  ) {}
 
   async create(data: CreateGrupoDto, userId: string) {
     return this.prisma.group.create({
@@ -84,6 +88,23 @@ export class GruposService {
     });
   }
 
+  /** Vista pública (sin auth) para la landing de invitación. */
+  async previewByInvite(inviteCode: string) {
+    const group = await this.prisma.group.findUnique({
+      where: { inviteCode },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        isPrivate: true,
+        createdAt: true,
+        _count: { select: { members: true } },
+      },
+    });
+    if (!group) throw new NotFoundException('Código de invitación inválido');
+    return group;
+  }
+
   async join(inviteCode: string, userId: string) {
     const group = await this.prisma.group.findUnique({ where: { inviteCode } });
     if (!group) throw new NotFoundException('Código de invitación inválido');
@@ -96,6 +117,18 @@ export class GruposService {
     await this.prisma.groupMember.create({
       data: { userId, groupId: group.id, role: Role.MEMBER },
     });
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { username: true },
+    });
+    await this.activity.emit({
+      groupId: group.id,
+      userId,
+      type: ActivityType.MEMBER_JOINED,
+      message: `${user?.username ?? 'Un usuario'} se unió al grupo`,
+    });
+
     return group;
   }
 

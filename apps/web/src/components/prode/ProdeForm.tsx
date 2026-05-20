@@ -170,7 +170,7 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
             <option value="">Sin capitán</option>
             {fixture.matches.map((m) => (
               <option key={m.id} value={m.id}>
-                {m.homeTeam} vs {m.awayTeam}
+                {m.homeTeamName} vs {m.awayTeamName}
               </option>
             ))}
           </select>

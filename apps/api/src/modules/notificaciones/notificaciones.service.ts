@@ -26,6 +26,13 @@ export class NotificacionesService {
     });
   }
 
+  async markOneRead(userId: string, id: string) {
+    return this.prisma.notification.updateMany({
+      where: { id, userId },
+      data: { read: true },
+    });
+  }
+
   async create(userId: string, type: NotificationType, message: string) {
     const notification = await this.prisma.notification.create({
       data: { userId, type, message },

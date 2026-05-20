@@ -1,11 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MatchStatus, NotificationType, Result } from '@prisma/client';
+import { ActivityType, MatchStatus, NotificationType, Result } from '@prisma/client';
 import axios from 'axios';
 import { WS_EVENTS } from '@prode/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EventsGateway } from '../../websocket/events.gateway';
 import { GamificacionService } from '../gamificacion/gamificacion.service';
 import { NotificacionesService } from '../notificaciones/notificaciones.service';
+import { ActivityService } from '../activity/activity.service';
 import { statusFromApiFootball } from '../../common/utils/api-football.util';
 import {
   POINTS_CORRECT_RESULT,
@@ -33,6 +34,7 @@ export class ResultadosService {
     private readonly prisma: PrismaService,
     private readonly gamificacion: GamificacionService,
     private readonly notificaciones: NotificacionesService,
+    private readonly activity: ActivityService,
     private readonly events: EventsGateway,
   ) {}
 
@@ -143,12 +145,23 @@ export class ResultadosService {
     );
     if (!finished.length) return;
 
-    const affectedUsers = new Set<string>();
-    let tournamentIdOfFixture: string | null = null;
+    const tournamentIdOfFixture = finished[0].match.tournamentId;
+    const affectedUserIds = [...new Set(finished.map((p) => p.userId))];
+
+    const memberships = await this.prisma.groupMember.findMany({
+      where: { userId: { in: affectedUserIds } },
+      select: { userId: true, groupId: true },
+    });
+    const affectedGroupIds = [...new Set(memberships.map((m) => m.groupId))];
+    const beforePositions = await this.snapshotPositions(
+      affectedGroupIds,
+      tournamentIdOfFixture,
+    );
+
+    const pointsByUser = new Map<string, number>();
 
     for (const pred of finished) {
       const { homeScore, awayScore } = pred.match;
-      tournamentIdOfFixture = pred.match.tournamentId;
 
       let actualResult: Result;
       if (homeScore! > awayScore!) actualResult = Result.HOME;
@@ -170,10 +183,48 @@ export class ResultadosService {
       });
 
       await this.updateGroupScores(pred.userId, points, pred.match.tournamentId);
-      affectedUsers.add(pred.userId);
+      pointsByUser.set(pred.userId, (pointsByUser.get(pred.userId) ?? 0) + points);
     }
 
-    for (const userId of affectedUsers) {
+    const afterPositions = await this.snapshotPositions(
+      affectedGroupIds,
+      tournamentIdOfFixture,
+    );
+
+    const users = await this.prisma.user.findMany({
+      where: { id: { in: affectedUserIds } },
+      select: { id: true, username: true },
+    });
+    const usernameById = new Map(users.map((u) => [u.id, u.username]));
+
+    for (const userId of affectedUserIds) {
+      const points = pointsByUser.get(userId) ?? 0;
+      const username = usernameById.get(userId) ?? 'Alguien';
+      const userMemberships = memberships.filter((m) => m.userId === userId);
+
+      for (const m of userMemberships) {
+        if (points > 0) {
+          await this.activity.emit({
+            groupId: m.groupId,
+            userId,
+            type: ActivityType.POINTS_EARNED,
+            message: `${username} sumó ${points} pts en la última fecha`,
+            payload: { fixtureId, points },
+          });
+        }
+        const before = beforePositions.get(`${m.groupId}|${userId}`);
+        const after = afterPositions.get(`${m.groupId}|${userId}`);
+        if (before && after && after < before) {
+          await this.activity.emit({
+            groupId: m.groupId,
+            userId,
+            type: ActivityType.RANK_UP,
+            message: `${username} subió al puesto #${after}`,
+            payload: { from: before, to: after },
+          });
+        }
+      }
+
       await this.gamificacion.evaluateAchievements(userId);
       await this.notificaciones.create(
         userId,
@@ -187,20 +238,30 @@ export class ResultadosService {
       tournamentId: tournamentIdOfFixture,
     });
 
-    const affectedGroups = await this.prisma.groupMember.findMany({
-      where: { userId: { in: [...affectedUsers] } },
-      select: { groupId: true },
-      distinct: ['groupId'],
-    });
-    for (const g of affectedGroups) {
-      this.events.emitToGroup(g.groupId, WS_EVENTS.RANKING_UPDATE, {
-        groupId: g.groupId,
-      });
+    for (const groupId of affectedGroupIds) {
+      this.events.emitToGroup(groupId, WS_EVENTS.RANKING_UPDATE, { groupId });
     }
 
     this.logger.log(
       `Calculated points for ${finished.length} predictions in fixture ${fixtureId}`,
     );
+  }
+
+  private async snapshotPositions(groupIds: string[], tournamentId: string) {
+    if (!groupIds.length) return new Map<string, number>();
+    const scores = await this.prisma.groupScore.findMany({
+      where: { groupId: { in: groupIds }, tournamentId },
+      orderBy: [{ total: 'desc' }, { streak: 'desc' }],
+      select: { groupId: true, userId: true },
+    });
+    const positions = new Map<string, number>();
+    const counters = new Map<string, number>();
+    for (const s of scores) {
+      const pos = (counters.get(s.groupId) ?? 0) + 1;
+      counters.set(s.groupId, pos);
+      positions.set(`${s.groupId}|${s.userId}`, pos);
+    }
+    return positions;
   }
 
   private async updateGroupScores(userId: string, points: number, tournamentId: string) {
