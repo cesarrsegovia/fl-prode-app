@@ -5,7 +5,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ActivityType, MatchStatus, Result } from '@prisma/client';
-import { WS_EVENTS } from '@prode/shared';
+import {
+  MatchStage as SharedMatchStage,
+  WS_EVENTS,
+  isMatchPredictionClosed,
+} from '@prode/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EventsGateway } from '../../websocket/events.gateway';
 import { ActivityService } from '../activity/activity.service';
@@ -39,8 +43,16 @@ export class PronosticosService {
     if (match.fixtureId !== fixture.id) {
       throw new BadRequestException('El partido no pertenece a la fecha indicada');
     }
-    if (fixture.closeAt <= new Date()) {
-      throw new BadRequestException('La fecha ya está cerrada para pronósticos');
+    if (
+      isMatchPredictionClosed({
+        stage: match.stage as unknown as SharedMatchStage,
+        startTime: match.startTime,
+        fixtureCloseAt: fixture.closeAt,
+      })
+    ) {
+      throw new BadRequestException(
+        'El plazo para este pronóstico ya está cerrado',
+      );
     }
     if (match.status !== MatchStatus.PENDING) {
       throw new BadRequestException('El partido ya no acepta pronósticos');
@@ -124,12 +136,20 @@ export class PronosticosService {
   async remove(userId: string, predictionId: string) {
     const pred = await this.prisma.prediction.findUnique({
       where: { id: predictionId },
-      include: { fixture: true },
+      include: { fixture: true, match: true },
     });
     if (!pred) throw new NotFoundException('Pronóstico no encontrado');
     if (pred.userId !== userId) throw new ForbiddenException('No es tu pronóstico');
-    if (pred.fixture.closeAt <= new Date()) {
-      throw new BadRequestException('La fecha ya está cerrada, no se puede borrar');
+    if (
+      isMatchPredictionClosed({
+        stage: pred.match.stage as unknown as SharedMatchStage,
+        startTime: pred.match.startTime,
+        fixtureCloseAt: pred.fixture.closeAt,
+      })
+    ) {
+      throw new BadRequestException(
+        'El plazo ya está cerrado, no se puede borrar',
+      );
     }
     await this.prisma.prediction.delete({ where: { id: predictionId } });
     return { id: predictionId };

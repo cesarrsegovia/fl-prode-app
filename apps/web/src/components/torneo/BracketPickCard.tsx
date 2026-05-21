@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Trophy, Check } from 'lucide-react';
+import { championPickDeadline } from '@prode/shared';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { bracketPick, type BracketPickResponse } from '@/lib/endpoints';
@@ -43,7 +44,10 @@ export function BracketPickCard({
   }, [tournamentId]);
 
   const lockedAt = useMemo(
-    () => (tournamentStartDate ? new Date(tournamentStartDate) : null),
+    () =>
+      tournamentStartDate
+        ? championPickDeadline(new Date(tournamentStartDate))
+        : null,
     [tournamentStartDate],
   );
   const locked = lockedAt ? lockedAt <= new Date() : false;

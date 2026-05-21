@@ -4,6 +4,7 @@ export * from './types/grupo.types';
 export * from './types/fixture.types';
 export * from './types/pronostico.types';
 export * from './types/ranking.types';
+export * from './types/r32.types';
 
 // Constants
 export * from './constants';
@@ -11,3 +12,6 @@ export * from './constants';
 // API & Realtime
 export * from './api/events';
 export * from './api/dtos';
+
+// Deadlines
+export * from './deadlines';

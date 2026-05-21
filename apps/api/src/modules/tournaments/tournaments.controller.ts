@@ -12,6 +12,7 @@ import { WorldCupImporterService } from '../importer/worldcup-importer.service';
 import { AdminGuard } from '../../common/guards/admin.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { BracketPickDto } from './dto/bracket-pick.dto';
+import { R32QualifierPicksDto } from './dto/r32-picks.dto';
 
 @Controller('tournaments')
 export class TournamentsController {
@@ -84,6 +85,33 @@ export class TournamentsController {
   @Get(':id/bracket-pick/aggregate')
   bracketPickAggregate(@Param('id') id: string) {
     return this.service.getBracketPickAggregate(id);
+  }
+
+  // ---------- R32 picks (clasificados a 16vos) ----------
+
+  @Get(':id/r32-picks/deadline')
+  async r32Deadline(@Param('id') id: string) {
+    const deadline = await this.service.getR32Deadline(id);
+    return { deadline };
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get(':id/r32-picks/me')
+  myR32Picks(
+    @Param('id') id: string,
+    @CurrentUser() user: { userId: string },
+  ) {
+    return this.service.getMyR32Picks(id, user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post(':id/r32-picks')
+  setR32Picks(
+    @Param('id') id: string,
+    @CurrentUser() user: { userId: string },
+    @Body() body: R32QualifierPicksDto,
+  ) {
+    return this.service.setR32Picks(id, user.userId, body.picks);
   }
 
   // ---------- TournamentEntry (wallet del padre) ----------

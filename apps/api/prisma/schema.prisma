@@ -30,6 +30,7 @@ model User {
   memberships       GroupMember[]
   predictions       Prediction[]
   bracketPicks      BracketPick[]
+  r32Picks          R32QualifierPick[]
   notifications     Notification[]
   achievements      UserAchievement[]
   activities        Activity[]
@@ -93,6 +94,7 @@ model Tournament {
   standings    GroupStanding[]
   scores       GroupScore[]
   bracketPicks BracketPick[]
+  r32Picks     R32QualifierPick[]
   entries      TournamentEntry[]
   walletTxs    WalletTransaction[]
 }
@@ -130,6 +132,7 @@ model Team {
   squad           SquadEntry[]
   standings       GroupStanding[]
   bracketPicks    BracketPick[]
+  r32Picks        R32QualifierPick[]
 }
 
 model TournamentTeam {
@@ -287,6 +290,26 @@ model Prediction {
   fixture Fixture @relation(fields: [fixtureId], references: [id])
 
   @@unique([userId, matchId])
+}
+
+// Predicción de los 32 equipos que clasifican a R32 (Round of 32 / "16vos de final")
+// Cada usuario manda 24 picks TOP2 (2 por cada uno de los 12 grupos) + 8 BEST_THIRD.
+// Deadline = día previo al inicio de la 3ra fecha de grupos.
+model R32QualifierPick {
+  id           String      @id @default(cuid())
+  userId       String
+  tournamentId String
+  teamId       String
+  kind         R32PickKind
+  pointsEarned Int?
+  createdAt    DateTime    @default(now())
+
+  user       User       @relation(fields: [userId], references: [id])
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
+  team       Team       @relation(fields: [teamId], references: [id])
+
+  @@unique([userId, tournamentId, teamId])
+  @@index([userId, tournamentId])
 }
 
 // Predicción de campeón del torneo (bonus al final)
@@ -539,4 +562,9 @@ enum TournamentEntryStatus {
   PAID
   REFUNDED
   SETTLED
+}
+
+enum R32PickKind {
+  TOP2
+  BEST_THIRD
 }

@@ -7,6 +7,7 @@ import { EventsGateway } from '../../websocket/events.gateway';
 import { GamificacionService } from '../gamificacion/gamificacion.service';
 import { NotificacionesService } from '../notificaciones/notificaciones.service';
 import { ActivityService } from '../activity/activity.service';
+import { TournamentsService } from '../tournaments/tournaments.service';
 import { statusFromApiFootball } from '../../common/utils/api-football.util';
 import {
   POINTS_CORRECT_RESULT,
@@ -36,6 +37,7 @@ export class ResultadosService {
     private readonly notificaciones: NotificacionesService,
     private readonly activity: ActivityService,
     private readonly events: EventsGateway,
+    private readonly tournaments: TournamentsService,
   ) {}
 
   async fetchAndUpdateResults() {
@@ -245,6 +247,29 @@ export class ResultadosService {
     this.logger.log(
       `Calculated points for ${finished.length} predictions in fixture ${fixtureId}`,
     );
+
+    // Si esta fixture es la 3ra fecha de grupos y ya están todos los partidos
+    // de grupos terminados, puntuamos los picks de clasificados a R32.
+    const fixtureMeta = await this.prisma.fixture.findUnique({
+      where: { id: fixtureId },
+      select: { round: true, tournamentId: true },
+    });
+    if (fixtureMeta?.round === 3) {
+      try {
+        const { scored, usersAffected } =
+          await this.tournaments.scoreR32PicksIfReady(fixtureMeta.tournamentId);
+        if (scored > 0) {
+          this.logger.log(
+            `R32 picks scored: ${scored} picks across ${usersAffected} users`,
+          );
+          this.events.emitToAll(WS_EVENTS.RANKING_UPDATE, {
+            tournamentId: fixtureMeta.tournamentId,
+          });
+        }
+      } catch (err: any) {
+        this.logger.error(`R32 scoring failed: ${err.message}`);
+      }
+    }
   }
 
   private async snapshotPositions(groupIds: string[], tournamentId: string) {

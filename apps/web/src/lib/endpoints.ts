@@ -1,6 +1,7 @@
 import type {
   FixtureWithMatches,
   Prediction,
+  R32PickKind,
   RankingEntry,
   Result,
 } from '@prode/shared';
@@ -154,6 +155,47 @@ export const bracketPick = {
         `/tournaments/${tournamentId}/bracket-pick`,
         { champTeamId },
       )
+      .then((r) => r.data),
+};
+
+// ---------- R32 picks (clasificados a 16vos) ----------
+export interface R32PickResponse {
+  id: string;
+  userId: string;
+  tournamentId: string;
+  teamId: string;
+  kind: R32PickKind;
+  pointsEarned: number | null;
+  createdAt: string;
+  team: {
+    id: string;
+    name: string;
+    shortName: string | null;
+    flagUrl: string | null;
+  };
+}
+
+export interface R32PickPayloadItem {
+  teamId: string;
+  kind: R32PickKind;
+}
+
+export const r32Picks = {
+  deadline: (tournamentId: string) =>
+    apiClient
+      .get<{ deadline: string | null }>(
+        `/tournaments/${tournamentId}/r32-picks/deadline`,
+      )
+      .then((r) => r.data),
+  mine: (tournamentId: string) =>
+    apiClient
+      .get<R32PickResponse[]>(`/tournaments/${tournamentId}/r32-picks/me`)
+      .then((r) => r.data),
+  set: (tournamentId: string, picks: R32PickPayloadItem[]) =>
+    apiClient
+      .post<R32PickResponse[]>(`/tournaments/${tournamentId}/r32-picks`, {
+        picks,
+      })
       .then((r) => r.data),
 };
 

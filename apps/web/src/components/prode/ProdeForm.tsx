@@ -2,6 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { FixtureWithMatches, Prediction, Result } from '@prode/shared';
+import {
+  isKnockoutStage,
+  matchPredictionDeadline,
+} from '@prode/shared';
 import { pronosticos } from '@/lib/endpoints';
 import { MatchCard, type MatchPick } from './MatchCard';
 import { Countdown } from './Countdown';
@@ -38,8 +42,42 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  const closeAt = useMemo(() => new Date(fixture.closeAt), [fixture.closeAt]);
-  const isClosed = closeAt.getTime() <= Date.now();
+  const fixtureCloseAt = useMemo(
+    () => new Date(fixture.closeAt),
+    [fixture.closeAt],
+  );
+  const isKnockoutFixture = useMemo(
+    () =>
+      fixture.matches.length > 0 && isKnockoutStage(fixture.matches[0].stage),
+    [fixture.matches],
+  );
+  const deadlinesByMatch = useMemo(() => {
+    const map: Record<string, Date> = {};
+    for (const m of fixture.matches) {
+      map[m.id] = matchPredictionDeadline({
+        stage: m.stage,
+        startTime: m.startTime,
+        fixtureCloseAt: fixture.closeAt,
+      });
+    }
+    return map;
+  }, [fixture.matches, fixture.closeAt]);
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(id);
+  }, []);
+  const isMatchClosed = (matchId: string) =>
+    (deadlinesByMatch[matchId]?.getTime() ?? 0) <= now;
+  const nextOpenDeadline = useMemo(() => {
+    if (!isKnockoutFixture) return fixtureCloseAt;
+    const futures = fixture.matches
+      .map((m) => deadlinesByMatch[m.id])
+      .filter((d): d is Date => !!d && d.getTime() > now)
+      .sort((a, b) => a.getTime() - b.getTime());
+    return futures[0] ?? null;
+  }, [isKnockoutFixture, fixture.matches, deadlinesByMatch, fixtureCloseAt, now]);
+  const allClosed = fixture.matches.every((m) => isMatchClosed(m.id));
 
   const totalMatches = fixture.matches.length;
   const filledCount = useMemo(
@@ -94,7 +132,9 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
 
   const saveAll = async () => {
     setSubmitError(null);
-    const entries = Object.entries(picks).filter(([, p]) => p.result);
+    const entries = Object.entries(picks).filter(
+      ([matchId, p]) => p.result && !isMatchClosed(matchId),
+    );
     if (!entries.length) {
       setSubmitError('Marcá al menos un resultado antes de guardar.');
       return;
@@ -127,9 +167,15 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
       >
         <div>
           <p className="text-xs uppercase tracking-widest text-on-surface-variant font-bold">
-            Cierra en
+            {isKnockoutFixture ? 'Próximo cierre' : 'Cierra en'}
           </p>
-          <Countdown targetDate={closeAt} />
+          {nextOpenDeadline ? (
+            <Countdown targetDate={nextOpenDeadline} />
+          ) : (
+            <p className="text-sm font-bold text-on-surface-variant">
+              Pronósticos cerrados
+            </p>
+          )}
         </div>
         <div className="text-right">
           <p className="text-xs uppercase tracking-widest text-on-surface-variant font-bold">
@@ -149,7 +195,7 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
         </div>
       </div>
 
-      {!isClosed && (
+      {!allClosed && !isKnockoutFixture && (
         <div
           className="rounded-xl p-4 flex items-center justify-between gap-4"
           style={{ background: 'var(--surface-container-low)' }}
@@ -178,31 +224,34 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
       )}
 
       <div className="space-y-4">
-        {fixture.matches.map((match) => (
-          <div key={match.id}>
-            <MatchCard
-              match={match}
-              pick={picks[match.id]}
-              isCaptainOption={false}
-              disabled={isClosed}
-              onChange={(next) => updatePick(match.id, next)}
-            />
-            {!isClosed && picks[match.id]?.result && (
-              <div className="mt-1 flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => savePick(match.id)}
-                  disabled={savingMatchId === match.id}
-                  className="text-xs font-bold text-primary hover:underline disabled:opacity-50"
-                >
-                  {savingMatchId === match.id
-                    ? 'Guardando…'
-                    : 'Guardar este'}
-                </button>
-              </div>
-            )}
-          </div>
-        ))}
+        {fixture.matches.map((match) => {
+          const closed = isMatchClosed(match.id);
+          return (
+            <div key={match.id}>
+              <MatchCard
+                match={match}
+                pick={picks[match.id]}
+                isCaptainOption={false}
+                disabled={closed}
+                onChange={(next) => updatePick(match.id, next)}
+              />
+              {!closed && picks[match.id]?.result && (
+                <div className="mt-1 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => savePick(match.id)}
+                    disabled={savingMatchId === match.id}
+                    className="text-xs font-bold text-primary hover:underline disabled:opacity-50"
+                  >
+                    {savingMatchId === match.id
+                      ? 'Guardando…'
+                      : 'Guardar este'}
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {submitError && (
@@ -212,7 +261,7 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
         <p className="text-sm font-bold text-primary">{successMsg}</p>
       )}
 
-      {!isClosed && (
+      {!allClosed && (
         <button
           type="button"
           onClick={saveAll}

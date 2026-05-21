@@ -8,6 +8,7 @@ import { MatchdayList } from '@/components/torneo/MatchdayList';
 import { BracketTree } from '@/components/torneo/BracketTree';
 import { VenueCard } from '@/components/torneo/VenueCard';
 import { BracketPickCard } from '@/components/torneo/BracketPickCard';
+import { R32PicksCard } from '@/components/torneo/R32PicksCard';
 import { TournamentTabs } from './TournamentTabs';
 
 interface Props {
@@ -63,6 +64,8 @@ export default async function TorneoPage({ params }: Props) {
           tournamentStartDate={tournament.startDate}
           teams={teamOptions}
         />
+
+        <R32PicksCard tournamentId={tournament.id} teams={teamOptions} />
 
         <TournamentTabs
           grupos={

@@ -2,6 +2,12 @@ import { Injectable, Logger } from '@nestjs/common';
 import { MatchStage, Prisma, TournamentType } from '@prisma/client';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import {
+  MatchStage as SharedMatchStage,
+  groupFixtureDeadline,
+  isKnockoutStage,
+  knockoutMatchDeadline,
+} from '@prode/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 
 /**
@@ -248,17 +254,21 @@ export class WorldCupSeederService {
     tournamentId: string,
     data: SeedData,
   ): Promise<Map<number, string>> {
-    // Earliest startTime por round = closeAt
-    const earliestByRound = new Map<number, Date>();
+    const earliestByRound = new Map<number, { start: Date; stage: MatchStage }>();
     for (const m of data.matches) {
       const t = new Date(m.startTime);
       const cur = earliestByRound.get(m.round);
-      if (!cur || t < cur) earliestByRound.set(m.round, t);
+      if (!cur || t < cur.start) {
+        earliestByRound.set(m.round, { start: t, stage: MatchStage[m.stage] });
+      }
     }
 
     const fixtureIdByRound = new Map<number, string>();
     await Promise.all(
-      [...earliestByRound.entries()].map(async ([round, closeAt]) => {
+      [...earliestByRound.entries()].map(async ([round, { start, stage }]) => {
+        const closeAt = isKnockoutStage(stage as unknown as SharedMatchStage)
+          ? knockoutMatchDeadline(start)
+          : groupFixtureDeadline(start);
         const row = await this.prisma.fixture.upsert({
           where: { tournamentId_round: { tournamentId, round } },
           update: { closeAt, name: ROUND_NAMES[round] ?? `Fecha ${round}` },

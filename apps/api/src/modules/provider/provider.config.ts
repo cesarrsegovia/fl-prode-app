@@ -12,14 +12,14 @@ export interface ProviderConfig {
 export function loadProviderConfig(): ProviderConfig {
   const name = (process.env.PROVIDER_NAME || 'prode').trim();
   const operatorName = (process.env.PROVIDER_OPERATOR_NAME || '').trim();
-  const baseUrl = (process.env.PROVIDER_BASE_URL || '').trim();
+  const baseUrl = (process.env.OFFCHAIN_API_URL || process.env.PROVIDER_BASE_URL || '').trim();
   const apiKey = (process.env.PROVIDER_OUTBOUND_API_KEY || '').trim();
   const timeoutMs = parseInt(process.env.PROVIDER_TIMEOUT_MS || '10000', 10);
 
   const enabled = Boolean(baseUrl && apiKey && operatorName);
   if (!enabled) {
     console.warn(
-      '[provider] integración deshabilitada — faltan PROVIDER_BASE_URL, PROVIDER_OUTBOUND_API_KEY u PROVIDER_OPERATOR_NAME',
+      '[provider] integración deshabilitada — faltan OFFCHAIN_API_URL, PROVIDER_OUTBOUND_API_KEY u PROVIDER_OPERATOR_NAME',
     );
   }
 
