@@ -1,0 +1,36 @@
+{
+  "links": {
+    "home": "Home",
+    "myProde": "My Prode",
+    "prode": "Prode",
+    "groups": "Groups",
+    "ranking": "Ranking",
+    "worldCup": "World Cup",
+    "admin": "Admin"
+  },
+  "auth": {
+    "login": "Log in",
+    "register": "Sign up"
+  },
+  "notifications": {
+    "aria": "Notifications",
+    "none": "No new notifications",
+    "count": "{count, plural, one {# new} other {# new}}"
+  },
+  "menu": {
+    "profile": "My profile",
+    "myPredictions": "My predictions",
+    "notifications": "Notifications",
+    "logout": "Log out",
+    "fallbackName": "Me"
+  },
+  "footer": {
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "support": "Support",
+    "copyright": "© {year} Prode · The stadium is yours"
+  },
+  "language": {
+    "label": "Language"
+  }
+}

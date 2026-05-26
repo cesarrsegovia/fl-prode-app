@@ -1,0 +1,31 @@
+{
+  "hero": {
+    "predict": "Predecí.",
+    "compete": "Competí.",
+    "win": "Ganá.",
+    "subtitle": "La plataforma de pronósticos deportivos más avanzada. Armá tu grupo, subí en el ranking y demostrá que sos el que más sabe de fútbol.",
+    "ctaPrimary": "Crear cuenta gratis",
+    "ctaSecondary": "Ver cómo funciona",
+    "social": "YA JUEGAN <hl>{count, number} USUARIOS</hl> ESTA FECHA"
+  },
+  "features": {
+    "groups": {
+      "title": "Grupos privados",
+      "desc": "Creá ligas exclusivas para tus amigos, compañeros de trabajo o familia con reglas personalizadas."
+    },
+    "global": {
+      "title": "Prode global",
+      "desc": "Participá en la liga general contra miles de usuarios y ganá premios exclusivos todas las semanas."
+    },
+    "ranking": {
+      "title": "Ranking en tiempo real",
+      "desc": "Seguí los resultados minuto a minuto y mira cómo escalas posiciones mientras ocurren los goles."
+    }
+  },
+  "stats": {
+    "predictions": "Predicciones",
+    "tournaments": "Torneos Activos",
+    "goals": "Goles Cantados",
+    "country": "En Argentina"
+  }
+}

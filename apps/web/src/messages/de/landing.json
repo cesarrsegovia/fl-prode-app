@@ -1,0 +1,31 @@
+{
+  "hero": {
+    "predict": "Tippen.",
+    "compete": "Mitspielen.",
+    "win": "Gewinnen.",
+    "subtitle": "Die fortschrittlichste Sport-Tipp-Plattform. Stelle deine Gruppe zusammen, klettere in der Rangliste nach oben und beweise, dass du am meisten von Fußball verstehst.",
+    "ctaPrimary": "Kostenloses Konto erstellen",
+    "ctaSecondary": "So funktioniert's",
+    "social": "JETZT DABEI <hl>{count, number} NUTZER</hl> DIESEN SPIELTAG"
+  },
+  "features": {
+    "groups": {
+      "title": "Private Gruppen",
+      "desc": "Erstelle exklusive Ligen für Freunde, Kollegen oder Familie mit eigenen Regeln."
+    },
+    "global": {
+      "title": "Globales Prode",
+      "desc": "Tritt in der allgemeinen Liga gegen Tausende Nutzer an und gewinne jede Woche exklusive Preise."
+    },
+    "ranking": {
+      "title": "Echtzeit-Rangliste",
+      "desc": "Verfolge die Ergebnisse Minute für Minute und sieh, wie du aufsteigst, während die Tore fallen."
+    }
+  },
+  "stats": {
+    "predictions": "Tipps",
+    "tournaments": "Aktive Turniere",
+    "goals": "Gerufene Tore",
+    "country": "In Argentinien"
+  }
+}

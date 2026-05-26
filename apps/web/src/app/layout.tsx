@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Bricolage_Grotesque, Inter_Tight } from 'next/font/google';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { cn } from '@/lib/utils';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -22,20 +24,24 @@ const body = Inter_Tight({
   display: 'swap',
 });
 
-export const metadata: Metadata = {
-  title: 'Prode · Mundial 2026',
-  description:
-    'Pronosticá los partidos del Mundial 2026 y competí con tus amigos.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('common');
+  return {
+    title: t('metaTitle'),
+    description: t('tagline'),
+  };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = await getLocale();
+
   return (
     <html
-      lang="es"
+      lang={locale}
       className={cn('dark', display.variable, body.variable)}
     >
       <head>
@@ -45,14 +51,18 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen flex flex-col relative">
-        <AuthProvider>
-          <RealtimeProvider>
-            <Navbar />
-            <div className="flex-1 relative z-10 pb-16 md:pb-0">{children}</div>
-            <Footer />
-            <BottomNav />
-          </RealtimeProvider>
-        </AuthProvider>
+        <NextIntlClientProvider>
+          <AuthProvider>
+            <RealtimeProvider>
+              <Navbar />
+              <div className="flex-1 relative z-10 pb-16 md:pb-0">
+                {children}
+              </div>
+              <Footer />
+              <BottomNav />
+            </RealtimeProvider>
+          </AuthProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

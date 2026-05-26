@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 function safeNext(raw: string | null): string {
   if (!raw) return '/home';
@@ -14,6 +15,7 @@ function safeNext(raw: string | null): string {
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:4000/api';
 
 export default function AuthPage() {
+  const t = useTranslations('auth');
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = safeNext(searchParams.get('next'));
@@ -38,12 +40,12 @@ export default function AuthPage() {
       });
 
       if (result?.error) {
-        setError('Credenciales incorrectas. Por favor, intenta de nuevo.');
+        setError(t('errors.invalidCredentials'));
       } else {
         router.push(next);
       }
     } catch {
-      setError('Error de conexión. Intenta más tarde.');
+      setError(t('errors.connection'));
     } finally {
       setLoading(false);
     }
@@ -63,7 +65,7 @@ export default function AuthPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.message || 'Error al registrarse.');
+        setError(data.message || t('errors.registerFailed'));
         return;
       }
 
@@ -75,12 +77,12 @@ export default function AuthPage() {
       });
 
       if (result?.error) {
-        setError('Registro exitoso, pero hubo un error al iniciar sesión.');
+        setError(t('errors.loginAfterRegister'));
       } else {
         router.push(next);
       }
     } catch {
-      setError('Error de conexión. Intenta más tarde.');
+      setError(t('errors.connection'));
     } finally {
       setLoading(false);
     }
@@ -97,7 +99,7 @@ export default function AuthPage() {
             <span className="material-symbols-outlined text-primary-container text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>sports_score</span>
             <h1 className="font-headline font-black text-3xl italic tracking-tighter text-primary-container">PRODE ARENA</h1>
           </div>
-          <p className="text-on-surface-variant text-sm font-medium tracking-wide uppercase">The Stadium is Yours</p>
+          <p className="text-on-surface-variant text-sm font-medium tracking-wide uppercase">{t('tagline')}</p>
         </div>
 
         <div className="glass-panel border border-outline-variant/10 rounded-2xl shadow-[0_32px_64px_rgba(0,0,0,0.4)] overflow-hidden">
@@ -108,14 +110,14 @@ export default function AuthPage() {
               onClick={() => { setIsLogin(true); setError(''); }}
               type="button"
             >
-              Iniciar sesión
+              {t('tabs.login')}
             </button>
             <button
               className={`flex-1 py-4 text-sm font-bold transition-colors ${!isLogin ? 'border-b-2 border-primary-container text-primary-container' : 'text-on-surface-variant hover:text-on-surface'}`}
               onClick={() => { setIsLogin(false); setError(''); }}
               type="button"
             >
-              Registrarse
+              {t('tabs.register')}
             </button>
           </div>
 
@@ -124,10 +126,10 @@ export default function AuthPage() {
               {/* Username field (register only) */}
               {!isLogin && (
                 <div className="space-y-2">
-                  <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1">Nombre de usuario</label>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1">{t('labels.username')}</label>
                   <input
                     className="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-xl px-4 py-3 text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container/30 transition-all relative z-20"
-                    placeholder="tucholopez"
+                    placeholder={t('placeholders.username')}
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
@@ -138,10 +140,10 @@ export default function AuthPage() {
 
               {/* Email */}
               <div className="space-y-2">
-                <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1">Email</label>
+                <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1">{t('labels.email')}</label>
                 <input
                   className="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-xl px-4 py-3 text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container/30 transition-all relative z-20"
-                  placeholder="nombre@ejemplo.com"
+                  placeholder={t('placeholders.email')}
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -151,7 +153,7 @@ export default function AuthPage() {
 
               {/* Password */}
               <div className="space-y-2">
-                <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1">Contraseña</label>
+                <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1">{t('labels.password')}</label>
                 <div className="relative">
                   <input
                     className="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-xl px-4 py-3 text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container/30 transition-all relative z-20"
@@ -191,23 +193,23 @@ export default function AuthPage() {
                 {loading ? (
                   <span className="inline-flex items-center gap-2">
                     <span className="animate-spin material-symbols-outlined text-[18px]">progress_activity</span>
-                    {isLogin ? 'Ingresando...' : 'Registrando...'}
+                    {isLogin ? t('submit.loggingIn') : t('submit.registering')}
                   </span>
                 ) : (
-                  isLogin ? 'Ingresar' : 'Crear cuenta'
+                  isLogin ? t('submit.login') : t('submit.register')
                 )}
               </button>
             </form>
 
             <div className="mt-8 text-center space-y-4">
               <p className="text-xs text-on-surface-variant font-medium relative z-20">
-                {isLogin ? '¿No tienes una cuenta? ' : '¿Ya tienes cuenta? '}
+                {isLogin ? t('switch.toRegisterPrompt') : t('switch.toLoginPrompt')}
                 <button
                   className="text-primary-container font-bold hover:underline"
                   onClick={() => { setIsLogin(!isLogin); setError(''); }}
                   type="button"
                 >
-                  {isLogin ? 'Regístrate ahora' : 'Inicia sesión'}
+                  {isLogin ? t('switch.toRegisterCta') : t('switch.toLoginCta')}
                 </button>
               </p>
             </div>

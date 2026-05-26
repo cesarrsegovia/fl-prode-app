@@ -10,15 +10,16 @@ import {
   ClipboardList,
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 const NAV = [
-  { href: '/home', label: 'Inicio', icon: Home, match: (p: string) => p === '/home' || p === '/' },
-  { href: '/prode', label: 'Prode', icon: ClipboardList, match: (p: string) => p.startsWith('/prode') },
-  { href: '/mundial', label: 'Mundial', icon: Trophy, match: (p: string) => p.startsWith('/mundial') || p.startsWith('/torneo') },
-  { href: '/grupos', label: 'Grupos', icon: Users, match: (p: string) => p.startsWith('/grupos') },
-  { href: '/ranking', label: 'Ranking', icon: ListChecks, match: (p: string) => p.startsWith('/ranking') },
-];
+  { href: '/home', labelKey: 'home', icon: Home, match: (p: string) => p === '/home' || p === '/' },
+  { href: '/prode', labelKey: 'prode', icon: ClipboardList, match: (p: string) => p.startsWith('/prode') },
+  { href: '/mundial', labelKey: 'worldCup', icon: Trophy, match: (p: string) => p.startsWith('/mundial') || p.startsWith('/torneo') },
+  { href: '/grupos', labelKey: 'groups', icon: Users, match: (p: string) => p.startsWith('/grupos') },
+  { href: '/ranking', labelKey: 'ranking', icon: ListChecks, match: (p: string) => p.startsWith('/ranking') },
+] as const;
 
 /**
  * Tab bar inferior visible solo en mobile (md:hidden).
@@ -27,6 +28,7 @@ const NAV = [
  */
 export function BottomNav() {
   const pathname = usePathname();
+  const t = useTranslations('nav');
   const { status } = useSession();
 
   if (status !== 'authenticated') return null;
@@ -50,7 +52,7 @@ export function BottomNav() {
               >
                 <Icon className="size-5" />
                 <span className="text-[10px] font-display font-bold uppercase tracking-widest">
-                  {item.label}
+                  {t(`links.${item.labelKey}`)}
                 </span>
               </Link>
             </li>

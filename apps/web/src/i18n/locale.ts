@@ -1,0 +1,23 @@
+'use server';
+
+import { cookies, headers } from 'next/headers';
+import { LOCALE_COOKIE, type Locale } from './config';
+import { matchLocale } from './locale-match';
+
+/** Idioma efectivo de la request (cookie > Accept-Language > default). */
+export async function getUserLocale(): Promise<Locale> {
+  const cookieStore = await cookies();
+  const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value ?? null;
+  const acceptLanguage = (await headers()).get('accept-language');
+  return matchLocale(acceptLanguage, cookieLocale);
+}
+
+/** Persiste la elección de idioma del usuario en la cookie. */
+export async function setUserLocale(locale: Locale): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.set(LOCALE_COOKIE, locale, {
+    path: '/',
+    maxAge: 60 * 60 * 24 * 365, // 1 año
+    sameSite: 'lax',
+  });
+}

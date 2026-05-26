@@ -1,0 +1,36 @@
+{
+  "links": {
+    "home": "Accueil",
+    "myProde": "Mon Prode",
+    "prode": "Prode",
+    "groups": "Groupes",
+    "ranking": "Classement",
+    "worldCup": "Coupe du monde",
+    "admin": "Admin"
+  },
+  "auth": {
+    "login": "Se connecter",
+    "register": "S'inscrire"
+  },
+  "notifications": {
+    "aria": "Notifications",
+    "none": "Aucune nouvelle notification",
+    "count": "{count, plural, one {# nouvelle} other {# nouvelles}}"
+  },
+  "menu": {
+    "profile": "Mon profil",
+    "myPredictions": "Mes pronostics",
+    "notifications": "Notifications",
+    "logout": "Se déconnecter",
+    "fallbackName": "Moi"
+  },
+  "footer": {
+    "terms": "Conditions",
+    "privacy": "Confidentialité",
+    "support": "Support",
+    "copyright": "© {year} Prode · Le stade est à vous"
+  },
+  "language": {
+    "label": "Langue"
+  }
+}

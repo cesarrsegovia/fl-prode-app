@@ -1,0 +1,31 @@
+{
+  "hero": {
+    "predict": "Predict.",
+    "compete": "Compete.",
+    "win": "Win.",
+    "subtitle": "The most advanced sports prediction platform. Build your group, climb the ranking, and prove you know football best.",
+    "ctaPrimary": "Create free account",
+    "ctaSecondary": "See how it works",
+    "social": "PLAYING NOW <hl>{count, number} USERS</hl> THIS MATCHDAY"
+  },
+  "features": {
+    "groups": {
+      "title": "Private groups",
+      "desc": "Create exclusive leagues for your friends, coworkers, or family with custom rules."
+    },
+    "global": {
+      "title": "Global Prode",
+      "desc": "Join the general league against thousands of users and win exclusive prizes every week."
+    },
+    "ranking": {
+      "title": "Real-time ranking",
+      "desc": "Follow results minute by minute and watch yourself climb as the goals go in."
+    }
+  },
+  "stats": {
+    "predictions": "Predictions",
+    "tournaments": "Active tournaments",
+    "goals": "Goals called",
+    "country": "In Argentina"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "links": {
+    "home": "Inicio",
+    "myProde": "Mi Prode",
+    "prode": "Prode",
+    "groups": "Grupos",
+    "ranking": "Ranking",
+    "worldCup": "Mundial",
+    "admin": "Admin"
+  },
+  "auth": {
+    "login": "Ingresar",
+    "register": "Registrate"
+  },
+  "notifications": {
+    "aria": "Notificaciones",
+    "none": "Sin notificaciones nuevas",
+    "count": "{count, plural, one {# nueva} other {# nuevas}}"
+  },
+  "menu": {
+    "profile": "Mi perfil",
+    "myPredictions": "Mis pronósticos",
+    "notifications": "Notificaciones",
+    "logout": "Salir",
+    "fallbackName": "Yo"
+  },
+  "footer": {
+    "terms": "Términos",
+    "privacy": "Privacidad",
+    "support": "Soporte",
+    "copyright": "© {year} Prode · El estadio es tuyo"
+  },
+  "language": {
+    "label": "Idioma"
+  }
+}

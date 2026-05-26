@@ -1,0 +1,36 @@
+{
+  "links": {
+    "home": "Start",
+    "myProde": "Mein Prode",
+    "prode": "Prode",
+    "groups": "Gruppen",
+    "ranking": "Rangliste",
+    "worldCup": "WM",
+    "admin": "Admin"
+  },
+  "auth": {
+    "login": "Anmelden",
+    "register": "Registrieren"
+  },
+  "notifications": {
+    "aria": "Benachrichtigungen",
+    "none": "Keine neuen Benachrichtigungen",
+    "count": "{count, plural, one {# neue} other {# neue}}"
+  },
+  "menu": {
+    "profile": "Mein Profil",
+    "myPredictions": "Meine Tipps",
+    "notifications": "Benachrichtigungen",
+    "logout": "Abmelden",
+    "fallbackName": "Ich"
+  },
+  "footer": {
+    "terms": "AGB",
+    "privacy": "Datenschutz",
+    "support": "Support",
+    "copyright": "© {year} Prode · Das Stadion gehört dir"
+  },
+  "language": {
+    "label": "Sprache"
+  }
+}

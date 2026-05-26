@@ -4,12 +4,14 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
 import { Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useNotifications } from '@/hooks/useNotifications';
+import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
 
 function getInitials(name?: string | null) {
   if (!name) return '??';
@@ -25,15 +27,16 @@ function diceBearAvatar(seed: string) {
 }
 
 const NAV_LINKS = [
-  { href: '/home', label: 'Inicio', match: (p: string) => p === '/' || p === '/home' },
-  { href: '/prode', label: 'Mi Prode', match: (p: string) => p.startsWith('/prode') },
-  { href: '/grupos', label: 'Grupos', match: (p: string) => p.startsWith('/grupos') },
-  { href: '/ranking', label: 'Ranking', match: (p: string) => p.startsWith('/ranking') },
-  { href: '/mundial', label: 'Mundial', match: (p: string) => p.startsWith('/mundial') || p.startsWith('/torneo') },
-];
+  { href: '/home', labelKey: 'home', match: (p: string) => p === '/' || p === '/home' },
+  { href: '/prode', labelKey: 'myProde', match: (p: string) => p.startsWith('/prode') },
+  { href: '/grupos', labelKey: 'groups', match: (p: string) => p.startsWith('/grupos') },
+  { href: '/ranking', labelKey: 'ranking', match: (p: string) => p.startsWith('/ranking') },
+  { href: '/mundial', labelKey: 'worldCup', match: (p: string) => p.startsWith('/mundial') || p.startsWith('/torneo') },
+] as const;
 
 export function Navbar() {
   const pathname = usePathname();
+  const t = useTranslations('nav');
   const { data: session, status } = useSession();
   const isAuthed = status === 'authenticated';
   const isAdmin = session?.user?.isAdmin === true;
@@ -42,7 +45,7 @@ export function Navbar() {
         ...NAV_LINKS,
         {
           href: '/admin',
-          label: 'Admin',
+          labelKey: 'admin' as const,
           match: (p: string) => p.startsWith('/admin'),
         },
       ]
@@ -73,7 +76,7 @@ export function Navbar() {
                     : 'text-ink-muted hover:text-foreground',
                 )}
               >
-                {link.label}
+                {t(`links.${link.labelKey}`)}
               </Link>
             );
           })}
@@ -81,11 +84,12 @@ export function Navbar() {
       </div>
 
       <div className="flex items-center gap-3">
+        <LanguageSwitcher />
         {status === 'loading' ? (
           <div className="w-24 h-8 rounded animate-pulse bg-surface-2" />
         ) : isAuthed ? (
           <AuthedActions
-            name={session?.user?.name ?? session?.user?.email ?? 'Yo'}
+            name={session?.user?.name ?? session?.user?.email ?? t('menu.fallbackName')}
             email={session?.user?.email ?? ''}
             userId={(session?.user as { id?: string } | undefined)?.id}
             image={session?.user?.image ?? null}
@@ -94,11 +98,13 @@ export function Navbar() {
           <>
             <Link href="/auth">
               <Button variant="ghost" className="font-display font-semibold">
-                Ingresar
+                {t('auth.login')}
               </Button>
             </Link>
             <Link href="/auth">
-              <Button className="font-display font-semibold">Registrate</Button>
+              <Button className="font-display font-semibold">
+                {t('auth.register')}
+              </Button>
             </Link>
           </>
         )}
@@ -118,6 +124,7 @@ function AuthedActions({
   userId?: string;
   image?: string | null;
 }) {
+  const t = useTranslations('nav');
   const { unreadCount } = useNotifications();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -141,8 +148,12 @@ function AuthedActions({
       <Link
         href="/notificaciones"
         className="relative size-9 rounded-full flex items-center justify-center text-ink-muted hover:text-neon hover:bg-surface-1 transition-colors"
-        aria-label="Notificaciones"
-        title={unreadCount ? `${unreadCount} nuevas` : 'Sin notificaciones nuevas'}
+        aria-label={t('notifications.aria')}
+        title={
+          unreadCount
+            ? t('notifications.count', { count: unreadCount })
+            : t('notifications.none')
+        }
       >
         <Bell className="size-5" />
         {unreadCount > 0 && (
@@ -179,7 +190,7 @@ function AuthedActions({
                 onClick={() => setMenuOpen(false)}
                 className="block px-4 py-3 text-sm font-display font-semibold text-foreground hover:bg-surface-3 transition-colors"
               >
-                Mi perfil
+                {t('menu.profile')}
               </Link>
             )}
             <Link
@@ -187,14 +198,14 @@ function AuthedActions({
               onClick={() => setMenuOpen(false)}
               className="block px-4 py-3 text-sm font-display font-semibold text-foreground hover:bg-surface-3 transition-colors border-t border-line"
             >
-              Mis pronósticos
+              {t('menu.myPredictions')}
             </Link>
             <Link
               href="/notificaciones"
               onClick={() => setMenuOpen(false)}
               className="block px-4 py-3 text-sm font-display font-semibold text-foreground hover:bg-surface-3 transition-colors border-t border-line"
             >
-              Notificaciones
+              {t('menu.notifications')}
             </Link>
             <button
               onClick={() => {
@@ -203,7 +214,7 @@ function AuthedActions({
               }}
               className="w-full text-left px-4 py-3 text-sm font-display font-semibold text-foreground hover:bg-surface-3 transition-colors border-t border-line"
             >
-              Salir
+              {t('menu.logout')}
             </button>
           </div>
         )}

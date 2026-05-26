@@ -1,9 +1,11 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 export default function Page() {
+  const t = useTranslations("landing");
   return (
     <>
       <main className="pt-16 overflow-hidden">
@@ -11,23 +13,21 @@ export default function Page() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-secondary-container/20 rounded-full blur-[120px] -z-10"></div>
           <div className="max-w-4xl mx-auto space-y-8">
             <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-white leading-[0.95]">
-              Predecí. <br />
-              Competí.{" "}
+              {t("hero.predict")} <br />
+              {t("hero.compete")}{" "}
               <span className="bg-linear-to-r from-primary-container to-primary-fixed-dim bg-clip-text text-transparent">
-                Ganá.
+                {t("hero.win")}
               </span>
             </h1>
             <p className="text-lg md:text-xl text-on-surface-variant max-w-2xl mx-auto font-medium">
-              La plataforma de pronósticos deportivos más avanzada. Armá tu
-              grupo, subí en el ranking y demostrá que sos el que más sabe de
-              fútbol.
+              {t("hero.subtitle")}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <Button className="w-full sm:w-auto px-8 py-6 font-extrabold text-lg rounded-xl">
-                Crear cuenta gratis
+                {t("hero.ctaPrimary")}
               </Button>
               <Button variant="secondary" className="w-full sm:w-auto px-8 py-6 font-bold text-lg rounded-xl border border-outline-variant/30 bg-surface-container-low text-white hover:bg-surface-container-high active:scale-95 transition-all">
-                Ver cómo funciona
+                {t("hero.ctaSecondary")}
               </Button>
             </div>
 
@@ -58,11 +58,14 @@ export default function Page() {
                 </div>
               </div>
               <p className="text-sm font-medium text-on-surface-variant tracking-wide">
-                YA JUEGAN{" "}
-                <span className="text-primary-container font-bold">
-                  12,450 USUARIOS
-                </span>{" "}
-                ESTA FECHA
+                {t.rich("hero.social", {
+                  count: 12450,
+                  hl: (chunks) => (
+                    <span className="text-primary-container font-bold">
+                      {chunks}
+                    </span>
+                  ),
+                })}
               </p>
             </div>
           </div>
@@ -83,11 +86,10 @@ export default function Page() {
                 </span>
               </div>
               <h3 className="text-2xl font-bold text-white mb-3">
-                Grupos privados
+                {t("features.groups.title")}
               </h3>
               <p className="text-on-surface-variant leading-relaxed">
-                Creá ligas exclusivas para tus amigos, compañeros de trabajo o
-                familia con reglas personalizadas.
+                {t("features.groups.desc")}
               </p>
             </div>
 
@@ -102,11 +104,10 @@ export default function Page() {
                 </span>
               </div>
               <h3 className="text-2xl font-bold text-white mb-3">
-                Prode global
+                {t("features.global.title")}
               </h3>
               <p className="text-on-surface-variant leading-relaxed">
-                Participá en la liga general contra miles de usuarios y ganá
-                premios exclusivos todas las semanas.
+                {t("features.global.desc")}
               </p>
             </div>
 
@@ -121,11 +122,10 @@ export default function Page() {
                 </span>
               </div>
               <h3 className="text-2xl font-bold text-white mb-3">
-                Ranking en tiempo real
+                {t("features.ranking.title")}
               </h3>
               <p className="text-on-surface-variant leading-relaxed">
-                Seguí los resultados minuto a minuto y mira cómo escalas
-                posiciones mientras ocurren los goles.
+                {t("features.ranking.desc")}
               </p>
             </div>
           </div>
@@ -138,7 +138,7 @@ export default function Page() {
                 500k+
               </div>
               <div className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">
-                Predicciones
+                {t("stats.predictions")}
               </div>
             </div>
             <div className="text-center space-y-2">
@@ -146,7 +146,7 @@ export default function Page() {
                 150+
               </div>
               <div className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">
-                Torneos Activos
+                {t("stats.tournaments")}
               </div>
             </div>
             <div className="text-center space-y-2">
@@ -154,7 +154,7 @@ export default function Page() {
                 2.5m
               </div>
               <div className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">
-                Goles Cantados
+                {t("stats.goals")}
               </div>
             </div>
             <div className="text-center space-y-2">
@@ -162,7 +162,7 @@ export default function Page() {
                 #1
               </div>
               <div className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">
-                En Argentina
+                {t("stats.country")}
               </div>
             </div>
           </div>
