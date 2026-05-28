@@ -1,0 +1,68 @@
+{
+  "eyebrow": "Admin",
+  "panel": "Panneau",
+  "tabs": {
+    "partidos": "Matchs",
+    "torneos": "Tournois",
+    "usuarios": "Utilisateurs",
+    "grupos": "Groupes"
+  },
+  "torneos": {
+    "title": "Tournois",
+    "description": "Configuration par tournoi : marquez le meilleur buteur gagnant pour distribuer les points bonus.",
+    "tournamentLabel": "Tournoi",
+    "playerLabel": "Meilleur buteur gagnant",
+    "noPlayers": "Aucun joueur chargé pour ce tournoi.",
+    "saveCta": "Enregistrer et noter",
+    "clearCta": "Retirer",
+    "saved": "{scored} choix notés. Utilisateurs concernés : {users}."
+  },
+  "common": {
+    "loadMore": "Charger plus",
+    "loadingMore": "Chargement…"
+  },
+  "users": {
+    "subtitle": "Gestion des utilisateurs : recherche et permissions admin.",
+    "searchPlaceholder": "Rechercher par nom d'utilisateur ou e-mail…",
+    "loadError": "Impossible de charger les utilisateurs",
+    "empty": "Aucun utilisateur à afficher.",
+    "you": "Vous",
+    "preds": "{count} prono.",
+    "groups": "{count} groupes",
+    "since": "depuis {date}",
+    "admin": "Admin",
+    "member": "Membre",
+    "selfDemoteError": "Vous ne pouvez pas retirer votre propre rôle admin.",
+    "updateError": "Impossible de mettre à jour"
+  },
+  "matches": {
+    "editingIn": "Modification des résultats de <b>{name}</b>",
+    "loadError": "Erreur de chargement des données",
+    "noActive": "Aucun tournoi actif ou aucun match chargé.",
+    "fixtureFallback": "Journée {round}",
+    "status": {
+      "PENDING": "En attente",
+      "LIVE": "En direct",
+      "FINISHED": "Terminé",
+      "CANCELLED": "Annulé"
+    },
+    "saved": "Enregistré",
+    "save": "Enregistrer",
+    "saveError": "Impossible d'enregistrer",
+    "group": "Groupe {name}"
+  },
+  "groups": {
+    "subtitle": "Liste de tous les groupes de la plateforme. La suppression est forcée même avec des membres actifs.",
+    "searchPlaceholder": "Rechercher par nom…",
+    "loadError": "Impossible de charger les groupes",
+    "empty": "Aucun groupe à afficher.",
+    "private": "Privé",
+    "public": "Public",
+    "members": "{count} membres",
+    "messages": "{count} msgs",
+    "events": "{count} événements",
+    "delete": "Supprimer",
+    "confirmDelete": "Supprimer le groupe « {name} » ? Cela supprime membres, messages et activité. Irréversible.",
+    "deleteError": "Impossible de supprimer"
+  }
+}

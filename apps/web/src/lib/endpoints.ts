@@ -158,6 +158,62 @@ export const bracketPick = {
       .then((r) => r.data),
 };
 
+// ---------- Top Scorer (Goleador) ----------
+export interface TournamentPlayerDto {
+  playerId: string;
+  name: string;
+  position: string | null;
+  number: number | null;
+  photoUrl: string | null;
+  team: {
+    id: string;
+    name: string;
+    shortName: string | null;
+    flagUrl: string | null;
+  };
+}
+
+export interface TopScorerPickResponse {
+  id: string;
+  playerId: string;
+  player: {
+    id: string;
+    name: string;
+    position: string | null;
+    photoUrl: string | null;
+  };
+}
+
+export const tournamentPlayers = {
+  list: (tournamentId: string) =>
+    apiClient
+      .get<TournamentPlayerDto[]>(`/tournaments/${tournamentId}/players`)
+      .then((r) => r.data),
+};
+
+export const topScorerPick = {
+  mine: (tournamentId: string) =>
+    apiClient
+      .get<TopScorerPickResponse | null>(
+        `/tournaments/${tournamentId}/top-scorer-pick/me`,
+      )
+      .then((r) => r.data),
+  set: (tournamentId: string, playerId: string) =>
+    apiClient
+      .post<TopScorerPickResponse>(
+        `/tournaments/${tournamentId}/top-scorer-pick`,
+        { playerId },
+      )
+      .then((r) => r.data),
+  setWinner: (tournamentId: string, playerId: string | null) =>
+    apiClient
+      .patch<{ scored: number; usersAffected: number }>(
+        `/tournaments/${tournamentId}/top-scorer`,
+        { playerId },
+      )
+      .then((r) => r.data),
+};
+
 // ---------- R32 picks (clasificados a 16vos) ----------
 export interface R32PickResponse {
   id: string;

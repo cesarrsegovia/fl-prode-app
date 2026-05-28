@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -13,6 +14,8 @@ import { AdminGuard } from '../../common/guards/admin.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { BracketPickDto } from './dto/bracket-pick.dto';
 import { R32QualifierPicksDto } from './dto/r32-picks.dto';
+import { TopScorerPickDto } from './dto/top-scorer-pick.dto';
+import { SetTopScorerDto } from './dto/set-top-scorer.dto';
 
 @Controller('tournaments')
 export class TournamentsController {
@@ -112,6 +115,41 @@ export class TournamentsController {
     @Body() body: R32QualifierPicksDto,
   ) {
     return this.service.setR32Picks(id, user.userId, body.picks);
+  }
+
+  // ---------- Top Scorer (Goleador) ----------
+
+  @Get(':id/players')
+  players(@Param('id') id: string) {
+    return this.service.getTournamentPlayers(id);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get(':id/top-scorer-pick/me')
+  myTopScorerPick(
+    @Param('id') id: string,
+    @CurrentUser() user: { userId: string },
+  ) {
+    return this.service.getMyTopScorerPick(id, user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post(':id/top-scorer-pick')
+  setTopScorerPick(
+    @Param('id') id: string,
+    @CurrentUser() user: { userId: string },
+    @Body() body: TopScorerPickDto,
+  ) {
+    return this.service.setTopScorerPick(id, user.userId, body.playerId);
+  }
+
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @Patch(':id/top-scorer')
+  setTopScorerWinner(
+    @Param('id') id: string,
+    @Body() body: SetTopScorerDto,
+  ) {
+    return this.service.setTournamentTopScorer(id, body.playerId ?? null);
   }
 
   // ---------- TournamentEntry (wallet del padre) ----------

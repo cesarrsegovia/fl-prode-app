@@ -40,6 +40,8 @@ export interface TournamentDto {
   logoUrl: string | null;
   trophyUrl: string | null;
   isActive: boolean;
+  topScorerPlayerId?: string | null;
+  topScorerDeadline?: string | null;
   groups?: GroupDto[];
   _count?: { teams?: number; matches?: number; fixtures?: number };
 }

@@ -1,0 +1,97 @@
+{
+  "metaTitle": "{name} · Prode",
+  "metaDescription": "Pronosticá los partidos de {name}.",
+  "metaFallback": "Torneo · Prode",
+  "tabs": {
+    "grupos": "Grupos",
+    "calendario": "Calendario",
+    "eliminatorias": "Eliminatorias",
+    "estadios": "Estadios"
+  },
+  "type": {
+    "international": "Torneo Internacional",
+    "cup": "Copa",
+    "league": "Liga"
+  },
+  "hero": {
+    "days": "{count, plural, one {día} other {días}}",
+    "untilStart": "para el inicio",
+    "teams": "selecciones",
+    "matches": "partidos"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "saving": "Guardando…",
+    "group": "Grupo {name}"
+  },
+  "matchday": {
+    "fallbackName": "Fecha {round}",
+    "matchesCount": "{count, plural, one {# partido} other {# partidos}}"
+  },
+  "matchRow": {
+    "live": "EN VIVO",
+    "final": "Final",
+    "cancelled": "Cancelado"
+  },
+  "standings": {
+    "group": "Grupo",
+    "team": "Equipo",
+    "played": "PJ",
+    "record": "G-E-P",
+    "goalDiff": "DG",
+    "points": "Pts"
+  },
+  "venue": {
+    "matchesCount": "{count, plural, one {# partido} other {# partidos}}",
+    "capacity": "capacidad"
+  },
+  "stages": {
+    "GROUP": "Fase de Grupos",
+    "R32": "Treintaidosavos",
+    "R16": "Octavos",
+    "QUARTERFINAL": "Cuartos",
+    "SEMIFINAL": "Semifinal",
+    "THIRD_PLACE": "Tercer Puesto",
+    "FINAL": "Final"
+  },
+  "champion": {
+    "eyebrow": "Predicción del campeón",
+    "titleChange": "¿Cambiás de candidato?",
+    "titleInitial": "¿Quién levanta la copa?",
+    "subtitle": "Elegí una selección antes del inicio del torneo. Bonus al final si acertás.",
+    "currentPick": "Tu pick actual",
+    "locked": "Predicciones cerradas",
+    "saveError": "No se pudo guardar tu predicción"
+  },
+  "r32": {
+    "eyebrow": "Clasificados a 16vos",
+    "title": "¿Quiénes pasan a la Ronda de 32?",
+    "subtitle": "Elegí 2 equipos por grupo (Top-2) y 8 mejores terceros. Cierra el día previo al inicio de la 3ra fecha de grupos.",
+    "top2Badge": "Top-2: {count}/24",
+    "thirdsBadge": "Mejores terceros: {count}/{total}",
+    "totalBadge": "Total: {count}/{total}",
+    "closesOn": "Cierra {date}",
+    "closed": "Cerrado",
+    "top2Section": "Top-2 por grupo",
+    "thirdsSection": "Mejores terceros ({count}/{total})",
+    "thirdsHelp": "De los equipos que no marcaste como Top-2, elegí 8 que creés que clasifican como mejores terceros.",
+    "thirdMark": "3ro",
+    "errTooManyTop2": "Ya elegiste {max} equipos del Grupo {group}. Sacá uno antes.",
+    "errThirdIsTop2": "Ese equipo ya está como Top-2 del grupo. Sacalo de Top-2 si querés marcarlo como mejor tercero.",
+    "errTooManyThirds": "Ya elegiste {max} mejores terceros. Sacá uno antes.",
+    "errIncomplete": "Te faltan picks: {count} de {total}.",
+    "saved": "Picks guardados",
+    "saveError": "No se pudo guardar",
+    "submit": "Guardar {count}/{total} picks"
+  },
+  "topScorer": {
+    "eyebrow": "Predicción de goleador",
+    "titleInitial": "¿Quién será el goleador?",
+    "titleChange": "¿Cambiás de candidato?",
+    "subtitle": "Elegí un jugador antes del inicio del torneo. Bonus al final si acertás.",
+    "currentPick": "Tu pick actual",
+    "locked": "Predicciones cerradas",
+    "saveError": "No se pudo guardar tu predicción",
+    "emptyPlayers": "Lista de jugadores próximamente"
+  }
+}

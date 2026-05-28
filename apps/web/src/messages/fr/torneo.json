@@ -1,0 +1,97 @@
+{
+  "metaTitle": "{name} · Prode",
+  "metaDescription": "Pronostiquez les matchs de {name}.",
+  "metaFallback": "Tournoi · Prode",
+  "tabs": {
+    "grupos": "Groupes",
+    "calendario": "Calendrier",
+    "eliminatorias": "Phase finale",
+    "estadios": "Stades"
+  },
+  "type": {
+    "international": "Tournoi international",
+    "cup": "Coupe",
+    "league": "Championnat"
+  },
+  "hero": {
+    "days": "{count, plural, one {jour} other {jours}}",
+    "untilStart": "avant le coup d'envoi",
+    "teams": "équipes",
+    "matches": "matchs"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "saving": "Enregistrement…",
+    "group": "Groupe {name}"
+  },
+  "matchday": {
+    "fallbackName": "Journée {round}",
+    "matchesCount": "{count, plural, one {# match} other {# matchs}}"
+  },
+  "matchRow": {
+    "live": "EN DIRECT",
+    "final": "Terminé",
+    "cancelled": "Annulé"
+  },
+  "standings": {
+    "group": "Groupe",
+    "team": "Équipe",
+    "played": "J",
+    "record": "V-N-D",
+    "goalDiff": "Diff",
+    "points": "Pts"
+  },
+  "venue": {
+    "matchesCount": "{count, plural, one {# match} other {# matchs}}",
+    "capacity": "capacité"
+  },
+  "stages": {
+    "GROUP": "Phase de groupes",
+    "R32": "Trente-deuxièmes",
+    "R16": "Huitièmes",
+    "QUARTERFINAL": "Quarts",
+    "SEMIFINAL": "Demi-finale",
+    "THIRD_PLACE": "Petite finale",
+    "FINAL": "Finale"
+  },
+  "champion": {
+    "eyebrow": "Pronostic du champion",
+    "titleChange": "Vous changez de favori ?",
+    "titleInitial": "Qui soulève le trophée ?",
+    "subtitle": "Choisissez une équipe avant le début du tournoi. Bonus à la fin si vous avez raison.",
+    "currentPick": "Votre choix actuel",
+    "locked": "Pronostics clôturés",
+    "saveError": "Impossible d'enregistrer votre pronostic"
+  },
+  "r32": {
+    "eyebrow": "Qualifiés pour les 16es",
+    "title": "Qui passe en Ronde de 32 ?",
+    "subtitle": "Choisissez 2 équipes par groupe (Top 2) et 8 meilleurs troisièmes. Clôture la veille du début de la 3e journée de groupes.",
+    "top2Badge": "Top 2 : {count}/24",
+    "thirdsBadge": "Meilleurs troisièmes : {count}/{total}",
+    "totalBadge": "Total : {count}/{total}",
+    "closesOn": "Clôture {date}",
+    "closed": "Clôturé",
+    "top2Section": "Top 2 par groupe",
+    "thirdsSection": "Meilleurs troisièmes ({count}/{total})",
+    "thirdsHelp": "Parmi les équipes non marquées Top 2, choisissez 8 qui selon vous se qualifient comme meilleurs troisièmes.",
+    "thirdMark": "3e",
+    "errTooManyTop2": "Vous avez déjà choisi {max} équipes du Groupe {group}. Retirez-en une.",
+    "errThirdIsTop2": "Cette équipe est déjà Top 2 du groupe. Retirez-la du Top 2 pour la marquer comme meilleur troisième.",
+    "errTooManyThirds": "Vous avez déjà choisi {max} meilleurs troisièmes. Retirez-en un.",
+    "errIncomplete": "Il vous manque des choix : {count} sur {total}.",
+    "saved": "Choix enregistrés",
+    "saveError": "Échec de l'enregistrement",
+    "submit": "Enregistrer {count}/{total} choix"
+  },
+  "topScorer": {
+    "eyebrow": "Pronostic du meilleur buteur",
+    "titleInitial": "Qui sera le meilleur buteur ?",
+    "titleChange": "Changer votre choix ?",
+    "subtitle": "Choisissez un joueur avant le début du tournoi. Bonus si vous visez juste.",
+    "currentPick": "Votre choix actuel",
+    "locked": "Pronostics fermés",
+    "saveError": "Échec de l'enregistrement",
+    "emptyPlayers": "Liste des joueurs bientôt disponible"
+  }
+}

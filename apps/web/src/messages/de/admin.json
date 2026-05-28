@@ -1,0 +1,68 @@
+{
+  "eyebrow": "Admin",
+  "panel": "Panel",
+  "tabs": {
+    "partidos": "Spiele",
+    "torneos": "Turniere",
+    "usuarios": "Benutzer",
+    "grupos": "Gruppen"
+  },
+  "torneos": {
+    "title": "Turniere",
+    "description": "Pro-Turnier-Konfiguration: Markiere den Torschützenkönig, um Bonuspunkte zu vergeben.",
+    "tournamentLabel": "Turnier",
+    "playerLabel": "Gewinnender Torschützenkönig",
+    "noPlayers": "Für dieses Turnier sind noch keine Spieler geladen.",
+    "saveCta": "Speichern und punkten",
+    "clearCta": "Markierung entfernen",
+    "saved": "{scored} Tipps gewertet. Betroffene Benutzer: {users}."
+  },
+  "common": {
+    "loadMore": "Mehr laden",
+    "loadingMore": "Laden…"
+  },
+  "users": {
+    "subtitle": "Benutzerverwaltung: Suche und Admin-Rechte.",
+    "searchPlaceholder": "Nach Benutzername oder E-Mail suchen…",
+    "loadError": "Benutzer konnten nicht geladen werden",
+    "empty": "Keine Benutzer anzuzeigen.",
+    "you": "Du",
+    "preds": "{count} Tipps",
+    "groups": "{count} Gruppen",
+    "since": "seit {date}",
+    "admin": "Admin",
+    "member": "Mitglied",
+    "selfDemoteError": "Du kannst dir nicht selbst die Admin-Rolle entziehen.",
+    "updateError": "Aktualisierung fehlgeschlagen"
+  },
+  "matches": {
+    "editingIn": "Ergebnisse bearbeiten für <b>{name}</b>",
+    "loadError": "Fehler beim Laden der Daten",
+    "noActive": "Kein aktives Turnier oder keine Spiele geladen.",
+    "fixtureFallback": "Spieltag {round}",
+    "status": {
+      "PENDING": "Ausstehend",
+      "LIVE": "Live",
+      "FINISHED": "Beendet",
+      "CANCELLED": "Abgesagt"
+    },
+    "saved": "Gespeichert",
+    "save": "Speichern",
+    "saveError": "Speichern fehlgeschlagen",
+    "group": "Gruppe {name}"
+  },
+  "groups": {
+    "subtitle": "Liste aller Gruppen der Plattform. Löschen wird auch bei aktiven Mitgliedern erzwungen.",
+    "searchPlaceholder": "Nach Namen suchen…",
+    "loadError": "Gruppen konnten nicht geladen werden",
+    "empty": "Keine Gruppen anzuzeigen.",
+    "private": "Privat",
+    "public": "Öffentlich",
+    "members": "{count} Mitglieder",
+    "messages": "{count} Nachr.",
+    "events": "{count} Ereignisse",
+    "delete": "Löschen",
+    "confirmDelete": "Gruppe \"{name}\" löschen? Dies löscht Mitglieder, Nachrichten und Aktivität. Unwiderruflich.",
+    "deleteError": "Löschen fehlgeschlagen"
+  }
+}

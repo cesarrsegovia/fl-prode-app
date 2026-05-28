@@ -30,6 +30,7 @@ model User {
   memberships       GroupMember[]
   predictions       Prediction[]
   bracketPicks      BracketPick[]
+  topScorerPicks    TopScorerPick[]
   r32Picks          R32QualifierPick[]
   notifications     Notification[]
   achievements      UserAchievement[]
@@ -86,17 +87,23 @@ model Tournament {
   entryCurrency String?
   createdAt     DateTime       @default(now())
 
-  fixtures     Fixture[]
-  matches      Match[]
-  groups       TournamentGroup[]
-  teams        TournamentTeam[]
-  squads       SquadEntry[]
-  standings    GroupStanding[]
-  scores       GroupScore[]
-  bracketPicks BracketPick[]
-  r32Picks     R32QualifierPick[]
-  entries      TournamentEntry[]
-  walletTxs    WalletTransaction[]
+  // Predicción de goleador del torneo
+  topScorerPlayerId String?
+  topScorerDeadline DateTime?
+
+  fixtures        Fixture[]
+  matches         Match[]
+  groups          TournamentGroup[]
+  teams           TournamentTeam[]
+  squads          SquadEntry[]
+  standings       GroupStanding[]
+  scores          GroupScore[]
+  bracketPicks    BracketPick[]
+  r32Picks        R32QualifierPick[]
+  entries         TournamentEntry[]
+  walletTxs       WalletTransaction[]
+  topScorerWinner Player?        @relation("TournamentTopScorer", fields: [topScorerPlayerId], references: [id])
+  topScorerPicks  TopScorerPick[]
 }
 
 model TournamentGroup {
@@ -174,7 +181,9 @@ model Player {
   age         Int?
   nationality String?
 
-  squad SquadEntry[]
+  squad           SquadEntry[]
+  topScorerOf     Tournament[]    @relation("TournamentTopScorer")
+  topScorerPicks  TopScorerPick[]
 }
 
 model SquadEntry {
@@ -324,6 +333,23 @@ model BracketPick {
   user       User       @relation(fields: [userId], references: [id])
   tournament Tournament @relation(fields: [tournamentId], references: [id])
   champTeam  Team       @relation(fields: [champTeamId], references: [id])
+
+  @@unique([userId, tournamentId])
+}
+
+// Predicción del goleador del torneo (bonus al final)
+model TopScorerPick {
+  id           String   @id @default(cuid())
+  userId       String
+  tournamentId String
+  playerId     String
+  pointsEarned Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user       User       @relation(fields: [userId], references: [id])
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
+  player     Player     @relation(fields: [playerId], references: [id])
 
   @@unique([userId, tournamentId])
 }
