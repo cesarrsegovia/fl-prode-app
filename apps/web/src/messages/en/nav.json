@@ -28,7 +28,9 @@
     "terms": "Terms",
     "privacy": "Privacy",
     "support": "Support",
-    "copyright": "© {year} Prode · The stadium is yours"
+    "faq": "FAQ",
+    "createdBy": "Created by",
+    "copyright": "© {year}"
   },
   "language": {
     "label": "Language"

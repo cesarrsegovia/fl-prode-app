@@ -10,6 +10,10 @@
   "create": {
     "namePlaceholder": "Group name",
     "descPlaceholder": "Description (optional)",
+    "privacyLabel": "Group privacy",
+    "private": "Private",
+    "public": "Public",
+    "privacyHint": "Defines how the group is shown. In both cases people join with the invite code.",
     "error": "Couldn't create the group",
     "submitting": "Creating…",
     "submit": "Create"
@@ -51,8 +55,27 @@
       "codeLabel": "Code:",
       "copy": "Copy",
       "copied": "Copied!",
+      "copyFailed": "Couldn't copy",
       "regenerate": "Regenerate"
     }
+  },
+  "invitePage": {
+    "invalidTitle": "Invalid invitation",
+    "invalidDesc": "This invitation doesn't exist or was revoked.",
+    "notFound": "We couldn't find this invitation",
+    "goHome": "Go home",
+    "eyebrow": "You're invited to a group",
+    "members": "{count, plural, one {# member} other {# members}}",
+    "private": "Private",
+    "public": "Public",
+    "join": "Join group",
+    "joining": "Joining…",
+    "joinError": "Couldn't join the group",
+    "needAccount": "You need an account to join.",
+    "signIn": "Sign in or register",
+    "alreadyMember": "You're already part of this group.",
+    "goToGroup": "Go to group",
+    "codeLabel": "Code:"
   },
   "members": {
     "since": "Since {date}",

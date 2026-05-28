@@ -39,6 +39,8 @@ const STATUSES: AdminFixture['matches'][number]['status'][] = [
   'CANCELLED',
 ];
 
+const KNOWN_ROUNDS = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
+
 interface TournamentInfo {
   id: string;
   name: string;
@@ -94,6 +96,13 @@ export default function AdminPartidosPage() {
   }
 
   const activeFixture = fixtures.find((f) => f.id === activeFixtureId);
+  const getFixtureLabel = (fixture: Pick<AdminFixture, 'round' | 'name'>) => {
+    if (KNOWN_ROUNDS.includes(fixture.round as (typeof KNOWN_ROUNDS)[number])) {
+      return t(`rounds.${fixture.round as (typeof KNOWN_ROUNDS)[number]}`);
+    }
+
+    return fixture.name ?? t('fixtureFallback', { round: fixture.round });
+  };
 
   return (
     <div>
@@ -116,7 +125,7 @@ export default function AdminPartidosPage() {
                 : 'bg-surface-1 text-ink-muted hover:text-foreground hover:bg-surface-2',
             )}
           >
-            {f.name ?? t('fixtureFallback', { round: f.round })}
+            {getFixtureLabel(f)}
           </button>
         ))}
       </div>

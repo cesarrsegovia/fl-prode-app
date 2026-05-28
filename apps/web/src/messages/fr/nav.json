@@ -28,7 +28,9 @@
     "terms": "Conditions",
     "privacy": "Confidentialité",
     "support": "Support",
-    "copyright": "© {year} Prode · Le stade est à vous"
+    "faq": "FAQ",
+    "createdBy": "Créé par",
+    "copyright": "© {year}"
   },
   "language": {
     "label": "Langue"

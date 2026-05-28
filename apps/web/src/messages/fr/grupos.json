@@ -10,6 +10,10 @@
   "create": {
     "namePlaceholder": "Nom du groupe",
     "descPlaceholder": "Description (facultatif)",
+    "privacyLabel": "Confidentialité du groupe",
+    "private": "Privé",
+    "public": "Public",
+    "privacyHint": "Définit comment le groupe est affiché. Dans les deux cas, on rejoint avec le code d'invitation.",
     "error": "Impossible de créer le groupe",
     "submitting": "Création…",
     "submit": "Créer"
@@ -51,8 +55,27 @@
       "codeLabel": "Code :",
       "copy": "Copier",
       "copied": "Copié !",
+      "copyFailed": "Impossible de copier",
       "regenerate": "Régénérer"
     }
+  },
+  "invitePage": {
+    "invalidTitle": "Invitation invalide",
+    "invalidDesc": "Cette invitation n'existe pas ou a été révoquée.",
+    "notFound": "Nous n'avons pas trouvé cette invitation",
+    "goHome": "Aller à l'accueil",
+    "eyebrow": "Vous êtes invité dans un groupe",
+    "members": "{count, plural, one {# membre} other {# membres}}",
+    "private": "Privé",
+    "public": "Public",
+    "join": "Rejoindre le groupe",
+    "joining": "Adhésion…",
+    "joinError": "Impossible de rejoindre le groupe",
+    "needAccount": "Vous avez besoin d'un compte pour rejoindre.",
+    "signIn": "Se connecter ou s'inscrire",
+    "alreadyMember": "Vous faites déjà partie de ce groupe.",
+    "goToGroup": "Aller au groupe",
+    "codeLabel": "Code :"
   },
   "members": {
     "since": "Depuis {date}",

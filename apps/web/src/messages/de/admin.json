@@ -40,6 +40,17 @@
     "loadError": "Fehler beim Laden der Daten",
     "noActive": "Kein aktives Turnier oder keine Spiele geladen.",
     "fixtureFallback": "Spieltag {round}",
+    "rounds": {
+      "1": "Gruppenphase · Spieltag 1",
+      "2": "Gruppenphase · Spieltag 2",
+      "3": "Gruppenphase · Spieltag 3",
+      "4": "Runde der letzten 32",
+      "5": "Achtelfinale",
+      "6": "Viertelfinale",
+      "7": "Halbfinale",
+      "8": "Spiel um Platz drei",
+      "9": "Finale"
+    },
     "status": {
       "PENDING": "Ausstehend",
       "LIVE": "Live",

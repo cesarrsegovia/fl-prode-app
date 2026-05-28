@@ -28,7 +28,9 @@
     "terms": "AGB",
     "privacy": "Datenschutz",
     "support": "Support",
-    "copyright": "© {year} Prode · Das Stadion gehört dir"
+    "faq": "FAQ",
+    "createdBy": "Erstellt von",
+    "copyright": "© {year}"
   },
   "language": {
     "label": "Sprache"
