@@ -65,20 +65,12 @@ export default function ProdePage() {
         .then((r) => r.data)
         .catch(() => null),
       fixtures.active(),
-      pronosticos
-        .myFixtures()
-        .catch(() => [] as Array<{ predictions?: Array<{ matchId: string }> }>),
+      pronosticos.predictedMatchIds().catch(() => [] as string[]),
     ])
-      .then(([tour, fx, mine]) => {
+      .then(([tour, fx, ids]) => {
         setTournament(tour);
         setItems(fx);
-        const ids = new Set<string>();
-        for (const f of mine as Array<{
-          predictions?: Array<{ matchId: string }>;
-        }>) {
-          for (const p of f.predictions ?? []) ids.add(p.matchId);
-        }
-        setPredictedMatchIds(ids);
+        setPredictedMatchIds(new Set(ids));
       })
       .catch((e) => setError(e?.message ?? t('list.loadError')))
       .finally(() => setIsLoading(false));

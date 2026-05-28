@@ -38,6 +38,10 @@ export const pronosticos = {
       .then((r) => r.data),
   myFixtures: () =>
     apiClient.get('/pronosticos/me').then((r) => r.data),
+  predictedMatchIds: () =>
+    apiClient
+      .get<string[]>('/pronosticos/me/match-ids')
+      .then((r) => r.data),
   remove: (id: string) =>
     apiClient.delete<{ id: string }>(`/pronosticos/${id}`).then((r) => r.data),
 };

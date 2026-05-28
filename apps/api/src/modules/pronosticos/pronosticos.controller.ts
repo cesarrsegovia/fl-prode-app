@@ -30,6 +30,12 @@ export class PronosticosController {
     return this.pronosticosService.findMyFixtures(user.userId);
   }
 
+  // Debe ir antes de `me/:fechaId` para que no lo capture el parámetro.
+  @Get('me/match-ids')
+  async myPredictedMatchIds(@CurrentUser() user: { userId: string }) {
+    return this.pronosticosService.findMyPredictedMatchIds(user.userId);
+  }
+
   @Get('me/:fechaId')
   async findMyPredictions(
     @CurrentUser() user: { userId: string },
