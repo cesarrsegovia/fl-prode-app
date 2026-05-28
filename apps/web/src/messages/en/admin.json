@@ -1,0 +1,68 @@
+{
+  "eyebrow": "Admin",
+  "panel": "Panel",
+  "tabs": {
+    "partidos": "Matches",
+    "torneos": "Tournaments",
+    "usuarios": "Users",
+    "grupos": "Groups"
+  },
+  "torneos": {
+    "title": "Tournaments",
+    "description": "Per-tournament config: set the winning top scorer to distribute bonus points.",
+    "tournamentLabel": "Tournament",
+    "playerLabel": "Winning top scorer",
+    "noPlayers": "This tournament has no players loaded yet.",
+    "saveCta": "Save and score",
+    "clearCta": "Clear",
+    "saved": "Scored {scored} picks. Users affected: {users}."
+  },
+  "common": {
+    "loadMore": "Load more",
+    "loadingMore": "Loading…"
+  },
+  "users": {
+    "subtitle": "User management: search and admin permissions.",
+    "searchPlaceholder": "Search by username or email…",
+    "loadError": "Couldn't load users",
+    "empty": "No users to show.",
+    "you": "You",
+    "preds": "{count} preds",
+    "groups": "{count} groups",
+    "since": "since {date}",
+    "admin": "Admin",
+    "member": "Member",
+    "selfDemoteError": "You can't remove your own admin role.",
+    "updateError": "Couldn't update"
+  },
+  "matches": {
+    "editingIn": "Editing results for <b>{name}</b>",
+    "loadError": "Error loading data",
+    "noActive": "No active tournament or no matches loaded.",
+    "fixtureFallback": "Matchday {round}",
+    "status": {
+      "PENDING": "Pending",
+      "LIVE": "Live",
+      "FINISHED": "Finished",
+      "CANCELLED": "Cancelled"
+    },
+    "saved": "Saved",
+    "save": "Save",
+    "saveError": "Couldn't save",
+    "group": "Group {name}"
+  },
+  "groups": {
+    "subtitle": "List of all platform groups. Deletion is forced even with active members.",
+    "searchPlaceholder": "Search by name…",
+    "loadError": "Couldn't load groups",
+    "empty": "No groups to show.",
+    "private": "Private",
+    "public": "Public",
+    "members": "{count} members",
+    "messages": "{count} msgs",
+    "events": "{count} events",
+    "delete": "Delete",
+    "confirmDelete": "Delete the group \"{name}\"? This deletes members, messages and activity. Irreversible.",
+    "deleteError": "Couldn't delete"
+  }
+}

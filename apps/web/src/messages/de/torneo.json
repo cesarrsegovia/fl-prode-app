@@ -1,0 +1,97 @@
+{
+  "metaTitle": "{name} · Prode",
+  "metaDescription": "Tippe die Spiele von {name}.",
+  "metaFallback": "Turnier · Prode",
+  "tabs": {
+    "grupos": "Gruppen",
+    "calendario": "Spielplan",
+    "eliminatorias": "K.-o.-Runde",
+    "estadios": "Stadien"
+  },
+  "type": {
+    "international": "Internationales Turnier",
+    "cup": "Pokal",
+    "league": "Liga"
+  },
+  "hero": {
+    "days": "{count, plural, one {Tag} other {Tage}}",
+    "untilStart": "bis zum Anpfiff",
+    "teams": "Teams",
+    "matches": "Spiele"
+  },
+  "common": {
+    "loading": "Laden...",
+    "saving": "Speichern…",
+    "group": "Gruppe {name}"
+  },
+  "matchday": {
+    "fallbackName": "Spieltag {round}",
+    "matchesCount": "{count, plural, one {# Spiel} other {# Spiele}}"
+  },
+  "matchRow": {
+    "live": "LIVE",
+    "final": "Endstand",
+    "cancelled": "Abgesagt"
+  },
+  "standings": {
+    "group": "Gruppe",
+    "team": "Team",
+    "played": "Sp",
+    "record": "S-U-N",
+    "goalDiff": "TD",
+    "points": "Pkt"
+  },
+  "venue": {
+    "matchesCount": "{count, plural, one {# Spiel} other {# Spiele}}",
+    "capacity": "Kapazität"
+  },
+  "stages": {
+    "GROUP": "Gruppenphase",
+    "R32": "Zweiunddreißigstelfinale",
+    "R16": "Achtelfinale",
+    "QUARTERFINAL": "Viertelfinale",
+    "SEMIFINAL": "Halbfinale",
+    "THIRD_PLACE": "Spiel um Platz 3",
+    "FINAL": "Finale"
+  },
+  "champion": {
+    "eyebrow": "Champion-Tipp",
+    "titleChange": "Favoriten ändern?",
+    "titleInitial": "Wer holt den Pokal?",
+    "subtitle": "Wähle ein Team vor Turnierbeginn. Bonus am Ende, wenn du richtig liegst.",
+    "currentPick": "Dein aktueller Tipp",
+    "locked": "Tipps geschlossen",
+    "saveError": "Dein Tipp konnte nicht gespeichert werden"
+  },
+  "r32": {
+    "eyebrow": "Qualifiziert fürs Sechzehntelfinale",
+    "title": "Wer kommt in die Runde der 32?",
+    "subtitle": "Wähle 2 Teams pro Gruppe (Top 2) und 8 beste Gruppendritte. Schließt am Tag vor dem 3. Gruppenspieltag.",
+    "top2Badge": "Top 2: {count}/24",
+    "thirdsBadge": "Beste Dritte: {count}/{total}",
+    "totalBadge": "Gesamt: {count}/{total}",
+    "closesOn": "Schließt {date}",
+    "closed": "Geschlossen",
+    "top2Section": "Top 2 pro Gruppe",
+    "thirdsSection": "Beste Dritte ({count}/{total})",
+    "thirdsHelp": "Wähle aus den nicht als Top 2 markierten Teams 8 aus, die sich deiner Meinung nach als beste Dritte qualifizieren.",
+    "thirdMark": "3.",
+    "errTooManyTop2": "Du hast bereits {max} Teams aus Gruppe {group} gewählt. Entferne zuerst eins.",
+    "errThirdIsTop2": "Dieses Team ist bereits Top 2 der Gruppe. Entferne es aus Top 2, um es als besten Dritten zu markieren.",
+    "errTooManyThirds": "Du hast bereits {max} beste Dritte gewählt. Entferne zuerst eins.",
+    "errIncomplete": "Dir fehlen Tipps: {count} von {total}.",
+    "saved": "Tipps gespeichert",
+    "saveError": "Speichern fehlgeschlagen",
+    "submit": "{count}/{total} Tipps speichern"
+  },
+  "topScorer": {
+    "eyebrow": "Torschützenkönig-Tipp",
+    "titleInitial": "Wer wird Torschützenkönig?",
+    "titleChange": "Tipp ändern?",
+    "subtitle": "Wähle einen Spieler vor Turnierbeginn. Bonus, wenn du richtig liegst.",
+    "currentPick": "Dein aktueller Tipp",
+    "locked": "Tipps geschlossen",
+    "saveError": "Tipp konnte nicht gespeichert werden",
+    "emptyPlayers": "Spielerliste folgt in Kürze"
+  }
+}

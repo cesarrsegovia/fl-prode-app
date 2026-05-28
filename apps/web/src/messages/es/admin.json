@@ -1,0 +1,68 @@
+{
+  "eyebrow": "Admin",
+  "panel": "Panel",
+  "tabs": {
+    "partidos": "Partidos",
+    "torneos": "Torneos",
+    "usuarios": "Usuarios",
+    "grupos": "Grupos"
+  },
+  "torneos": {
+    "title": "Torneos",
+    "description": "Configuración por torneo: marcá al goleador ganador para repartir los puntos extra.",
+    "tournamentLabel": "Torneo",
+    "playerLabel": "Goleador ganador",
+    "noPlayers": "Este torneo aún no tiene jugadores cargados.",
+    "saveCta": "Guardar y puntuar",
+    "clearCta": "Quitar marca",
+    "saved": "Se calcularon {scored} picks. Usuarios afectados: {users}."
+  },
+  "common": {
+    "loadMore": "Cargar más",
+    "loadingMore": "Cargando…"
+  },
+  "users": {
+    "subtitle": "Gestión de usuarios: búsqueda y permisos de admin.",
+    "searchPlaceholder": "Buscar por usuario o email…",
+    "loadError": "No se pudieron cargar los usuarios",
+    "empty": "Sin usuarios para mostrar.",
+    "you": "Vos",
+    "preds": "{count} preds",
+    "groups": "{count} grupos",
+    "since": "desde {date}",
+    "admin": "Admin",
+    "member": "Miembro",
+    "selfDemoteError": "No podés quitarte el rol admin a vos mismo.",
+    "updateError": "No se pudo actualizar"
+  },
+  "matches": {
+    "editingIn": "Editando resultados de <b>{name}</b>",
+    "loadError": "Error cargando datos",
+    "noActive": "No hay torneo activo o sin partidos cargados.",
+    "fixtureFallback": "Fecha {round}",
+    "status": {
+      "PENDING": "Pendiente",
+      "LIVE": "En vivo",
+      "FINISHED": "Finalizado",
+      "CANCELLED": "Cancelado"
+    },
+    "saved": "Guardado",
+    "save": "Guardar",
+    "saveError": "No se pudo guardar",
+    "group": "Grupo {name}"
+  },
+  "groups": {
+    "subtitle": "Listado de todos los grupos de la plataforma. Borrado fuerza inclusive si tenés miembros activos.",
+    "searchPlaceholder": "Buscar por nombre…",
+    "loadError": "No se pudieron cargar los grupos",
+    "empty": "Sin grupos para mostrar.",
+    "private": "Privado",
+    "public": "Público",
+    "members": "{count} miembros",
+    "messages": "{count} msgs",
+    "events": "{count} eventos",
+    "delete": "Eliminar",
+    "confirmDelete": "¿Eliminar el grupo \"{name}\"? Esta acción borra miembros, mensajes y actividad. Irreversible.",
+    "deleteError": "No se pudo eliminar"
+  }
+}

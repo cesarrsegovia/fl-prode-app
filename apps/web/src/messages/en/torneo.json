@@ -1,0 +1,97 @@
+{
+  "metaTitle": "{name} · Prode",
+  "metaDescription": "Predict the matches of {name}.",
+  "metaFallback": "Tournament · Prode",
+  "tabs": {
+    "grupos": "Groups",
+    "calendario": "Schedule",
+    "eliminatorias": "Knockouts",
+    "estadios": "Venues"
+  },
+  "type": {
+    "international": "International Tournament",
+    "cup": "Cup",
+    "league": "League"
+  },
+  "hero": {
+    "days": "{count, plural, one {day} other {days}}",
+    "untilStart": "until kickoff",
+    "teams": "teams",
+    "matches": "matches"
+  },
+  "common": {
+    "loading": "Loading...",
+    "saving": "Saving…",
+    "group": "Group {name}"
+  },
+  "matchday": {
+    "fallbackName": "Matchday {round}",
+    "matchesCount": "{count, plural, one {# match} other {# matches}}"
+  },
+  "matchRow": {
+    "live": "LIVE",
+    "final": "Full time",
+    "cancelled": "Cancelled"
+  },
+  "standings": {
+    "group": "Group",
+    "team": "Team",
+    "played": "P",
+    "record": "W-D-L",
+    "goalDiff": "GD",
+    "points": "Pts"
+  },
+  "venue": {
+    "matchesCount": "{count, plural, one {# match} other {# matches}}",
+    "capacity": "capacity"
+  },
+  "stages": {
+    "GROUP": "Group Stage",
+    "R32": "Round of 32",
+    "R16": "Round of 16",
+    "QUARTERFINAL": "Quarterfinals",
+    "SEMIFINAL": "Semifinals",
+    "THIRD_PLACE": "Third Place",
+    "FINAL": "Final"
+  },
+  "champion": {
+    "eyebrow": "Champion prediction",
+    "titleChange": "Changing your pick?",
+    "titleInitial": "Who lifts the trophy?",
+    "subtitle": "Pick a team before the tournament starts. Bonus at the end if you're right.",
+    "currentPick": "Your current pick",
+    "locked": "Predictions closed",
+    "saveError": "Couldn't save your prediction"
+  },
+  "r32": {
+    "eyebrow": "Round of 32 qualifiers",
+    "title": "Who advances to the Round of 32?",
+    "subtitle": "Pick 2 teams per group (Top 2) and 8 best third-placed teams. Closes the day before the 3rd group matchday starts.",
+    "top2Badge": "Top 2: {count}/24",
+    "thirdsBadge": "Best thirds: {count}/{total}",
+    "totalBadge": "Total: {count}/{total}",
+    "closesOn": "Closes {date}",
+    "closed": "Closed",
+    "top2Section": "Top 2 per group",
+    "thirdsSection": "Best third-placed ({count}/{total})",
+    "thirdsHelp": "From the teams you didn't mark as Top 2, pick 8 you think qualify as best third-placed.",
+    "thirdMark": "3rd",
+    "errTooManyTop2": "You already picked {max} teams from Group {group}. Remove one first.",
+    "errThirdIsTop2": "That team is already a group Top 2. Remove it from Top 2 if you want to mark it as best third.",
+    "errTooManyThirds": "You already picked {max} best thirds. Remove one first.",
+    "errIncomplete": "You're missing picks: {count} of {total}.",
+    "saved": "Picks saved",
+    "saveError": "Couldn't save",
+    "submit": "Save {count}/{total} picks"
+  },
+  "topScorer": {
+    "eyebrow": "Top scorer prediction",
+    "titleInitial": "Who will be top scorer?",
+    "titleChange": "Changing your pick?",
+    "subtitle": "Pick a player before the tournament starts. Bonus if you nail it.",
+    "currentPick": "Your current pick",
+    "locked": "Picks closed",
+    "saveError": "Couldn't save your pick",
+    "emptyPlayers": "Player list coming soon"
+  }
+}

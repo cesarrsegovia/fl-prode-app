@@ -14,10 +14,12 @@ import {
   R32_TOTAL_QUALIFIERS,
   championPickDeadline,
   r32QualifierDeadline,
+  topScorerPickDeadline,
 } from '@prode/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ProviderService } from '../provider/provider.service';
 import { ProviderClientError } from '../provider/provider.client';
+import { resolveTopScorerPoints } from './top-scorer';
 
 interface R32PickInputItem {
   teamId: string;
@@ -617,5 +619,156 @@ export class TournamentsService {
         }))
         .sort((a, b) => b.count - a.count),
     };
+  }
+
+  // ---------- Goleador (predicción del top scorer) ----------
+
+  /** Jugadores del torneo (agrupables por equipo / posición). */
+  async getTournamentPlayers(tournamentId: string) {
+    const entries = await this.prisma.squadEntry.findMany({
+      where: { tournamentId },
+      include: {
+        player: true,
+        team: {
+          select: { id: true, name: true, shortName: true, flagUrl: true },
+        },
+      },
+    });
+    return entries.map((e) => ({
+      playerId: e.playerId,
+      name: e.player.name,
+      position: e.player.position,
+      number: e.player.number,
+      photoUrl: e.player.photoUrl,
+      team: e.team,
+    }));
+  }
+
+  async getMyTopScorerPick(tournamentId: string, userId: string) {
+    return this.prisma.topScorerPick.findUnique({
+      where: { userId_tournamentId: { userId, tournamentId } },
+      include: {
+        player: {
+          select: { id: true, name: true, position: true, photoUrl: true },
+        },
+      },
+    });
+  }
+
+  async setTopScorerPick(
+    tournamentId: string,
+    userId: string,
+    playerId: string,
+  ) {
+    const tournament = await this.prisma.tournament.findUnique({
+      where: { id: tournamentId },
+      select: { id: true, startDate: true, topScorerDeadline: true },
+    });
+    if (!tournament) throw new NotFoundException('Torneo no encontrado');
+
+    const fallback = tournament.startDate
+      ? topScorerPickDeadline(tournament.startDate)
+      : null;
+    const deadline = tournament.topScorerDeadline ?? fallback;
+    if (deadline && deadline.getTime() <= Date.now()) {
+      throw new BadRequestException(
+        'El plazo para elegir goleador ya está cerrado.',
+      );
+    }
+
+    const squadEntry = await this.prisma.squadEntry.findFirst({
+      where: { tournamentId, playerId },
+      select: { id: true },
+    });
+    if (!squadEntry) {
+      throw new NotFoundException('El jugador no participa en este torneo');
+    }
+
+    return this.prisma.topScorerPick.upsert({
+      where: { userId_tournamentId: { userId, tournamentId } },
+      update: { playerId },
+      create: { userId, tournamentId, playerId },
+      include: {
+        player: {
+          select: { id: true, name: true, position: true, photoUrl: true },
+        },
+      },
+    });
+  }
+
+  /** Admin: marca el goleador ganador del torneo y dispara el scoring. */
+  async setTournamentTopScorer(
+    tournamentId: string,
+    playerId: string | null,
+  ) {
+    await this.prisma.tournament.update({
+      where: { id: tournamentId },
+      data: { topScorerPlayerId: playerId },
+    });
+    if (playerId) {
+      return this.scoreTopScorerPicks(tournamentId, playerId);
+    }
+    return { scored: 0, usersAffected: 0 };
+  }
+
+  async scoreTopScorerPicks(tournamentId: string, winningPlayerId: string) {
+    const picks = await this.prisma.topScorerPick.findMany({
+      where: { tournamentId, pointsEarned: null },
+    });
+
+    let scored = 0;
+    const usersAffected = new Set<string>();
+
+    for (const pick of picks) {
+      const points = resolveTopScorerPoints(pick.playerId, winningPlayerId);
+      await this.prisma.topScorerPick.update({
+        where: { id: pick.id },
+        data: { pointsEarned: points },
+      });
+      if (points > 0) {
+        await this.applyExtraPointsToGroupScores(
+          pick.userId,
+          points,
+          tournamentId,
+        );
+        usersAffected.add(pick.userId);
+      }
+      scored++;
+    }
+    return { scored, usersAffected: usersAffected.size };
+  }
+
+  /**
+   * Suma puntos extra (campeón, goleador) al total del GroupScore. No toca los
+   * contadores de desempate por partido (esos solo aplican a Predictions).
+   */
+  private async applyExtraPointsToGroupScores(
+    userId: string,
+    points: number,
+    tournamentId: string,
+  ) {
+    if (points <= 0) return;
+    const memberships = await this.prisma.groupMember.findMany({
+      where: { userId },
+    });
+    for (const m of memberships) {
+      await this.prisma.groupScore.upsert({
+        where: {
+          groupId_userId_tournamentId: {
+            groupId: m.groupId,
+            userId,
+            tournamentId,
+          },
+        },
+        update: { total: { increment: points } },
+        create: {
+          userId,
+          groupId: m.groupId,
+          tournamentId,
+          total: points,
+          streak: 0,
+        },
+      });
+    }
   }
 }

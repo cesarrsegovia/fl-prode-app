@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
+import { getTranslations } from 'next-intl/server';
 import { Skeleton } from '@/components/ui/skeleton';
 import { tournamentApi } from '@/lib/server-endpoints';
 import { TournamentHero } from '@/components/torneo/TournamentHero';
@@ -8,6 +9,7 @@ import { MatchdayList } from '@/components/torneo/MatchdayList';
 import { BracketTree } from '@/components/torneo/BracketTree';
 import { VenueCard } from '@/components/torneo/VenueCard';
 import { BracketPickCard } from '@/components/torneo/BracketPickCard';
+import { TopScorerPickCard } from '@/components/torneo/TopScorerPickCard';
 import { R32PicksCard } from '@/components/torneo/R32PicksCard';
 import { TournamentTabs } from './TournamentTabs';
 
@@ -17,14 +19,15 @@ interface Props {
 
 export async function generateMetadata({ params }: Props) {
   const { id } = await params;
+  const t = await getTranslations('torneo');
   try {
     const tournament = await tournamentApi.one(id);
     return {
-      title: `${tournament.name} · Prode`,
-      description: `Pronosticá los partidos de ${tournament.name}.`,
+      title: t('metaTitle', { name: tournament.name }),
+      description: t('metaDescription', { name: tournament.name }),
     };
   } catch {
-    return { title: 'Torneo · Prode' };
+    return { title: t('metaFallback') };
   }
 }
 
@@ -63,6 +66,12 @@ export default async function TorneoPage({ params }: Props) {
           tournamentId={tournament.id}
           tournamentStartDate={tournament.startDate}
           teams={teamOptions}
+        />
+
+        <TopScorerPickCard
+          tournamentId={tournament.id}
+          tournamentStartDate={tournament.startDate}
+          topScorerDeadline={tournament.topScorerDeadline ?? null}
         />
 
         <R32PicksCard tournamentId={tournament.id} teams={teamOptions} />
