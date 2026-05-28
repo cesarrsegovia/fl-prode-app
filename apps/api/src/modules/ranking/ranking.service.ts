@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { GROUP_SCORE_ORDER_BY } from './ranking-order';
 
 @Injectable()
 export class RankingService {
@@ -10,8 +11,20 @@ export class RankingService {
     const scores = await this.prisma.groupScore.groupBy({
       by: ['userId'],
       where,
-      _sum: { total: true },
-      orderBy: { _sum: { total: 'desc' } },
+      _sum: {
+        total: true,
+        correctWinners: true,
+        exactScores: true,
+        exactGoalsSum: true,
+      },
+      _min: { firstPredictionAt: true },
+      orderBy: [
+        { _sum: { total: 'desc' } },
+        { _sum: { correctWinners: 'desc' } },
+        { _sum: { exactScores: 'desc' } },
+        { _sum: { exactGoalsSum: 'desc' } },
+        { _min: { firstPredictionAt: 'asc' } },
+      ],
       take: 100,
     });
 
@@ -32,6 +45,9 @@ export class RankingService {
       avatarUrl: userMap.get(s.userId)?.avatarUrl,
       total: s._sum.total ?? 0,
       streak: 0,
+      correctWinners: s._sum.correctWinners ?? 0,
+      exactScores: s._sum.exactScores ?? 0,
+      exactGoalsSum: s._sum.exactGoalsSum ?? 0,
       positionChange: 0,
     }));
   }
@@ -41,7 +57,7 @@ export class RankingService {
     if (tournamentId) where.tournamentId = tournamentId;
     const scores = await this.prisma.groupScore.findMany({
       where,
-      orderBy: { total: 'desc' },
+      orderBy: GROUP_SCORE_ORDER_BY,
     });
 
     if (!scores.length) return [];
@@ -61,6 +77,9 @@ export class RankingService {
       avatarUrl: userMap.get(s.userId)?.avatarUrl,
       total: s.total,
       streak: s.streak,
+      correctWinners: s.correctWinners,
+      exactScores: s.exactScores,
+      exactGoalsSum: s.exactGoalsSum,
       positionChange: 0,
     }));
   }
