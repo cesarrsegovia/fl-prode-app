@@ -339,6 +339,10 @@ model GroupScore {
   tournamentId String
   total        Int    @default(0)
   streak       Int    @default(0)
+  correctWinners    Int       @default(0)
+  exactScores       Int       @default(0)
+  exactGoalsSum     Int       @default(0)
+  firstPredictionAt DateTime?
 
   group      Group      @relation(fields: [groupId], references: [id])
   tournament Tournament @relation(fields: [tournamentId], references: [id])

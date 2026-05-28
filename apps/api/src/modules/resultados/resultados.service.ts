@@ -9,11 +9,7 @@ import { NotificacionesService } from '../notificaciones/notificaciones.service'
 import { ActivityService } from '../activity/activity.service';
 import { TournamentsService } from '../tournaments/tournaments.service';
 import { statusFromApiFootball } from '../../common/utils/api-football.util';
-import {
-  POINTS_CORRECT_RESULT,
-  POINTS_EXACT_SCORE,
-  CAPTAIN_MULTIPLIER,
-} from '@prode/shared';
+import { computePredictionOutcome } from './scoring';
 
 interface ApiFixtureResponse {
   fixture: { id: number; status: { short: string } };
@@ -164,28 +160,28 @@ export class ResultadosService {
 
     for (const pred of finished) {
       const { homeScore, awayScore } = pred.match;
-
-      let actualResult: Result;
-      if (homeScore! > awayScore!) actualResult = Result.HOME;
-      else if (homeScore! < awayScore!) actualResult = Result.AWAY;
-      else actualResult = Result.DRAW;
-
-      let points = 0;
-      if (pred.result === actualResult) {
-        points += POINTS_CORRECT_RESULT;
-        if (pred.homeScoreGuess === homeScore && pred.awayScoreGuess === awayScore) {
-          points += POINTS_EXACT_SCORE;
-        }
-      }
-      if (pred.isCaptain) points *= CAPTAIN_MULTIPLIER;
+      const outcome = computePredictionOutcome(pred, {
+        homeScore: homeScore!,
+        awayScore: awayScore!,
+      });
 
       await this.prisma.prediction.update({
         where: { id: pred.id },
-        data: { pointsEarned: points },
+        data: { pointsEarned: outcome.points },
       });
 
-      await this.updateGroupScores(pred.userId, points, pred.match.tournamentId);
-      pointsByUser.set(pred.userId, (pointsByUser.get(pred.userId) ?? 0) + points);
+      await this.updateGroupScores(
+        pred.userId,
+        {
+          points: outcome.points,
+          correctWinners: outcome.correctWinner,
+          exactScores: outcome.exactScore,
+          exactGoalsSum: outcome.exactGoals,
+        },
+        pred.match.tournamentId,
+        pred.createdAt,
+      );
+      pointsByUser.set(pred.userId, (pointsByUser.get(pred.userId) ?? 0) + outcome.points);
     }
 
     const afterPositions = await this.snapshotPositions(
@@ -276,7 +272,13 @@ export class ResultadosService {
     if (!groupIds.length) return new Map<string, number>();
     const scores = await this.prisma.groupScore.findMany({
       where: { groupId: { in: groupIds }, tournamentId },
-      orderBy: [{ total: 'desc' }, { streak: 'desc' }],
+      orderBy: [
+        { total: 'desc' },
+        { correctWinners: 'desc' },
+        { exactScores: 'desc' },
+        { exactGoalsSum: 'desc' },
+        { firstPredictionAt: 'asc' },
+      ],
       select: { groupId: true, userId: true },
     });
     const positions = new Map<string, number>();
@@ -289,7 +291,12 @@ export class ResultadosService {
     return positions;
   }
 
-  private async updateGroupScores(userId: string, points: number, tournamentId: string) {
+  private async updateGroupScores(
+    userId: string,
+    delta: { points: number; correctWinners: number; exactScores: number; exactGoalsSum: number },
+    tournamentId: string,
+    predictionCreatedAt: Date,
+  ) {
     const memberships = await this.prisma.groupMember.findMany({ where: { userId } });
     for (const membership of memberships) {
       const existing = await this.prisma.groupScore.findUnique({
@@ -302,10 +309,21 @@ export class ResultadosService {
         },
       });
       if (existing) {
-        const newStreak = points > 0 ? existing.streak + 1 : 0;
+        const newStreak = delta.points > 0 ? existing.streak + 1 : 0;
+        const firstPredictionAt =
+          !existing.firstPredictionAt || predictionCreatedAt < existing.firstPredictionAt
+            ? predictionCreatedAt
+            : existing.firstPredictionAt;
         await this.prisma.groupScore.update({
           where: { id: existing.id },
-          data: { total: existing.total + points, streak: newStreak },
+          data: {
+            total: existing.total + delta.points,
+            streak: newStreak,
+            correctWinners: existing.correctWinners + delta.correctWinners,
+            exactScores: existing.exactScores + delta.exactScores,
+            exactGoalsSum: existing.exactGoalsSum + delta.exactGoalsSum,
+            firstPredictionAt,
+          },
         });
       } else {
         await this.prisma.groupScore.create({
@@ -313,8 +331,12 @@ export class ResultadosService {
             userId,
             groupId: membership.groupId,
             tournamentId,
-            total: points,
-            streak: points > 0 ? 1 : 0,
+            total: delta.points,
+            streak: delta.points > 0 ? 1 : 0,
+            correctWinners: delta.correctWinners,
+            exactScores: delta.exactScores,
+            exactGoalsSum: delta.exactGoalsSum,
+            firstPredictionAt: predictionCreatedAt,
           },
         });
       }
