@@ -133,6 +133,15 @@ export class PronosticosService {
     });
   }
 
+  /** IDs de matches que el usuario ya pronostico (para barra de progreso). */
+  async findMyPredictedMatchIds(userId: string): Promise<string[]> {
+    const rows = await this.prisma.prediction.findMany({
+      where: { userId },
+      select: { matchId: true },
+    });
+    return rows.map((r) => r.matchId);
+  }
+
   async remove(userId: string, predictionId: string) {
     const pred = await this.prisma.prediction.findUnique({
       where: { id: predictionId },
