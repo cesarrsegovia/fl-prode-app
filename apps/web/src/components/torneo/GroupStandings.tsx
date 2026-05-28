@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import type { GroupWithStandingsDto } from '@/lib/server-endpoints';
 import { TeamFlag } from './TeamFlag';
@@ -81,6 +82,7 @@ interface Props {
 }
 
 export function GroupStandings({ group }: Props) {
+  const t = useTranslations('torneo.standings');
   const rows = group.standings.length
     ? group.standings
     : group.teams.map((tt, idx) => ({
@@ -105,7 +107,7 @@ export function GroupStandings({ group }: Props) {
             <span className="text-neon">{group.name}</span>
           </h3>
           <span className="text-[10px] font-display uppercase tracking-[0.2em] text-ink-dim">
-            Grupo
+            {t('group')}
           </span>
         </div>
       </CardHeader>
@@ -114,13 +116,13 @@ export function GroupStandings({ group }: Props) {
           <thead>
             <tr className="text-[10px] uppercase tracking-[0.15em] text-ink-dim font-display">
               <th className="text-left pr-2 pb-1 font-medium"></th>
-              <th className="text-left pr-2 pb-1 font-medium">Equipo</th>
-              <th className="px-1 pb-1 text-center font-medium">PJ</th>
+              <th className="text-left pr-2 pb-1 font-medium">{t('team')}</th>
+              <th className="px-1 pb-1 text-center font-medium">{t('played')}</th>
               <th className="hidden sm:table-cell px-1 pb-1 text-center font-medium">
-                G-E-P
+                {t('record')}
               </th>
-              <th className="px-1 pb-1 text-center font-medium">DG</th>
-              <th className="pl-2 pb-1 text-right font-medium">Pts</th>
+              <th className="px-1 pb-1 text-center font-medium">{t('goalDiff')}</th>
+              <th className="pl-2 pb-1 text-right font-medium">{t('points')}</th>
             </tr>
           </thead>
           <tbody>

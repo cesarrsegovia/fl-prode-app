@@ -1,6 +1,7 @@
 'use client';
 
 import { type ReactNode, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Tabs,
   TabsContent,
@@ -15,12 +16,7 @@ interface Props {
   estadios: ReactNode;
 }
 
-const TABS = [
-  { value: 'grupos', label: 'Grupos' },
-  { value: 'calendario', label: 'Calendario' },
-  { value: 'eliminatorias', label: 'Eliminatorias' },
-  { value: 'estadios', label: 'Estadios' },
-];
+const TAB_VALUES = ['grupos', 'calendario', 'eliminatorias', 'estadios'] as const;
 
 export function TournamentTabs({
   grupos,
@@ -28,6 +24,7 @@ export function TournamentTabs({
   eliminatorias,
   estadios,
 }: Props) {
+  const t = useTranslations('torneo.tabs');
   const [value, setValue] = useState('grupos');
   const panels: Record<string, ReactNode> = {
     grupos,
@@ -39,20 +36,20 @@ export function TournamentTabs({
   return (
     <Tabs value={value} onValueChange={setValue} className="w-full">
       <TabsList variant="line" className="mb-8 border-b border-line/40 rounded-none w-full justify-start gap-6 h-auto p-0">
-        {TABS.map((t) => (
+        {TAB_VALUES.map((value) => (
           <TabsTrigger
-            key={t.value}
-            value={t.value}
+            key={value}
+            value={value}
             className="font-display font-bold uppercase tracking-[0.15em] text-xs px-1 pb-3 h-auto rounded-none data-active:text-neon"
           >
-            {t.label}
+            {t(value)}
           </TabsTrigger>
         ))}
       </TabsList>
 
-      {TABS.map((t) => (
-        <TabsContent key={t.value} value={t.value} className="mt-0">
-          {panels[t.value]}
+      {TAB_VALUES.map((value) => (
+        <TabsContent key={value} value={value} className="mt-0">
+          {panels[value]}
         </TabsContent>
       ))}
     </Tabs>

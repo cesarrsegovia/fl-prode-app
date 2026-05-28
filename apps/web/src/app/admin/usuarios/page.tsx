@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { useFormatter, useTranslations } from 'next-intl';
 import { Loader2, Search, ShieldCheck, ShieldOff } from 'lucide-react';
 import { admin, type AdminUserItem } from '@/lib/endpoints';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,13 +10,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
-const formatter = new Intl.DateTimeFormat('es-AR', {
-  day: '2-digit',
-  month: 'short',
-  year: 'numeric',
-});
-
 export default function AdminUsuariosPage() {
+  const t = useTranslations('admin.users');
+  const tc = useTranslations('admin.common');
+  const format = useFormatter();
   const { data: session } = useSession();
   const myUserId = (session?.user as { id?: string } | undefined)?.id;
 
@@ -42,7 +40,7 @@ export default function AdminUsuariosPage() {
       setNextCursor(res.nextCursor);
     } catch (e: unknown) {
       const m = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      setError(m ?? 'No se pudieron cargar los usuarios');
+      setError(m ?? t('loadError'));
     } finally {
       setLoading(false);
     }
@@ -66,7 +64,7 @@ export default function AdminUsuariosPage() {
 
   const toggleAdmin = async (u: AdminUserItem) => {
     if (u.id === myUserId && u.isAdmin) {
-      alert('No podés quitarte el rol admin a vos mismo.');
+      alert(t('selfDemoteError'));
       return;
     }
     const next = !u.isAdmin;
@@ -76,7 +74,7 @@ export default function AdminUsuariosPage() {
       setItems((prev) => prev.map((it) => (it.id === u.id ? { ...it, isAdmin: next } : it)));
     } catch (e: unknown) {
       const m = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      alert(m ?? 'No se pudo actualizar');
+      alert(m ?? t('updateError'));
     } finally {
       setTogglingId(null);
     }
@@ -85,7 +83,7 @@ export default function AdminUsuariosPage() {
   return (
     <div>
       <p className="font-display text-sm text-ink-muted mb-6">
-        Gestión de usuarios: búsqueda y permisos de admin.
+        {t('subtitle')}
       </p>
 
       <div className="relative mb-6 max-w-md">
@@ -94,7 +92,7 @@ export default function AdminUsuariosPage() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar por usuario o email…"
+          placeholder={t('searchPlaceholder')}
           className="w-full pl-9 pr-3 h-10 bg-surface-1 border border-line rounded-full text-sm font-display text-foreground placeholder:text-ink-dim focus:outline-none focus:border-neon"
         />
       </div>
@@ -108,7 +106,7 @@ export default function AdminUsuariosPage() {
       ) : error ? (
         <p className="text-sm text-destructive font-bold">{error}</p>
       ) : !items.length ? (
-        <p className="text-sm text-ink-muted">Sin usuarios para mostrar.</p>
+        <p className="text-sm text-ink-muted">{t('empty')}</p>
       ) : (
         <div className="space-y-2">
           {items.map((u) => (
@@ -132,7 +130,7 @@ export default function AdminUsuariosPage() {
                       {u.username}
                       {u.id === myUserId && (
                         <Badge variant="outline" className="ml-2 text-[10px]">
-                          Vos
+                          {t('you')}
                         </Badge>
                       )}
                     </p>
@@ -141,9 +139,9 @@ export default function AdminUsuariosPage() {
                 </div>
 
                 <div className="flex items-center gap-4 text-[10px] uppercase tracking-[0.18em] font-display font-bold text-ink-dim">
-                  <span>{u._count.predictions} preds</span>
-                  <span>{u._count.memberships} grupos</span>
-                  <span>desde {formatter.format(new Date(u.createdAt))}</span>
+                  <span>{t('preds', { count: u._count.predictions })}</span>
+                  <span>{t('groups', { count: u._count.memberships })}</span>
+                  <span>{t('since', { date: format.dateTime(new Date(u.createdAt), { day: '2-digit', month: 'short', year: 'numeric' }) })}</span>
                 </div>
 
                 <button
@@ -160,11 +158,11 @@ export default function AdminUsuariosPage() {
                     <Loader2 className="size-3 animate-spin" />
                   ) : u.isAdmin ? (
                     <>
-                      <ShieldCheck className="size-3" /> Admin
+                      <ShieldCheck className="size-3" /> {t('admin')}
                     </>
                   ) : (
                     <>
-                      <ShieldOff className="size-3" /> Miembro
+                      <ShieldOff className="size-3" /> {t('member')}
                     </>
                   )}
                 </button>
@@ -178,7 +176,7 @@ export default function AdminUsuariosPage() {
               disabled={loadingMore}
               className="w-full mt-4 h-10 rounded-full bg-surface-1 border border-line text-xs font-display font-bold uppercase tracking-[0.15em] text-ink-muted hover:text-foreground hover:bg-surface-2 disabled:opacity-50"
             >
-              {loadingMore ? 'Cargando…' : 'Cargar más'}
+              {loadingMore ? tc('loadingMore') : tc('loadMore')}
             </button>
           )}
         </div>

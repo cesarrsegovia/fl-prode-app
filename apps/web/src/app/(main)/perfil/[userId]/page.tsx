@@ -3,6 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
+import { useFormatter, useTranslations } from 'next-intl';
 import {
   Trophy,
   Flame,
@@ -93,6 +94,8 @@ function StatCard({
 }
 
 function AchievementCard({ achievement }: { achievement: AchievementDto }) {
+  const t = useTranslations('perfil');
+  const format = useFormatter();
   const Icon = ACHIEVEMENT_ICONS[achievement.key] ?? Trophy;
   const unlocked = achievement.unlocked;
   return (
@@ -123,12 +126,13 @@ function AchievementCard({ achievement }: { achievement: AchievementDto }) {
           <p className="text-xs text-ink-muted">{achievement.description}</p>
           {unlocked && achievement.unlockedAt && (
             <p className="text-[10px] uppercase tracking-[0.18em] font-display font-bold text-neon mt-2">
-              Desbloqueado{' '}
-              {new Intl.DateTimeFormat('es-AR', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric',
-              }).format(new Date(achievement.unlockedAt))}
+              {t('unlockedOn', {
+                date: format.dateTime(new Date(achievement.unlockedAt), {
+                  day: '2-digit',
+                  month: 'short',
+                  year: 'numeric',
+                }),
+              })}
             </p>
           )}
         </div>
@@ -143,6 +147,8 @@ export default function PerfilPage({
   params: Promise<{ userId: string }>;
 }) {
   const { userId } = use(params);
+  const t = useTranslations('perfil');
+  const format = useFormatter();
   const { data: session } = useSession();
   const isMe = session?.user?.id === userId;
 
@@ -168,7 +174,7 @@ export default function PerfilPage({
         if (entry) setRankingEntry(entry);
       })
       .catch((e) =>
-        setError(e?.response?.data?.message ?? 'No se pudo cargar el perfil'),
+        setError(e?.response?.data?.message ?? t('loadError')),
       )
       .finally(() => setIsLoading(false));
   }, [userId, isMe]);
@@ -189,10 +195,10 @@ export default function PerfilPage({
     );
   }
 
-  const memberSince = new Intl.DateTimeFormat('es-AR', {
+  const memberSince = format.dateTime(new Date(user.createdAt), {
     month: 'long',
     year: 'numeric',
-  }).format(new Date(user.createdAt));
+  });
 
   const avatar = user.avatarUrl ?? diceBearAvatar(user.username);
 
@@ -208,7 +214,7 @@ export default function PerfilPage({
 
         <div className="flex-1">
           <p className="font-display text-xs uppercase tracking-[0.25em] text-neon mb-2">
-            {isMe ? 'Mi perfil' : 'Jugador'}
+            {isMe ? t('eyebrowMe') : t('eyebrowOther')}
           </p>
           <h1 className="font-display font-extrabold text-foreground text-[clamp(2.5rem,6vw,4rem)] tracking-[-0.03em] leading-[0.95]">
             {user.username}
@@ -217,7 +223,7 @@ export default function PerfilPage({
             <p className="text-sm text-ink-muted mt-3 max-w-xl">{user.bio}</p>
           )}
           <p className="text-[10px] uppercase tracking-[0.2em] font-display font-bold text-ink-dim mt-4">
-            Desde {memberSince}
+            {t('memberSince', { date: memberSince })}
           </p>
         </div>
       </header>
@@ -225,33 +231,40 @@ export default function PerfilPage({
       {userStats ? (
         <section className="mb-10">
           <h2 className="font-display font-extrabold text-xl text-foreground mb-4 tracking-tight">
-            Stats
+            {t('statsTitle')}
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <StatCard
               icon={Trophy}
-              label="Posición global"
+              label={t('stats.globalPosition')}
               value={rankingEntry ? `#${rankingEntry.position}` : '—'}
               highlight
-              hint={rankingEntry ? `${rankingEntry.total} puntos` : 'Sin ranking'}
+              hint={
+                rankingEntry
+                  ? t('stats.globalPositionHintPoints', { points: rankingEntry.total })
+                  : t('stats.globalPositionHintNone')
+              }
             />
             <StatCard
               icon={Target}
-              label="Aciertos"
+              label={t('stats.hits')}
               value={`${userStats.hitRate}%`}
               hint={`${userStats.hits}/${userStats.settledPredictions}`}
             />
             <StatCard
               icon={Sparkles}
-              label="Marcadores exactos"
+              label={t('stats.exactScores')}
               value={userStats.exactScores}
-              hint="bonus +3 ea."
+              hint={t('stats.exactScoresHint')}
             />
             <StatCard
               icon={Flame}
-              label="Capitán"
+              label={t('stats.captain')}
               value={`${userStats.captain.hitRate}%`}
-              hint={`${userStats.captain.hits}/${userStats.captain.played} aciertos`}
+              hint={t('stats.captainHint', {
+                hits: userStats.captain.hits,
+                played: userStats.captain.played,
+              })}
             />
           </div>
 
@@ -261,19 +274,22 @@ export default function PerfilPage({
                 <TrendingUp className="size-8 text-neon shrink-0" />
                 <div className="flex-1">
                   <p className="text-[10px] uppercase tracking-[0.2em] font-display font-bold text-neon mb-1">
-                    Mejor fecha
+                    {t('bestFixture.label')}
                   </p>
                   <p className="font-display font-extrabold text-foreground">
                     {userStats.bestFixture.name}
                   </p>
                   <p className="text-xs text-ink-muted">
-                    {userStats.bestFixture.hits} aciertos · {userStats.bestFixture.matches} partidos
+                    {t('bestFixture.summary', {
+                      hits: userStats.bestFixture.hits,
+                      matches: userStats.bestFixture.matches,
+                    })}
                   </p>
                 </div>
                 <p className="font-display font-extrabold text-4xl text-neon tabular-nums">
                   {userStats.bestFixture.total}
                   <span className="text-xs text-ink-dim font-normal ml-1">
-                    pts
+                    {t('bestFixture.points')}
                   </span>
                 </p>
               </CardContent>
@@ -283,9 +299,9 @@ export default function PerfilPage({
       ) : (
         <Empty className="mb-10">
           <EmptyHeader>
-            <EmptyTitle>Sin estadísticas todavía</EmptyTitle>
+            <EmptyTitle>{t('noStatsTitle')}</EmptyTitle>
             <EmptyDescription>
-              Cuando cargues pronósticos y se calculen puntos, vas a verlos acá.
+              {t('noStatsDesc')}
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
@@ -295,7 +311,7 @@ export default function PerfilPage({
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display font-extrabold text-xl text-foreground tracking-tight">
-              Logros
+              {t('achievementsTitle')}
             </h2>
             {achievements.length > 0 && (
               <Badge variant="outline" className="font-display tracking-wider">
@@ -306,7 +322,7 @@ export default function PerfilPage({
           {achievements.length === 0 ? (
             <Empty>
               <EmptyHeader>
-                <EmptyTitle>Sin logros configurados</EmptyTitle>
+                <EmptyTitle>{t('noAchievementsTitle')}</EmptyTitle>
               </EmptyHeader>
             </Empty>
           ) : (
@@ -324,21 +340,21 @@ export default function PerfilPage({
           href="/ranking"
           className="text-xs font-display font-bold uppercase tracking-[0.18em] text-neon hover:underline"
         >
-          Ver ranking →
+          {t('links.ranking')}
         </Link>
         {isMe && (
           <Link
             href="/mis-pronosticos"
             className="text-xs font-display font-bold uppercase tracking-[0.18em] text-ink-muted hover:text-neon"
           >
-            Mis pronósticos →
+            {t('links.myPredictions')}
           </Link>
         )}
         <Link
           href="/prode"
           className="text-xs font-display font-bold uppercase tracking-[0.18em] text-ink-muted hover:text-neon"
         >
-          Cargar pronósticos →
+          {t('links.predict')}
         </Link>
       </div>
     </main>

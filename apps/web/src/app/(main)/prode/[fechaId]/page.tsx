@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import type { FixtureWithMatches, Prediction } from '@prode/shared';
 import { fixtures, pronosticos } from '@/lib/endpoints';
 import { ProdeForm } from '@/components/prode/ProdeForm';
@@ -11,6 +12,7 @@ export default function ProdeFechaPage({
 }: {
   params: Promise<{ fechaId: string }>;
 }) {
+  const t = useTranslations('prode');
   const { fechaId } = use(params);
   const [fixture, setFixture] = useState<FixtureWithMatches | null>(null);
   const [preds, setPreds] = useState<Prediction[] | null>(null);
@@ -25,7 +27,7 @@ export default function ProdeFechaPage({
         setFixture(fx);
         setPreds(ps as Prediction[]);
       })
-      .catch((e) => setError(e?.message ?? 'No se pudo cargar la fecha'));
+      .catch((e) => setError(e?.message ?? t('fixture.loadError')));
   }, [fechaId]);
 
   if (error) {
@@ -33,7 +35,7 @@ export default function ProdeFechaPage({
       <main className="pt-24 pb-12 px-4 max-w-3xl mx-auto">
         <p className="text-sm text-red-400 font-bold">{error}</p>
         <Link href="/prode" className="text-primary underline text-sm">
-          ← Volver a fechas
+          {t('fixture.backToListLong')}
         </Link>
       </main>
     );
@@ -56,18 +58,18 @@ export default function ProdeFechaPage({
         href="/prode"
         className="text-xs font-bold text-on-surface-variant hover:text-primary uppercase tracking-widest"
       >
-        ← Fechas
+        {t('fixture.backToList')}
       </Link>
       <header className="mt-2 mb-6">
         <h1 className="text-3xl font-extrabold tracking-tight text-white">
-          Fecha {fixture.round}
+          {t('fixture.fallbackName', { round: fixture.round })}
         </h1>
         <p className="text-sm text-on-surface-variant">
           <Link
             href={`/prode/${fixture.id}/resultados`}
             className="text-primary hover:underline"
           >
-            Ver resultados de esta fecha →
+            {t('fixture.viewResults')}
           </Link>
         </p>
       </header>

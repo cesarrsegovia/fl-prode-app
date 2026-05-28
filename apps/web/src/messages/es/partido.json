@@ -1,0 +1,35 @@
+{
+  "metaTitle": "{home} vs {away} · Prode",
+  "metaFallback": "Partido · Prode",
+  "group": "Grupo {name}",
+  "fixtureFallback": "Fecha {round}",
+  "live": "EN VIVO",
+  "vs": "vs",
+  "info": {
+    "kickoff": "Kickoff",
+    "venue": "Estadio",
+    "referee": "Árbitro"
+  },
+  "poll": {
+    "title": "¿Qué piensa la gente?",
+    "empty": "Todavía nadie pronosticó este partido.",
+    "loadPrediction": "Cargar pronóstico",
+    "home": "Gana local",
+    "draw": "Empate",
+    "away": "Gana visitante",
+    "totalPredictions": "{count, plural, one {# pronóstico cargado} other {# pronósticos cargados}}"
+  },
+  "cta": "Cargar pronósticos de esta fecha",
+  "friends": {
+    "title": "Vs amigos",
+    "hidden": "Picks ocultos hasta el cierre de la fecha",
+    "noMembers": "Este grupo todavía no tiene miembros.",
+    "noPick": "No pronosticó"
+  },
+  "groupStats": {
+    "title": "¿Qué piensa tu gente?",
+    "submitted": "{total}/{members} pronosticaron",
+    "pending": " · {count} pendientes",
+    "empty": "Sin pronósticos cargados todavía."
+  }
+}

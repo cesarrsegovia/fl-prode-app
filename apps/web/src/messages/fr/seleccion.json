@@ -1,0 +1,12 @@
+{
+  "metaTitle": "{name} · Prode",
+  "metaFallback": "Équipe nationale · Prode",
+  "eyebrow": "Équipe nationale",
+  "group": "Groupe {name}",
+  "schedule": "Calendrier",
+  "noMatchesTitle": "Aucun match pour l'instant",
+  "noMatchesDesc": "Ils apparaîtront ici une fois le calendrier publié.",
+  "squad": "Effectif",
+  "noSquadTitle": "Effectif non publié",
+  "noSquadDesc": "Les sélectionneurs publient les effectifs à l'approche du tournoi."
+}

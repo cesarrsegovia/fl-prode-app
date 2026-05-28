@@ -1,0 +1,41 @@
+{
+  "greeting": "Hola, {name}",
+  "playerFallback": "Jugador",
+  "heroLine1": "El estadio",
+  "heroLine2": "es tuyo.",
+  "tournament": {
+    "active": "Torneo activo",
+    "daysLabel": "{count, plural, one {día} other {días}}",
+    "untilStart": "para el inicio",
+    "view": "Ver torneo"
+  },
+  "nextFixture": {
+    "title": "Próxima fecha abierta",
+    "fallbackName": "Fecha {round}",
+    "matches": "{count, plural, one {# partido} other {# partidos}}",
+    "closesIn": "Cierra en",
+    "loadPredictions": "Cargar pronósticos",
+    "none": "No hay fechas abiertas por ahora."
+  },
+  "myRanking": {
+    "title": "Tu ranking global",
+    "totalPoints": "<b>{points, number}</b> puntos totales",
+    "viewFull": "Ver ranking completo",
+    "empty": "Pronosticá una fecha para entrar al ranking."
+  },
+  "myGroups": {
+    "title": "Mis grupos",
+    "viewAll": "Ver todos",
+    "empty": "Todavía no estás en ningún grupo.",
+    "createOrJoin": "Crear o unirme a uno →"
+  },
+  "top5": {
+    "title": "Top 5 global",
+    "empty": "Sin datos todavía.",
+    "points": "{points, number} pts"
+  },
+  "activity": {
+    "title": "Actividad reciente",
+    "empty": "Sin novedades por ahora."
+  }
+}

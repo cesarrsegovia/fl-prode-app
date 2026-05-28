@@ -1,18 +1,16 @@
+import { useFormatter, useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { VenueDto } from '@/lib/server-endpoints';
-
-function formatCapacity(n: number | null) {
-  if (!n) return null;
-  return new Intl.NumberFormat('es-AR').format(n);
-}
 
 interface Props {
   venue: VenueDto;
 }
 
 export function VenueCard({ venue }: Props) {
-  const capacity = formatCapacity(venue.capacity);
+  const t = useTranslations('torneo.venue');
+  const format = useFormatter();
+  const capacity = venue.capacity ? format.number(venue.capacity) : null;
   const matches = venue._count?.matches ?? 0;
 
   return (
@@ -39,7 +37,7 @@ export function VenueCard({ venue }: Props) {
           </p>
           {matches > 0 && (
             <Badge variant="outline" className="text-[10px]">
-              {matches} {matches === 1 ? 'partido' : 'partidos'}
+              {t('matchesCount', { count: matches })}
             </Badge>
           )}
         </div>
@@ -50,7 +48,7 @@ export function VenueCard({ venue }: Props) {
               {capacity}
             </span>
             <span className="text-[10px] uppercase tracking-[0.2em] text-ink-dim font-display">
-              capacidad
+              {t('capacity')}
             </span>
           </div>
         )}

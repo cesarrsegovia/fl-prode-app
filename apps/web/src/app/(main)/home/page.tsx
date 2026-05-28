@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
+import { useFormatter, useTranslations } from 'next-intl';
 import { ChevronRight, Trophy } from 'lucide-react';
 import type { FixtureWithMatches, RankingEntry } from '@prode/shared';
 import {
@@ -38,9 +39,12 @@ function daysUntil(date: string | null) {
 }
 
 export default function HomePage() {
+  const t = useTranslations('home');
+  const format = useFormatter();
   const { data: session } = useSession();
   const userId = (session?.user as { id?: string } | undefined)?.id;
-  const username = session?.user?.name ?? session?.user?.email ?? 'Jugador';
+  const username =
+    session?.user?.name ?? session?.user?.email ?? t('playerFallback');
 
   const [tournament, setTournament] = useState<TournamentSummary | null>(null);
   const [nextFixture, setNextFixture] = useState<FixtureWithMatches | null>(null);
@@ -74,10 +78,10 @@ export default function HomePage() {
     <main className="pt-24 pb-24 px-4 md:px-8 max-w-7xl mx-auto">
       <header className="mb-10">
         <p className="font-display text-xs uppercase tracking-[0.3em] text-neon mb-2">
-          Hola, {username}
+          {t('greeting', { name: username })}
         </p>
         <h1 className="font-display font-extrabold text-foreground tracking-[-0.04em] text-[clamp(2.5rem,7vw,5rem)] leading-[0.95]">
-          El estadio<br />es tuyo.
+          {t('heroLine1')}<br />{t('heroLine2')}
         </h1>
       </header>
 
@@ -101,7 +105,7 @@ export default function HomePage() {
               <div className="flex items-center gap-2 mb-3">
                 <Trophy className="size-4 text-neon" />
                 <span className="font-display text-xs uppercase tracking-[0.25em] text-neon">
-                  Torneo activo
+                  {t('tournament.active')}
                 </span>
               </div>
               <h2 className="font-display font-extrabold text-foreground text-[clamp(2rem,5vw,3.5rem)] tracking-[-0.03em] leading-[0.95]">
@@ -121,12 +125,13 @@ export default function HomePage() {
                     {tourDays}
                   </span>
                   <span className="font-display text-[10px] uppercase tracking-[0.2em] text-ink-muted">
-                    días<br />para el inicio
+                    {t('tournament.daysLabel', { count: tourDays })}<br />
+                    {t('tournament.untilStart')}
                   </span>
                 </div>
               )}
               <span className="inline-flex items-center gap-1 text-xs font-display font-bold text-foreground group-hover:text-neon transition-colors">
-                Ver torneo
+                {t('tournament.view')}
                 <ChevronRight className="size-3" />
               </span>
             </div>
@@ -139,7 +144,7 @@ export default function HomePage() {
         <Card className="lg:col-span-2 bg-surface-1 border-line">
           <CardHeader>
             <p className="font-display text-xs uppercase tracking-[0.25em] text-neon">
-              Próxima fecha abierta
+              {t('nextFixture.title')}
             </p>
           </CardHeader>
           <CardContent>
@@ -148,10 +153,11 @@ export default function HomePage() {
             ) : nextFixture ? (
               <>
                 <h3 className="font-display font-extrabold text-3xl text-foreground tracking-tight mb-1">
-                  {nextFixture.name ?? `Fecha ${nextFixture.round}`}
+                  {nextFixture.name ??
+                    t('nextFixture.fallbackName', { round: nextFixture.round })}
                 </h3>
                 <p className="text-sm text-ink-muted mb-4">
-                  {nextFixture.matches.length} partidos
+                  {t('nextFixture.matches', { count: nextFixture.matches.length })}
                 </p>
                 <div className="flex items-center gap-3 mb-6 flex-wrap">
                   {nextFixture.matches.slice(0, 6).map((m) => (
@@ -172,20 +178,20 @@ export default function HomePage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-ink-muted">Cierra en</span>
+                    <span className="text-ink-muted">{t('nextFixture.closesIn')}</span>
                     <Countdown targetDate={new Date(nextFixture.closeAt)} />
                   </div>
                   <Link
                     href={`/prode/${nextFixture.id}`}
                     className="bg-neon text-primary-foreground font-display font-extrabold text-sm px-5 py-2.5 rounded-xl glow-neon active:scale-95 transition-transform"
                   >
-                    Cargar pronósticos
+                    {t('nextFixture.loadPredictions')}
                   </Link>
                 </div>
               </>
             ) : (
               <p className="text-sm text-ink-muted">
-                No hay fechas abiertas por ahora.
+                {t('nextFixture.none')}
               </p>
             )}
           </CardContent>
@@ -194,7 +200,7 @@ export default function HomePage() {
         <Card className="bg-surface-1 border-line">
           <CardHeader>
             <p className="font-display text-xs uppercase tracking-[0.25em] text-neon">
-              Tu ranking global
+              {t('myRanking.title')}
             </p>
           </CardHeader>
           <CardContent>
@@ -206,22 +212,26 @@ export default function HomePage() {
                   #{myEntry.position}
                 </p>
                 <p className="text-sm text-ink-muted mt-3">
-                  <span className="font-bold text-foreground tabular-nums">
-                    {myEntry.total}
-                  </span>{' '}
-                  puntos totales
+                  {t.rich('myRanking.totalPoints', {
+                    points: myEntry.total,
+                    b: (chunks) => (
+                      <span className="font-bold text-foreground tabular-nums">
+                        {chunks}
+                      </span>
+                    ),
+                  })}
                 </p>
                 <Link
                   href="/ranking"
                   className="inline-flex items-center gap-1 mt-4 text-sm font-display font-bold text-neon hover:underline"
                 >
-                  Ver ranking completo
+                  {t('myRanking.viewFull')}
                   <ChevronRight className="size-3" />
                 </Link>
               </>
             ) : (
               <p className="text-sm text-ink-muted">
-                Pronosticá una fecha para entrar al ranking.
+                {t('myRanking.empty')}
               </p>
             )}
           </CardContent>
@@ -232,13 +242,13 @@ export default function HomePage() {
       <section className="mb-12">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display font-extrabold text-2xl text-foreground tracking-tight">
-            Mis grupos
+            {t('myGroups.title')}
           </h2>
           <Link
             href="/grupos"
             className="text-xs font-display font-bold text-neon hover:underline uppercase tracking-[0.18em]"
           >
-            Ver todos
+            {t('myGroups.viewAll')}
           </Link>
         </div>
 
@@ -252,13 +262,13 @@ export default function HomePage() {
           <Card className="bg-surface-1 border-line">
             <CardContent className="p-8 text-center">
               <p className="text-sm text-ink-muted mb-3">
-                Todavía no estás en ningún grupo.
+                {t('myGroups.empty')}
               </p>
               <Link
                 href="/grupos"
                 className="text-sm font-display font-bold text-neon hover:underline"
               >
-                Crear o unirme a uno →
+                {t('myGroups.createOrJoin')}
               </Link>
             </CardContent>
           </Card>
@@ -276,7 +286,7 @@ export default function HomePage() {
         <Card className="bg-surface-1 border-line">
           <CardHeader>
             <h3 className="font-display font-extrabold text-lg text-foreground">
-              Top 5 global
+              {t('top5.title')}
             </h3>
           </CardHeader>
           <CardContent>
@@ -287,7 +297,7 @@ export default function HomePage() {
                 ))}
               </div>
             ) : topRanking.length === 0 ? (
-              <p className="text-sm text-ink-muted">Sin datos todavía.</p>
+              <p className="text-sm text-ink-muted">{t('top5.empty')}</p>
             ) : (
               <ul className="space-y-2">
                 {topRanking.map((e) => (
@@ -300,7 +310,7 @@ export default function HomePage() {
                       {e.username}
                     </span>
                     <span className="text-sm font-display font-extrabold text-neon tabular-nums">
-                      {e.total} pts
+                      {t('top5.points', { points: e.total })}
                     </span>
                   </li>
                 ))}
@@ -312,7 +322,7 @@ export default function HomePage() {
         <Card className="bg-surface-1 border-line">
           <CardHeader>
             <h3 className="font-display font-extrabold text-lg text-foreground">
-              Actividad reciente
+              {t('activity.title')}
             </h3>
           </CardHeader>
           <CardContent>
@@ -323,7 +333,7 @@ export default function HomePage() {
                 ))}
               </div>
             ) : recentNotifs.length === 0 ? (
-              <p className="text-sm text-ink-muted">Sin novedades por ahora.</p>
+              <p className="text-sm text-ink-muted">{t('activity.empty')}</p>
             ) : (
               <ul className="space-y-3">
                 {recentNotifs.map((n) => (
@@ -335,7 +345,7 @@ export default function HomePage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-foreground">{n.message}</p>
                       <p className="text-[10px] uppercase tracking-[0.2em] font-display font-bold text-ink-dim mt-1">
-                        {new Date(n.createdAt).toLocaleString('es-AR', {
+                        {format.dateTime(new Date(n.createdAt), {
                           day: '2-digit',
                           month: 'short',
                           hour: '2-digit',

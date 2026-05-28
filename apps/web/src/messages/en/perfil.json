@@ -1,0 +1,32 @@
+{
+  "eyebrowMe": "My profile",
+  "eyebrowOther": "Player",
+  "memberSince": "Since {date}",
+  "loadError": "Couldn't load the profile",
+  "statsTitle": "Stats",
+  "stats": {
+    "globalPosition": "Global position",
+    "globalPositionHintPoints": "{points} points",
+    "globalPositionHintNone": "Unranked",
+    "hits": "Hits",
+    "exactScores": "Exact scores",
+    "exactScoresHint": "bonus +3 ea.",
+    "captain": "Captain",
+    "captainHint": "{hits}/{played} hits"
+  },
+  "bestFixture": {
+    "label": "Best matchday",
+    "summary": "{hits} hits · {matches} matches",
+    "points": "pts"
+  },
+  "noStatsTitle": "No stats yet",
+  "noStatsDesc": "When you submit predictions and points are calculated, you'll see them here.",
+  "achievementsTitle": "Achievements",
+  "noAchievementsTitle": "No achievements configured",
+  "unlockedOn": "Unlocked {date}",
+  "links": {
+    "ranking": "View ranking →",
+    "myPredictions": "My predictions →",
+    "predict": "Enter predictions →"
+  }
+}

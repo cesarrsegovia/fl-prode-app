@@ -1,3 +1,4 @@
+import { useFormatter, useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import type { MatchDto } from '@/lib/server-endpoints';
 import { TeamFlag } from './TeamFlag';
@@ -12,25 +13,6 @@ const STAGE_ORDER: Stage[] = [
   'THIRD_PLACE',
   'FINAL',
 ];
-
-const STAGE_LABELS: Record<Stage, string> = {
-  GROUP: 'Fase de Grupos',
-  R32: 'Treintaidosavos',
-  R16: 'Octavos',
-  QUARTERFINAL: 'Cuartos',
-  SEMIFINAL: 'Semifinal',
-  THIRD_PLACE: 'Tercer Puesto',
-  FINAL: 'Final',
-};
-
-function formatKickoff(iso: string) {
-  return new Intl.DateTimeFormat('es-AR', {
-    day: '2-digit',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(iso));
-}
 
 function BracketSide({
   name,
@@ -66,6 +48,7 @@ function BracketSide({
 }
 
 function BracketMatch({ match }: { match: MatchDto }) {
+  const format = useFormatter();
   const finished = match.status === 'FINISHED';
   const live = match.status === 'LIVE';
   return (
@@ -89,7 +72,14 @@ function BracketMatch({ match }: { match: MatchDto }) {
         finished={finished}
       />
       <div className="mt-1.5 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-ink-dim font-display">
-        <span>{formatKickoff(match.startTime)}</span>
+        <span>
+          {format.dateTime(new Date(match.startTime), {
+            day: '2-digit',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
+        </span>
         {match.venue && <span className="truncate">{match.venue.city}</span>}
       </div>
     </article>
@@ -101,6 +91,7 @@ interface Props {
 }
 
 export function BracketTree({ matches }: Props) {
+  const t = useTranslations('torneo.stages');
   const byStage = new Map<Stage, MatchDto[]>();
   for (const m of matches) {
     const arr = byStage.get(m.stage) ?? [];
@@ -122,7 +113,7 @@ export function BracketTree({ matches }: Props) {
         {presentStages.map((stage) => (
           <div key={stage} className="flex flex-col gap-3 min-w-[240px]">
             <h4 className="font-display text-xs uppercase tracking-[0.2em] text-neon">
-              {STAGE_LABELS[stage]}
+              {t(stage)}
             </h4>
             {byStage.get(stage)!.map((m) => (
               <BracketMatch key={m.id} match={m} />

@@ -1,0 +1,23 @@
+{
+  "eyebrow": "Mon historique",
+  "title": "Mes pronostics.",
+  "filters": {
+    "all": "Tous",
+    "hit": "Réussi",
+    "miss": "Raté"
+  },
+  "emptyTitle": "Aucun pronostic à afficher",
+  "emptyDescAll": "Saisissez vos premiers pronostics pour voir l'historique.",
+  "emptyDescFiltered": "Changez le filtre ou attendez que d'autres points soient calculés.",
+  "loadMore": "Charger plus",
+  "fixtureFallback": "Journée {round}",
+  "youPicked": "Vous avez choisi",
+  "captain": "Capitaine",
+  "points": "{points} pts",
+  "exact": "Exact",
+  "outcome": {
+    "home": "Domicile",
+    "draw": "Nul",
+    "away": "Extérieur"
+  }
+}

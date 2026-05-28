@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { getFormatter, getTranslations } from 'next-intl/server';
 import { ChevronRight, MapPin, Trophy } from 'lucide-react';
 import { matchApi } from '@/lib/server-endpoints';
 import { TeamFlag } from '@/components/torneo/TeamFlag';
@@ -15,25 +16,18 @@ interface Props {
 
 export async function generateMetadata({ params }: Props) {
   const { id } = await params;
+  const t = await getTranslations('partido');
   try {
     const match = await matchApi.one(id);
     return {
-      title: `${match.homeTeamName} vs ${match.awayTeamName} · Prode`,
+      title: t('metaTitle', {
+        home: match.homeTeamName,
+        away: match.awayTeamName,
+      }),
     };
   } catch {
-    return { title: 'Partido · Prode' };
+    return { title: t('metaFallback') };
   }
-}
-
-function formatKickoff(iso: string) {
-  const d = new Date(iso);
-  return new Intl.DateTimeFormat('es-AR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(d);
 }
 
 function teamLabel(name: string, fullName?: string | null) {
@@ -42,6 +36,8 @@ function teamLabel(name: string, fullName?: string | null) {
 
 export default async function PartidoPage({ params }: Props) {
   const { id } = await params;
+  const t = await getTranslations('partido');
+  const format = await getFormatter();
 
   let match;
   let aggregate;
@@ -88,11 +84,11 @@ export default async function PartidoPage({ params }: Props) {
         <div className="flex items-center gap-3 mb-4">
           {match.group && (
             <Badge variant="outline" className="font-display tracking-wider">
-              Grupo {match.group.name}
+              {t('group', { name: match.group.name })}
             </Badge>
           )}
           <span className="text-[10px] uppercase tracking-[0.2em] font-display font-bold text-ink-dim">
-            {match.fixture.name ?? `Fecha ${match.fixture.round}`}
+            {match.fixture.name ?? t('fixtureFallback', { round: match.fixture.round })}
           </span>
         </div>
 
@@ -119,7 +115,7 @@ export default async function PartidoPage({ params }: Props) {
             ) : live ? (
               <>
                 <Badge className="bg-neon text-primary-foreground animate-pulse">
-                  EN VIVO
+                  {t('live')}
                 </Badge>
                 <p className="font-display font-extrabold text-4xl text-foreground tabular-nums">
                   {match.homeScore ?? 0} <span className="text-ink-dim">–</span>{' '}
@@ -129,13 +125,13 @@ export default async function PartidoPage({ params }: Props) {
             ) : (
               <>
                 <span className="text-[10px] uppercase tracking-[0.2em] font-display font-bold text-ink-muted">
-                  vs
+                  {t('vs')}
                 </span>
                 <span className="font-display text-xs uppercase tracking-widest text-ink-dim">
-                  {new Intl.DateTimeFormat('es-AR', {
+                  {format.dateTime(new Date(match.startTime), {
                     hour: '2-digit',
                     minute: '2-digit',
-                  }).format(new Date(match.startTime))}
+                  })}
                 </span>
               </>
             )}
@@ -160,17 +156,23 @@ export default async function PartidoPage({ params }: Props) {
         <dl className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
           <div>
             <dt className="text-[10px] uppercase tracking-[0.2em] font-display font-bold text-ink-muted mb-1">
-              Kickoff
+              {t('info.kickoff')}
             </dt>
             <dd className="font-display font-semibold text-foreground">
-              {formatKickoff(match.startTime)}
+              {format.dateTime(new Date(match.startTime), {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
             </dd>
           </div>
           {match.venue && (
             <div>
               <dt className="text-[10px] uppercase tracking-[0.2em] font-display font-bold text-ink-muted mb-1">
                 <MapPin className="inline size-3 mr-1" />
-                Estadio
+                {t('info.venue')}
               </dt>
               <dd className="font-display font-semibold text-foreground">
                 {match.venue.name}
@@ -184,7 +186,7 @@ export default async function PartidoPage({ params }: Props) {
           {match.refereeName && (
             <div>
               <dt className="text-[10px] uppercase tracking-[0.2em] font-display font-bold text-ink-muted mb-1">
-                Árbitro
+                {t('info.referee')}
               </dt>
               <dd className="font-display font-semibold text-foreground">
                 {match.refereeName}
@@ -196,18 +198,18 @@ export default async function PartidoPage({ params }: Props) {
 
       <section>
         <h3 className="font-display font-extrabold text-xl text-foreground mb-4 tracking-tight">
-          ¿Qué piensa la gente?
+          {t('poll.title')}
         </h3>
         {aggregate.total === 0 ? (
           <Card className="bg-surface-1 border-line">
             <CardContent className="p-6 text-center">
               <p className="text-sm text-ink-muted">
-                Todavía nadie pronosticó este partido.{' '}
+                {t('poll.empty')}{' '}
                 <Link
                   href={`/prode/${match.fixture.id}`}
                   className="text-neon hover:underline font-display font-bold inline-flex items-center gap-1"
                 >
-                  Cargar pronóstico
+                  {t('poll.loadPrediction')}
                   <ChevronRight className="size-3" />
                 </Link>
               </p>
@@ -217,25 +219,25 @@ export default async function PartidoPage({ params }: Props) {
           <Card className="bg-surface-1 border-line">
             <CardContent className="p-6 space-y-4">
               <PercentBar
-                label="Gana local"
+                label={t('poll.home')}
                 value={aggregate.homePct}
                 count={aggregate.home}
                 tone="home"
               />
               <PercentBar
-                label="Empate"
+                label={t('poll.draw')}
                 value={aggregate.drawPct}
                 count={aggregate.draw}
                 tone="draw"
               />
               <PercentBar
-                label="Gana visitante"
+                label={t('poll.away')}
                 value={aggregate.awayPct}
                 count={aggregate.away}
                 tone="away"
               />
               <p className="text-[10px] uppercase tracking-[0.18em] font-display font-bold text-ink-dim pt-2 border-t border-line/40">
-                {aggregate.total} pronósticos cargados
+                {t('poll.totalPredictions', { count: aggregate.total })}
               </p>
             </CardContent>
           </Card>
@@ -261,7 +263,7 @@ export default async function PartidoPage({ params }: Props) {
             className="inline-flex items-center gap-2 bg-neon text-primary-foreground font-display font-extrabold text-sm px-6 py-3 rounded-xl glow-neon active:scale-95 transition-transform"
           >
             <Trophy className="size-4" />
-            Cargar pronósticos de esta fecha
+            {t('cta')}
           </Link>
         </div>
       )}

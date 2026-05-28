@@ -1,0 +1,15 @@
+{
+  "eyebrow": "Inbox",
+  "title": "Benachrichtigungen.",
+  "markAllRead": "Alle als gelesen markieren ({count})",
+  "emptyTitle": "Leerer Posteingang",
+  "emptyDesc": "Wenn Punkte berechnet werden, ein Schluss naht oder du in der Rangliste aufsteigst, siehst du sie hier.",
+  "types": {
+    "FIXTURE_CLOSING": "Bald Schluss",
+    "RESULT_CALCULATED": "Punkte",
+    "RANKING_CHANGE": "Rangliste",
+    "GROUP_INVITE": "Gruppe",
+    "ACHIEVEMENT_UNLOCKED": "Erfolg",
+    "fallback": "Notif."
+  }
+}

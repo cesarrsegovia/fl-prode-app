@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Users } from 'lucide-react';
 import {
   grupos,
@@ -23,6 +24,7 @@ interface GroupBlock {
 }
 
 export function MatchGroupStats({ matchId }: Props) {
+  const t = useTranslations('partido.groupStats');
   const [blocks, setBlocks] = useState<GroupBlock[] | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -62,7 +64,7 @@ export function MatchGroupStats({ matchId }: Props) {
     <section>
       <h3 className="font-display font-extrabold text-xl text-foreground mb-4 tracking-tight flex items-center gap-2">
         <Users className="size-5 text-neon" />
-        ¿Qué piensa tu gente?
+        {t('title')}
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {blocks.map(({ entry, agg }) => (
@@ -75,16 +77,16 @@ export function MatchGroupStats({ matchId }: Props) {
                 {entry.group.name}
               </Link>
               <p className="text-[10px] uppercase tracking-[0.18em] font-display font-bold text-ink-dim">
-                {agg.total}/{agg.members} pronosticaron
+                {t('submitted', { total: agg.total, members: agg.members })}
                 {agg.pending > 0 && (
-                  <span className="text-citrus"> · {agg.pending} pendientes</span>
+                  <span className="text-citrus">{t('pending', { count: agg.pending })}</span>
                 )}
               </p>
             </CardHeader>
             <CardContent className="pb-4 space-y-2">
               {agg.total === 0 ? (
                 <p className="text-xs text-ink-muted">
-                  Sin pronósticos cargados todavía.
+                  {t('empty')}
                 </p>
               ) : (
                 <>

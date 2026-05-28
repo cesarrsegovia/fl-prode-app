@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { Users } from 'lucide-react';
 import { teamApi, tournamentApi } from '@/lib/server-endpoints';
 import { TeamFlag } from '@/components/torneo/TeamFlag';
@@ -13,16 +14,18 @@ interface Props {
 
 export async function generateMetadata({ params }: Props) {
   const { id } = await params;
+  const t = await getTranslations('seleccion');
   try {
     const team = await teamApi.one(id);
-    return { title: `${team.name} · Prode` };
+    return { title: t('metaTitle', { name: team.name }) };
   } catch {
-    return { title: 'Selección · Prode' };
+    return { title: t('metaFallback') };
   }
 }
 
 export default async function SeleccionPage({ params }: Props) {
   const { id } = await params;
+  const t = await getTranslations('seleccion');
 
   let team;
   try {
@@ -58,7 +61,7 @@ export default async function SeleccionPage({ params }: Props) {
         <TeamFlag src={team.flagUrl} alt={team.name} size="xl" className="size-28 md:size-32" />
         <div className="flex-1">
           <p className="font-display text-xs uppercase tracking-[0.25em] text-neon mb-2">
-            Selección
+            {t('eyebrow')}
           </p>
           <h1 className="font-display font-extrabold text-foreground text-[clamp(2.5rem,7vw,5rem)] tracking-[-0.04em] leading-[0.95]">
             {team.name}
@@ -74,7 +77,7 @@ export default async function SeleccionPage({ params }: Props) {
             {activeMembership?.group && (
               <>
                 <span>·</span>
-                <span className="text-neon">Grupo {activeMembership.group.name}</span>
+                <span className="text-neon">{t('group', { name: activeMembership.group.name })}</span>
               </>
             )}
           </div>
@@ -83,14 +86,14 @@ export default async function SeleccionPage({ params }: Props) {
 
       <section className="mb-12">
         <h2 className="font-display font-extrabold text-xl text-foreground mb-4 tracking-tight">
-          Calendario
+          {t('schedule')}
         </h2>
         {matches.length === 0 ? (
           <Empty>
             <EmptyHeader>
-              <EmptyTitle>Sin partidos cargados</EmptyTitle>
+              <EmptyTitle>{t('noMatchesTitle')}</EmptyTitle>
               <EmptyDescription>
-                Cuando se publique el calendario aparecerán acá.
+                {t('noMatchesDesc')}
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
@@ -106,14 +109,14 @@ export default async function SeleccionPage({ params }: Props) {
       <section>
         <h2 className="font-display font-extrabold text-xl text-foreground mb-4 tracking-tight flex items-center gap-2">
           <Users className="size-5 text-neon" />
-          Plantilla
+          {t('squad')}
         </h2>
         {squad.length === 0 ? (
           <Empty>
             <EmptyHeader>
-              <EmptyTitle>Plantilla no cargada</EmptyTitle>
+              <EmptyTitle>{t('noSquadTitle')}</EmptyTitle>
               <EmptyDescription>
-                Los DT publican plantillas más cerca del inicio del torneo.
+                {t('noSquadDesc')}
               </EmptyDescription>
             </EmptyHeader>
           </Empty>

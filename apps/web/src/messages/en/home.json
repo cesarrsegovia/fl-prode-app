@@ -1,0 +1,41 @@
+{
+  "greeting": "Hi, {name}",
+  "playerFallback": "Player",
+  "heroLine1": "The stadium",
+  "heroLine2": "is yours.",
+  "tournament": {
+    "active": "Active tournament",
+    "daysLabel": "{count, plural, one {day} other {days}}",
+    "untilStart": "until kickoff",
+    "view": "View tournament"
+  },
+  "nextFixture": {
+    "title": "Next open matchday",
+    "fallbackName": "Matchday {round}",
+    "matches": "{count, plural, one {# match} other {# matches}}",
+    "closesIn": "Closes in",
+    "loadPredictions": "Enter predictions",
+    "none": "No open matchdays right now."
+  },
+  "myRanking": {
+    "title": "Your global ranking",
+    "totalPoints": "<b>{points, number}</b> total points",
+    "viewFull": "View full ranking",
+    "empty": "Predict a matchday to join the ranking."
+  },
+  "myGroups": {
+    "title": "My groups",
+    "viewAll": "View all",
+    "empty": "You're not in any group yet.",
+    "createOrJoin": "Create or join one →"
+  },
+  "top5": {
+    "title": "Global top 5",
+    "empty": "No data yet.",
+    "points": "{points, number} pts"
+  },
+  "activity": {
+    "title": "Recent activity",
+    "empty": "Nothing new for now."
+  }
+}

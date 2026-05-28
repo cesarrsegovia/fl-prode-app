@@ -1,0 +1,32 @@
+{
+  "eyebrowMe": "Mon profil",
+  "eyebrowOther": "Joueur",
+  "memberSince": "Depuis {date}",
+  "loadError": "Impossible de charger le profil",
+  "statsTitle": "Stats",
+  "stats": {
+    "globalPosition": "Position mondiale",
+    "globalPositionHintPoints": "{points} points",
+    "globalPositionHintNone": "Sans classement",
+    "hits": "Bons pronostics",
+    "exactScores": "Scores exacts",
+    "exactScoresHint": "bonus +3 ch.",
+    "captain": "Capitaine",
+    "captainHint": "{hits}/{played} réussis"
+  },
+  "bestFixture": {
+    "label": "Meilleure journée",
+    "summary": "{hits} bons · {matches} matchs",
+    "points": "pts"
+  },
+  "noStatsTitle": "Pas encore de statistiques",
+  "noStatsDesc": "Lorsque vous saisissez des pronostics et que les points sont calculés, vous les verrez ici.",
+  "achievementsTitle": "Succès",
+  "noAchievementsTitle": "Aucun succès configuré",
+  "unlockedOn": "Débloqué le {date}",
+  "links": {
+    "ranking": "Voir le classement →",
+    "myPredictions": "Mes pronostics →",
+    "predict": "Saisir des pronostics →"
+  }
+}

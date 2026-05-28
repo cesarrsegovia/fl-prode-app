@@ -1,0 +1,74 @@
+{
+  "list": {
+    "title": "Mis grupos",
+    "subtitle": "Creá grupos privados o unite con un código.",
+    "joinWithCode": "Unirme con código",
+    "createGroup": "Crear grupo",
+    "loadError": "No se pudieron cargar tus grupos",
+    "empty": "Todavía no estás en ningún grupo. Creá uno o pedí un código a algún amigo."
+  },
+  "create": {
+    "namePlaceholder": "Nombre del grupo",
+    "descPlaceholder": "Descripción (opcional)",
+    "error": "No se pudo crear el grupo",
+    "submitting": "Creando…",
+    "submit": "Crear"
+  },
+  "join": {
+    "label": "Código de invitación",
+    "placeholder": "Pegá el código que te pasaron",
+    "error": "Código inválido",
+    "submitting": "Uniendo…",
+    "submit": "Unirme"
+  },
+  "card": {
+    "admin": "Admin",
+    "members": "{count, plural, one {miembro} other {miembros}}",
+    "private": "Privado"
+  },
+  "detail": {
+    "back": "← Mis grupos",
+    "backShort": "← Volver",
+    "memberCount": "{count, plural, one {# miembro} other {# miembros}}",
+    "private": "Privado",
+    "public": "Público",
+    "deleteGroup": "Eliminar grupo",
+    "leaveGroup": "Salir del grupo",
+    "loadError": "No se pudo cargar el grupo",
+    "confirmLeave": "¿Salir del grupo?",
+    "leaveError": "No se pudo salir del grupo",
+    "confirmDelete": "¿Eliminar el grupo? Esta acción es irreversible.",
+    "deleteError": "No se pudo eliminar el grupo",
+    "tabs": {
+      "ranking": "Ranking",
+      "activity": "Actividad",
+      "chat": "Chat",
+      "members": "Miembros ({count})"
+    },
+    "invite": {
+      "title": "Código de invitación",
+      "subtitle": "Compartilo para sumar miembros al grupo.",
+      "codeLabel": "Código:",
+      "copy": "Copiar",
+      "copied": "¡Copiado!",
+      "regenerate": "Regenerar"
+    }
+  },
+  "members": {
+    "since": "Desde {date}",
+    "you": "(vos)",
+    "admin": "Admin"
+  },
+  "activity": {
+    "emptyTitle": "Todavía no hay actividad en este grupo.",
+    "emptyDesc": "Cuando carguen pronósticos o se calculen puntos vas a verlo acá."
+  },
+  "chat": {
+    "emptyTitle": "Todavía no hay mensajes en este grupo.",
+    "emptyDesc": "Mandá el primero 👇",
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "placeholder": "Escribí un mensaje…",
+    "send": "Enviar"
+  }
+}

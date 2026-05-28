@@ -1,0 +1,32 @@
+{
+  "eyebrowMe": "Mein Profil",
+  "eyebrowOther": "Spieler",
+  "memberSince": "Seit {date}",
+  "loadError": "Profil konnte nicht geladen werden",
+  "statsTitle": "Statistiken",
+  "stats": {
+    "globalPosition": "Globale Position",
+    "globalPositionHintPoints": "{points} Punkte",
+    "globalPositionHintNone": "Keine Platzierung",
+    "hits": "Treffer",
+    "exactScores": "Exakte Ergebnisse",
+    "exactScoresHint": "Bonus +3 je",
+    "captain": "Kapitän",
+    "captainHint": "{hits}/{played} Treffer"
+  },
+  "bestFixture": {
+    "label": "Bester Spieltag",
+    "summary": "{hits} Treffer · {matches} Spiele",
+    "points": "Pkt."
+  },
+  "noStatsTitle": "Noch keine Statistiken",
+  "noStatsDesc": "Wenn du Tipps abgibst und Punkte berechnet werden, siehst du sie hier.",
+  "achievementsTitle": "Erfolge",
+  "noAchievementsTitle": "Keine Erfolge konfiguriert",
+  "unlockedOn": "Freigeschaltet am {date}",
+  "links": {
+    "ranking": "Rangliste ansehen →",
+    "myPredictions": "Meine Tipps →",
+    "predict": "Tipps abgeben →"
+  }
+}

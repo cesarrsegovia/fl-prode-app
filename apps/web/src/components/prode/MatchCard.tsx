@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useFormatter, useTranslations } from 'next-intl';
 import type { Match } from '@prode/shared';
 import { MatchStatus, Result } from '@prode/shared';
 import { cn } from '@/lib/utils';
@@ -47,33 +48,33 @@ export function MatchCard({
   disabled,
   onChange,
 }: Props) {
+  const t = useTranslations('prode.match');
+  const format = useFormatter();
+
   const isLocked =
     disabled ||
     match.status === MatchStatus.LIVE ||
     match.status === MatchStatus.FINISHED ||
     match.status === MatchStatus.CANCELLED;
 
-  const kickoffLabel = useMemo(() => {
-    const d = new Date(match.startTime);
-    return d.toLocaleString('es-AR', {
-      weekday: 'short',
-      day: '2-digit',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  }, [match.startTime]);
+  const kickoffLabel = format.dateTime(new Date(match.startTime), {
+    weekday: 'short',
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 
   const statusBadge = useMemo(() => {
     switch (match.status) {
       case MatchStatus.LIVE:
-        return { text: 'En juego', tone: 'live' as const };
+        return { key: 'live', tone: 'live' as const };
       case MatchStatus.FINISHED:
-        return { text: 'Finalizado', tone: 'done' as const };
+        return { key: 'finished', tone: 'done' as const };
       case MatchStatus.CANCELLED:
-        return { text: 'Cancelado', tone: 'cancelled' as const };
+        return { key: 'cancelled', tone: 'cancelled' as const };
       default:
-        return { text: 'Abierto', tone: 'open' as const };
+        return { key: 'open', tone: 'open' as const };
     }
   }, [match.status]);
 
@@ -116,7 +117,7 @@ export function MatchCard({
             )}
           >
             <span className="size-1.5 rounded-full bg-current" />
-            {statusBadge.text}
+            {t(`status.${statusBadge.key}`)}
           </span>
         </div>
 
@@ -182,7 +183,7 @@ export function MatchCard({
         {!isLocked && (
           <div className="mt-6 pt-4 border-t border-line/40 flex items-center justify-between">
             <span className="text-[10px] font-display font-extrabold uppercase tracking-[0.18em] text-ink-muted">
-              Bonus marcador (+3 pts)
+              {t('scoreBonus')}
             </span>
             <div className="flex items-center gap-3">
               <input
@@ -216,7 +217,7 @@ export function MatchCard({
                   onChange({ ...pick, isCaptain: e.target.checked })
                 }
               />
-              Capitán (x2)
+              {t('captainCheck')}
             </label>
           </div>
         )}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { CheckCircle2, Crown, Loader2, XCircle } from 'lucide-react';
 import { Result } from '@prode/shared';
 import { stats, type PredictionHistoryItem } from '@/lib/endpoints';
@@ -14,10 +15,10 @@ import { cn } from '@/lib/utils';
 
 type Filter = 'all' | 'hit' | 'miss';
 
-const RESULT_LABEL: Record<Result, string> = {
-  [Result.HOME]: 'Local',
-  [Result.DRAW]: 'Empate',
-  [Result.AWAY]: 'Visitante',
+const OUTCOME_KEY: Record<Result, string> = {
+  [Result.HOME]: 'home',
+  [Result.DRAW]: 'draw',
+  [Result.AWAY]: 'away',
 };
 
 function actualResult(
@@ -30,6 +31,7 @@ function actualResult(
 }
 
 function HistoryRow({ p }: { p: PredictionHistoryItem }) {
+  const t = useTranslations('mis-pronosticos');
   const finished = p.match.status === 'FINISHED';
   const real = actualResult(p.match);
   const hit = finished && real && p.result === real;
@@ -67,13 +69,13 @@ function HistoryRow({ p }: { p: PredictionHistoryItem }) {
           <div className="flex items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-[10px] uppercase tracking-[0.18em] font-display font-bold text-ink-dim">
-                {p.fixture.name ?? `Fecha ${p.fixture.round}`}
+                {p.fixture.name ?? t('fixtureFallback', { round: p.fixture.round })}
               </span>
               <span className="text-ink-dim">·</span>
               <span className="text-ink-muted">
-                Pickeaste{' '}
+                {t('youPicked')}{' '}
                 <span className="text-foreground font-display font-bold">
-                  {RESULT_LABEL[p.result]}
+                  {t(`outcome.${OUTCOME_KEY[p.result]}`)}
                 </span>
                 {p.homeScoreGuess !== null && p.awayScoreGuess !== null && (
                   <span className="text-ink-dim ml-1">
@@ -87,7 +89,7 @@ function HistoryRow({ p }: { p: PredictionHistoryItem }) {
                   className="text-[10px] gap-1 border-neon/40 text-neon"
                 >
                   <Crown className="size-3" />
-                  Capitán
+                  {t('captain')}
                 </Badge>
               )}
             </div>
@@ -105,11 +107,11 @@ function HistoryRow({ p }: { p: PredictionHistoryItem }) {
                     (p.pointsEarned ?? 0) > 0 ? 'text-neon' : 'text-ink-dim',
                   )}
                 >
-                  {p.pointsEarned ?? 0} pts
+                  {t('points', { points: p.pointsEarned ?? 0 })}
                 </span>
                 {exact && (
                   <Badge className="bg-neon/15 text-neon text-[10px]">
-                    Exacto
+                    {t('exact')}
                   </Badge>
                 )}
               </div>
@@ -122,6 +124,7 @@ function HistoryRow({ p }: { p: PredictionHistoryItem }) {
 }
 
 export default function MisPronosticosPage() {
+  const t = useTranslations('mis-pronosticos');
   const [items, setItems] = useState<PredictionHistoryItem[]>([]);
   const [filter, setFilter] = useState<Filter>('all');
   const [cursor, setCursor] = useState<string | null>(null);
@@ -162,10 +165,10 @@ export default function MisPronosticosPage() {
     <main className="pt-24 pb-24 px-4 max-w-3xl mx-auto">
       <header className="mb-10">
         <p className="font-display text-xs uppercase tracking-[0.3em] text-neon mb-2">
-          Mi historial
+          {t('eyebrow')}
         </p>
         <h1 className="font-display font-extrabold text-foreground tracking-[-0.04em] text-[clamp(2.5rem,7vw,5rem)] leading-[0.95]">
-          Mis pronósticos.
+          {t('title')}
         </h1>
       </header>
 
@@ -181,7 +184,7 @@ export default function MisPronosticosPage() {
                 : 'bg-surface-1 text-ink-muted hover:text-foreground hover:bg-surface-2',
             )}
           >
-            {f === 'all' ? 'Todos' : f === 'hit' ? 'Acierto' : 'Falla'}
+            {t(`filters.${f}`)}
           </button>
         ))}
       </div>
@@ -195,11 +198,11 @@ export default function MisPronosticosPage() {
       ) : filtered.length === 0 ? (
         <Empty>
           <EmptyHeader>
-            <EmptyTitle>Sin pronósticos por mostrar</EmptyTitle>
+            <EmptyTitle>{t('emptyTitle')}</EmptyTitle>
             <EmptyDescription>
               {filter === 'all'
-                ? 'Cargá tus primeros pronósticos para ver el historial.'
-                : 'Cambiá el filtro o esperá a que se calculen más puntos.'}
+                ? t('emptyDescAll')
+                : t('emptyDescFiltered')}
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
@@ -218,7 +221,7 @@ export default function MisPronosticosPage() {
                 className="flex items-center gap-2 px-5 py-2 rounded-xl bg-surface-1 border border-line hover:border-neon font-display font-bold text-sm uppercase tracking-[0.15em] text-ink-muted hover:text-neon transition-colors"
               >
                 {loadingMore && <Loader2 className="size-3 animate-spin" />}
-                Cargar más
+                {t('loadMore')}
               </button>
             </div>
           )}

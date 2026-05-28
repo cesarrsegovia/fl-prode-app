@@ -1,0 +1,23 @@
+{
+  "eyebrow": "My history",
+  "title": "My predictions.",
+  "filters": {
+    "all": "All",
+    "hit": "Hit",
+    "miss": "Miss"
+  },
+  "emptyTitle": "No predictions to show",
+  "emptyDescAll": "Enter your first predictions to see your history.",
+  "emptyDescFiltered": "Change the filter or wait for more points to be calculated.",
+  "loadMore": "Load more",
+  "fixtureFallback": "Matchday {round}",
+  "youPicked": "You picked",
+  "captain": "Captain",
+  "points": "{points} pts",
+  "exact": "Exact",
+  "outcome": {
+    "home": "Home",
+    "draw": "Draw",
+    "away": "Away"
+  }
+}

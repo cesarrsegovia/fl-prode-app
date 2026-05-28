@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useFormatter, useTranslations } from 'next-intl';
 import { Save, Loader2 } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 import { adminMatches } from '@/lib/endpoints';
@@ -44,6 +45,7 @@ interface TournamentInfo {
 }
 
 export default function AdminPartidosPage() {
+  const t = useTranslations('admin.matches');
   const [tournament, setTournament] = useState<TournamentInfo | null>(null);
   const [fixtures, setFixtures] = useState<AdminFixture[]>([]);
   const [activeFixtureId, setActiveFixtureId] = useState<string | null>(null);
@@ -65,7 +67,7 @@ export default function AdminPartidosPage() {
         setFixtures(sched.data);
         setActiveFixtureId(sched.data[0]?.id ?? null);
       })
-      .catch((e) => setError(e?.message ?? 'Error cargando datos'))
+      .catch((e) => setError(e?.message ?? t('loadError')))
       .finally(() => setLoading(false));
   }, []);
 
@@ -86,7 +88,7 @@ export default function AdminPartidosPage() {
   if (!tournament || !fixtures.length) {
     return (
       <p className="text-sm text-ink-muted">
-        No hay torneo activo o sin partidos cargados.
+        {t('noActive')}
       </p>
     );
   }
@@ -96,7 +98,10 @@ export default function AdminPartidosPage() {
   return (
     <div>
       <p className="font-display text-sm text-ink-muted mb-6">
-        Editando resultados de <strong>{tournament.name}</strong>
+        {t.rich('editingIn', {
+          name: tournament.name,
+          b: (chunks) => <strong>{chunks}</strong>,
+        })}
       </p>
 
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
@@ -111,7 +116,7 @@ export default function AdminPartidosPage() {
                 : 'bg-surface-1 text-ink-muted hover:text-foreground hover:bg-surface-2',
             )}
           >
-            {f.name ?? `Fecha ${f.round}`}
+            {f.name ?? t('fixtureFallback', { round: f.round })}
           </button>
         ))}
       </div>
@@ -151,6 +156,8 @@ function MatchEditor({
   match: AdminFixture['matches'][number];
   onUpdated: (m: Partial<AdminFixture['matches'][number]> & { id: string }) => void;
 }) {
+  const t = useTranslations('admin.matches');
+  const format = useFormatter();
   const [homeScore, setHomeScore] = useState<string>(
     match.homeScore?.toString() ?? '',
   );
@@ -184,18 +191,18 @@ function MatchEditor({
       setSaved(true);
       setTimeout(() => setSaved(false), 1500);
     } catch (e: any) {
-      setError(e?.response?.data?.message ?? 'No se pudo guardar');
+      setError(e?.response?.data?.message ?? t('saveError'));
     } finally {
       setSaving(false);
     }
   };
 
-  const kickoff = new Intl.DateTimeFormat('es-AR', {
+  const kickoff = format.dateTime(new Date(match.startTime), {
     day: '2-digit',
     month: 'short',
     hour: '2-digit',
     minute: '2-digit',
-  }).format(new Date(match.startTime));
+  });
 
   return (
     <Card className="bg-surface-1 border-line">
@@ -247,7 +254,7 @@ function MatchEditor({
             >
               {STATUSES.map((s) => (
                 <option key={s} value={s}>
-                  {s}
+                  {t(`status.${s}`)}
                 </option>
               ))}
             </select>
@@ -264,11 +271,11 @@ function MatchEditor({
               {saving ? (
                 <Loader2 className="size-3 animate-spin" />
               ) : saved ? (
-                'Guardado'
+                t('saved')
               ) : (
                 <>
                   <Save className="size-3" />
-                  Guardar
+                  {t('save')}
                 </>
               )}
             </button>
@@ -280,7 +287,7 @@ function MatchEditor({
           {match.group && (
             <>
               <span>·</span>
-              <span className="text-neon">Grupo {match.group.name}</span>
+              <span className="text-neon">{t('group', { name: match.group.name })}</span>
             </>
           )}
           {match.venue && (

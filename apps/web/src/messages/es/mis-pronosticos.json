@@ -1,0 +1,23 @@
+{
+  "eyebrow": "Mi historial",
+  "title": "Mis pronósticos.",
+  "filters": {
+    "all": "Todos",
+    "hit": "Acierto",
+    "miss": "Falla"
+  },
+  "emptyTitle": "Sin pronósticos por mostrar",
+  "emptyDescAll": "Cargá tus primeros pronósticos para ver el historial.",
+  "emptyDescFiltered": "Cambiá el filtro o esperá a que se calculen más puntos.",
+  "loadMore": "Cargar más",
+  "fixtureFallback": "Fecha {round}",
+  "youPicked": "Pickeaste",
+  "captain": "Capitán",
+  "points": "{points} pts",
+  "exact": "Exacto",
+  "outcome": {
+    "home": "Local",
+    "draw": "Empate",
+    "away": "Visitante"
+  }
+}

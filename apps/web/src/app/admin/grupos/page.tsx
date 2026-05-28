@@ -2,19 +2,17 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useFormatter, useTranslations } from 'next-intl';
 import { Loader2, Search, Trash2, Lock, Globe } from 'lucide-react';
 import { admin, type AdminGroupItem } from '@/lib/endpoints';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 
-const formatter = new Intl.DateTimeFormat('es-AR', {
-  day: '2-digit',
-  month: 'short',
-  year: 'numeric',
-});
-
 export default function AdminGruposPage() {
+  const t = useTranslations('admin.groups');
+  const tc = useTranslations('admin.common');
+  const format = useFormatter();
   const [items, setItems] = useState<AdminGroupItem[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [search, setSearch] = useState('');
@@ -38,7 +36,7 @@ export default function AdminGruposPage() {
       setNextCursor(res.nextCursor);
     } catch (e: unknown) {
       const m = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      setError(m ?? 'No se pudieron cargar los grupos');
+      setError(m ?? t('loadError'));
     } finally {
       setLoading(false);
     }
@@ -61,19 +59,14 @@ export default function AdminGruposPage() {
   };
 
   const deleteGroup = async (g: AdminGroupItem) => {
-    if (
-      !confirm(
-        `¿Eliminar el grupo "${g.name}"? Esta acción borra miembros, mensajes y actividad. Irreversible.`,
-      )
-    )
-      return;
+    if (!confirm(t('confirmDelete', { name: g.name }))) return;
     setDeletingId(g.id);
     try {
       await admin.deleteGroup(g.id);
       setItems((prev) => prev.filter((it) => it.id !== g.id));
     } catch (e: unknown) {
       const m = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      alert(m ?? 'No se pudo eliminar');
+      alert(m ?? t('deleteError'));
     } finally {
       setDeletingId(null);
     }
@@ -82,7 +75,7 @@ export default function AdminGruposPage() {
   return (
     <div>
       <p className="font-display text-sm text-ink-muted mb-6">
-        Listado de todos los grupos de la plataforma. Borrado fuerza inclusive si tenés miembros activos.
+        {t('subtitle')}
       </p>
 
       <div className="relative mb-6 max-w-md">
@@ -91,7 +84,7 @@ export default function AdminGruposPage() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar por nombre…"
+          placeholder={t('searchPlaceholder')}
           className="w-full pl-9 pr-3 h-10 bg-surface-1 border border-line rounded-full text-sm font-display text-foreground placeholder:text-ink-dim focus:outline-none focus:border-neon"
         />
       </div>
@@ -105,7 +98,7 @@ export default function AdminGruposPage() {
       ) : error ? (
         <p className="text-sm text-destructive font-bold">{error}</p>
       ) : !items.length ? (
-        <p className="text-sm text-ink-muted">Sin grupos para mostrar.</p>
+        <p className="text-sm text-ink-muted">{t('empty')}</p>
       ) : (
         <div className="space-y-2">
           {items.map((g) => (
@@ -121,11 +114,11 @@ export default function AdminGruposPage() {
                     </Link>
                     {g.isPrivate ? (
                       <Badge variant="outline" className="text-[10px] gap-1">
-                        <Lock className="size-2.5" /> Privado
+                        <Lock className="size-2.5" /> {t('private')}
                       </Badge>
                     ) : (
                       <Badge variant="outline" className="text-[10px] gap-1">
-                        <Globe className="size-2.5" /> Público
+                        <Globe className="size-2.5" /> {t('public')}
                       </Badge>
                     )}
                   </div>
@@ -135,10 +128,10 @@ export default function AdminGruposPage() {
                 </div>
 
                 <div className="flex items-center gap-4 text-[10px] uppercase tracking-[0.18em] font-display font-bold text-ink-dim">
-                  <span>{g._count.members} miembros</span>
-                  <span>{g._count.messages} msgs</span>
-                  <span>{g._count.activities} eventos</span>
-                  <span>{formatter.format(new Date(g.createdAt))}</span>
+                  <span>{t('members', { count: g._count.members })}</span>
+                  <span>{t('messages', { count: g._count.messages })}</span>
+                  <span>{t('events', { count: g._count.activities })}</span>
+                  <span>{format.dateTime(new Date(g.createdAt), { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                 </div>
 
                 <button
@@ -150,7 +143,7 @@ export default function AdminGruposPage() {
                     <Loader2 className="size-3 animate-spin" />
                   ) : (
                     <>
-                      <Trash2 className="size-3" /> Eliminar
+                      <Trash2 className="size-3" /> {t('delete')}
                     </>
                   )}
                 </button>
@@ -164,7 +157,7 @@ export default function AdminGruposPage() {
               disabled={loadingMore}
               className="w-full mt-4 h-10 rounded-full bg-surface-1 border border-line text-xs font-display font-bold uppercase tracking-[0.15em] text-ink-muted hover:text-foreground hover:bg-surface-2 disabled:opacity-50"
             >
-              {loadingMore ? 'Cargando…' : 'Cargar más'}
+              {loadingMore ? tc('loadingMore') : tc('loadMore')}
             </button>
           )}
         </div>
