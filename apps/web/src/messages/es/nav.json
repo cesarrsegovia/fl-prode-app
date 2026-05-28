@@ -28,7 +28,9 @@
     "terms": "Términos",
     "privacy": "Privacidad",
     "support": "Soporte",
-    "copyright": "© {year} Prode · El estadio es tuyo"
+    "faq": "FAQ",
+    "createdBy": "Creado por",
+    "copyright": "© {year}"
   },
   "language": {
     "label": "Idioma"

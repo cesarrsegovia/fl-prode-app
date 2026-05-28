@@ -24,7 +24,7 @@ function getInitials(name?: string | null) {
 // DiceBear "personas": retratos ilustrados, gratis y sin auth.
 function diceBearAvatar(seed: string) {
   const safe = encodeURIComponent(seed.trim().toLowerCase() || 'prode');
-  return `https://api.dicebear.com/9.x/personas/svg?seed=${safe}&backgroundColor=b6f23d,45fc9b,1de9b6&radius=50`;
+  return `https://api.dicebear.com/9.x/personas/svg?seed=${safe}&backgroundColor=e9ac36,c79a2e,f4d69c&radius=50`;
 }
 
 const NAV_LINKS = [

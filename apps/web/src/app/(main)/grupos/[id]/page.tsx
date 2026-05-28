@@ -47,6 +47,7 @@ export default function GrupoDetailPage({
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>('ranking');
   const [inviteCopied, setInviteCopied] = useState(false);
+  const [copyFailed, setCopyFailed] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
 
   const { entries, isLoading: rankingLoading } = useRanking(id);
@@ -75,14 +76,42 @@ export default function GrupoDetailPage({
     ? `${typeof window !== 'undefined' ? window.location.origin : ''}/invitacion/${group.inviteCode}`
     : '';
 
+  const flashCopied = () => {
+    setCopyFailed(false);
+    setInviteCopied(true);
+    setTimeout(() => setInviteCopied(false), 1500);
+  };
+
   const copyInvite = async () => {
     if (!group) return;
+    // Preferred: async Clipboard API (requires secure context + permission).
     try {
-      await navigator.clipboard.writeText(inviteUrl);
-      setInviteCopied(true);
-      setTimeout(() => setInviteCopied(false), 1500);
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(inviteUrl);
+        flashCopied();
+        return;
+      }
     } catch {
-      /* clipboard may be blocked; ignore */
+      /* fall through to the legacy fallback below */
+    }
+    // Fallback: hidden textarea + execCommand for http/insecure contexts.
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = inviteUrl;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      if (ok) {
+        flashCopied();
+        return;
+      }
+      throw new Error('execCommand copy failed');
+    } catch {
+      setCopyFailed(true);
+      setTimeout(() => setCopyFailed(false), 2000);
     }
   };
 
@@ -244,9 +273,15 @@ export default function GrupoDetailPage({
             <div className="flex gap-2 mt-3">
               <button
                 onClick={copyInvite}
-                className="flex-1 bg-primary text-black text-sm font-bold py-2 rounded-lg active:scale-95 transition-transform"
+                className={`flex-1 text-sm font-bold py-2 rounded-lg active:scale-95 transition-transform ${
+                  copyFailed ? 'bg-red-500/20 text-red-400' : 'bg-primary text-black'
+                }`}
               >
-                {inviteCopied ? t('invite.copied') : t('invite.copy')}
+                {copyFailed
+                  ? t('invite.copyFailed')
+                  : inviteCopied
+                    ? t('invite.copied')
+                    : t('invite.copy')}
               </button>
               {isAdmin && (
                 <button

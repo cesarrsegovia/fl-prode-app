@@ -40,6 +40,17 @@
     "loadError": "Erreur de chargement des données",
     "noActive": "Aucun tournoi actif ou aucun match chargé.",
     "fixtureFallback": "Journée {round}",
+    "rounds": {
+      "1": "Phase de groupes · Journée 1",
+      "2": "Phase de groupes · Journée 2",
+      "3": "Phase de groupes · Journée 3",
+      "4": "Seizièmes de finale",
+      "5": "Huitièmes de finale",
+      "6": "Quarts de finale",
+      "7": "Demi-finales",
+      "8": "Match pour la troisième place",
+      "9": "Finale"
+    },
     "status": {
       "PENDING": "En attente",
       "LIVE": "En direct",

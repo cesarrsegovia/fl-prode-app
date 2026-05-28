@@ -40,6 +40,17 @@
     "loadError": "Error cargando datos",
     "noActive": "No hay torneo activo o sin partidos cargados.",
     "fixtureFallback": "Fecha {round}",
+    "rounds": {
+      "1": "Fase de grupos · Fecha 1",
+      "2": "Fase de grupos · Fecha 2",
+      "3": "Fase de grupos · Fecha 3",
+      "4": "Treintaidosavos de final",
+      "5": "Octavos de final",
+      "6": "Cuartos de final",
+      "7": "Semifinales",
+      "8": "Tercer puesto",
+      "9": "Final"
+    },
     "status": {
       "PENDING": "Pendiente",
       "LIVE": "En vivo",

@@ -106,6 +106,7 @@ function CreateGroupForm({ onCreated }: { onCreated: () => void }) {
   const t = useTranslations('grupos.create');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [isPrivate, setIsPrivate] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -114,7 +115,11 @@ function CreateGroupForm({ onCreated }: { onCreated: () => void }) {
     setError(null);
     setSubmitting(true);
     try {
-      await grupos.create({ name, description: description || undefined });
+      await grupos.create({
+        name,
+        description: description || undefined,
+        isPrivate,
+      });
       onCreated();
     } catch (err: any) {
       setError(err?.response?.data?.message ?? t('error'));
@@ -144,6 +149,26 @@ function CreateGroupForm({ onCreated }: { onCreated: () => void }) {
         className="w-full bg-surface-container-highest rounded-lg px-4 py-3 text-white placeholder:text-on-surface-variant"
         rows={2}
       />
+
+      <fieldset className="space-y-2">
+        <legend className="text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">
+          {t('privacyLabel')}
+        </legend>
+        <div className="flex gap-2">
+          <PrivacyOption
+            active={isPrivate}
+            label={t('private')}
+            onClick={() => setIsPrivate(true)}
+          />
+          <PrivacyOption
+            active={!isPrivate}
+            label={t('public')}
+            onClick={() => setIsPrivate(false)}
+          />
+        </div>
+        <p className="text-[11px] text-on-surface-variant">{t('privacyHint')}</p>
+      </fieldset>
+
       {error && <p className="text-xs text-red-400 font-bold">{error}</p>}
       <button
         type="submit"
@@ -153,6 +178,31 @@ function CreateGroupForm({ onCreated }: { onCreated: () => void }) {
         {submitting ? t('submitting') : t('submit')}
       </button>
     </form>
+  );
+}
+
+function PrivacyOption({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`flex-1 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+        active
+          ? 'bg-primary text-black'
+          : 'bg-surface-container-highest text-on-surface-variant hover:text-white'
+      }`}
+    >
+      {label}
+    </button>
   );
 }
 
