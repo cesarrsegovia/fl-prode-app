@@ -6,6 +6,9 @@ export interface RankingEntry {
   streak: number;
   position: number;
   positionChange: number;
+  correctWinners?: number;
+  exactScores?: number;
+  exactGoalsSum?: number;
 }
 
 export interface GroupRanking {

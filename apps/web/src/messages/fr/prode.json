@@ -1,0 +1,100 @@
+{
+  "list": {
+    "eyebrow": "Mon Prode",
+    "titleLine1": "Saisissez",
+    "titleLine2": "vos pronostics.",
+    "loadError": "Échec du chargement des journées",
+    "emptyTitle": "Aucune journée ouverte",
+    "emptyDesc": "Aucune journée à pronostiquer pour le moment. Revenez bientôt.",
+    "predict": "Pronostiquer"
+  },
+  "progress": {
+    "title": "Votre progression",
+    "predicted": "{predicted} sur {total} matchs pronostiqués",
+    "pending": "{pending} en attente",
+    "percent": "{pct}% complété"
+  },
+  "tabs": {
+    "pending": "En attente",
+    "predicted": "Pronostiqués",
+    "live": "En direct",
+    "results": "Résultats",
+    "topScorer": "Buteurs"
+  },
+  "featured": {
+    "champion": {
+      "label": "Votre champion",
+      "points": "Vaut 15 pts"
+    },
+    "topScorer": {
+      "label": "Votre meilleur buteur",
+      "points": "Vaut 15 pts"
+    },
+    "deadlineUntil": "Jusqu'au {date}",
+    "empty": "Non choisi"
+  },
+  "allUpToDate": {
+    "title": "Tout est à jour !",
+    "subtitle": "Vous avez pronostiqué tous les prochains matchs. Bien joué !"
+  },
+  "topScorerTabHint": "Choisissez votre meilleur buteur depuis la page du tournoi.",
+  "goToTournament": "Aller au tournoi →",
+  "fixture": {
+    "fallbackName": "Journée {round}",
+    "matches": "{count, plural, one {# match} other {# matchs}}",
+    "closesIn": "Clôture dans",
+    "backToList": "← Journées",
+    "loadError": "Impossible de charger la journée",
+    "backToListLong": "← Retour aux journées",
+    "viewResults": "Voir les résultats de cette journée →"
+  },
+  "countdown": {
+    "closed": "Clôturé"
+  },
+  "form": {
+    "nextClose": "Prochaine clôture",
+    "closesIn": "Clôture dans",
+    "closed": "Pronostics clôturés",
+    "progress": "Progression",
+    "progressValue": "{filled} sur {total} matchs",
+    "captainTitle": "Capitaine de la journée",
+    "captainDesc": "Double les points du match choisi",
+    "noCaptain": "Sans capitaine",
+    "saved": "Pronostic enregistré",
+    "saveError": "Impossible d'enregistrer le pronostic",
+    "needOne": "Indiquez au moins un résultat avant d'enregistrer.",
+    "savedMany": "{count, plural, one {# pronostic enregistré} other {# pronostics enregistrés}}",
+    "saveAllError": "Un problème est survenu lors de l'enregistrement",
+    "saving": "Enregistrement…",
+    "saveThis": "Enregistrer celui-ci",
+    "saveAll": "Enregistrer tous les pronostics"
+  },
+  "match": {
+    "status": {
+      "live": "En direct",
+      "finished": "Terminé",
+      "cancelled": "Annulé",
+      "open": "Ouvert"
+    },
+    "scoreBonus": "Bonus score (+3 pts)",
+    "captainCheck": "Capitaine (x2)"
+  },
+  "results": {
+    "back": "← Retour aux pronostics",
+    "title": "Résultats",
+    "yourPoints": "Vos points",
+    "pending": "En attente",
+    "real": "Réel",
+    "yourPick": "Votre pronostic",
+    "noPick": "Non saisi",
+    "points": "Points",
+    "outcome": {
+      "home": "Domicile",
+      "draw": "Nul",
+      "away": "Extérieur"
+    },
+    "badgeResult": "+3 Résultat",
+    "badgeExact": "+3 Score exact",
+    "badgeCaptain": "x2 Capitaine"
+  }
+}

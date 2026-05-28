@@ -1,0 +1,100 @@
+{
+  "list": {
+    "eyebrow": "Mein Prode",
+    "titleLine1": "Gib",
+    "titleLine2": "deine Tipps ab.",
+    "loadError": "Spieltage konnten nicht geladen werden",
+    "emptyTitle": "Keine offenen Spieltage",
+    "emptyDesc": "Derzeit gibt es keine Spieltage zum Tippen. Schau bald wieder vorbei.",
+    "predict": "Tippen"
+  },
+  "progress": {
+    "title": "Dein Fortschritt",
+    "predicted": "{predicted} von {total} Spielen getippt",
+    "pending": "{pending} offen",
+    "percent": "{pct}% abgeschlossen"
+  },
+  "tabs": {
+    "pending": "Offen",
+    "predicted": "Getippt",
+    "live": "Live",
+    "results": "Ergebnisse",
+    "topScorer": "Torschützenkönig"
+  },
+  "featured": {
+    "champion": {
+      "label": "Dein Meister",
+      "points": "Wert: 15 Pkt"
+    },
+    "topScorer": {
+      "label": "Dein Torschützenkönig",
+      "points": "Wert: 15 Pkt"
+    },
+    "deadlineUntil": "Bis {date}",
+    "empty": "Noch nicht gewählt"
+  },
+  "allUpToDate": {
+    "title": "Alles erledigt!",
+    "subtitle": "Du hast alle kommenden Spiele getippt. Gut gemacht!"
+  },
+  "topScorerTabHint": "Wähle deinen Torschützenkönig auf der Turnierseite.",
+  "goToTournament": "Zum Turnier →",
+  "fixture": {
+    "fallbackName": "Spieltag {round}",
+    "matches": "{count, plural, one {# Spiel} other {# Spiele}}",
+    "closesIn": "Schließt in",
+    "backToList": "← Spieltage",
+    "loadError": "Spieltag konnte nicht geladen werden",
+    "backToListLong": "← Zurück zu den Spieltagen",
+    "viewResults": "Ergebnisse dieses Spieltags ansehen →"
+  },
+  "countdown": {
+    "closed": "Geschlossen"
+  },
+  "form": {
+    "nextClose": "Nächster Schluss",
+    "closesIn": "Schließt in",
+    "closed": "Tipps geschlossen",
+    "progress": "Fortschritt",
+    "progressValue": "{filled} von {total} Spielen",
+    "captainTitle": "Kapitän des Spieltags",
+    "captainDesc": "Verdoppelt die Punkte des gewählten Spiels",
+    "noCaptain": "Kein Kapitän",
+    "saved": "Tipp gespeichert",
+    "saveError": "Tipp konnte nicht gespeichert werden",
+    "needOne": "Markiere mindestens ein Ergebnis vor dem Speichern.",
+    "savedMany": "{count, plural, one {# Tipp gespeichert} other {# Tipps gespeichert}}",
+    "saveAllError": "Beim Speichern ist ein Problem aufgetreten",
+    "saving": "Speichern…",
+    "saveThis": "Diesen speichern",
+    "saveAll": "Alle Tipps speichern"
+  },
+  "match": {
+    "status": {
+      "live": "Live",
+      "finished": "Beendet",
+      "cancelled": "Abgesagt",
+      "open": "Offen"
+    },
+    "scoreBonus": "Ergebnis-Bonus (+3 Pkt.)",
+    "captainCheck": "Kapitän (x2)"
+  },
+  "results": {
+    "back": "← Zurück zu den Tipps",
+    "title": "Ergebnisse",
+    "yourPoints": "Deine Punkte",
+    "pending": "Ausstehend",
+    "real": "Echt",
+    "yourPick": "Dein Tipp",
+    "noPick": "Nicht abgegeben",
+    "points": "Punkte",
+    "outcome": {
+      "home": "Heim",
+      "draw": "Unentschieden",
+      "away": "Auswärts"
+    },
+    "badgeResult": "+3 Ergebnis",
+    "badgeExact": "+3 Exaktes Ergebnis",
+    "badgeCaptain": "x2 Kapitän"
+  }
+}

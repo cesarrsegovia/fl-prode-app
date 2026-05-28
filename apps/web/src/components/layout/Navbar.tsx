@@ -5,13 +5,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
-import { Bell } from 'lucide-react';
+import { Bell, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useNotifications } from '@/hooks/useNotifications';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
+import { FaqModal } from '@/components/common/FaqModal';
 
 function getInitials(name?: string | null) {
   if (!name) return '??';
@@ -40,6 +41,7 @@ export function Navbar() {
   const { data: session, status } = useSession();
   const isAuthed = status === 'authenticated';
   const isAdmin = session?.user?.isAdmin === true;
+  const [faqOpen, setFaqOpen] = useState(false);
   const navLinks = isAdmin
     ? [
         ...NAV_LINKS,
@@ -84,6 +86,16 @@ export function Navbar() {
       </div>
 
       <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => setFaqOpen(true)}
+          aria-label={t('faqTrigger')}
+          title={t('faqTrigger')}
+          className="size-9 rounded-full flex items-center justify-center text-ink-muted hover:text-neon hover:bg-surface-1 transition-colors"
+        >
+          <HelpCircle className="size-5" />
+        </button>
+        <FaqModal open={faqOpen} onOpenChange={setFaqOpen} />
         <LanguageSwitcher />
         {status === 'loading' ? (
           <div className="w-24 h-8 rounded animate-pulse bg-surface-2" />

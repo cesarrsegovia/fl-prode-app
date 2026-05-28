@@ -93,5 +93,9 @@
     "locked": "Pronostics fermés",
     "saveError": "Échec de l'enregistrement",
     "emptyPlayers": "Liste des joueurs bientôt disponible"
+  },
+  "alerts": {
+    "missingChampion": "Votre champion manque",
+    "missingTopScorer": "Votre meilleur buteur manque"
   }
 }

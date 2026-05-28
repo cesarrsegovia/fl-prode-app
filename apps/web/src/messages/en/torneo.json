@@ -93,5 +93,9 @@
     "locked": "Picks closed",
     "saveError": "Couldn't save your pick",
     "emptyPlayers": "Player list coming soon"
+  },
+  "alerts": {
+    "missingChampion": "Missing your champion",
+    "missingTopScorer": "Missing your top scorer"
   }
 }

@@ -1,0 +1,100 @@
+{
+  "list": {
+    "eyebrow": "My Prode",
+    "titleLine1": "Enter",
+    "titleLine2": "your predictions.",
+    "loadError": "Failed to load matchdays",
+    "emptyTitle": "No open matchdays",
+    "emptyDesc": "There are no matchdays to predict right now. Come back soon.",
+    "predict": "Predict"
+  },
+  "progress": {
+    "title": "Your Progress",
+    "predicted": "{predicted} of {total} matches predicted",
+    "pending": "{pending} pending",
+    "percent": "{pct}% complete"
+  },
+  "tabs": {
+    "pending": "Pending",
+    "predicted": "Predicted",
+    "live": "Live",
+    "results": "Results",
+    "topScorer": "Top Scorer"
+  },
+  "featured": {
+    "champion": {
+      "label": "Your Champion",
+      "points": "Worth 15 pts"
+    },
+    "topScorer": {
+      "label": "Your Top Scorer",
+      "points": "Worth 15 pts"
+    },
+    "deadlineUntil": "Until {date}",
+    "empty": "Not picked"
+  },
+  "allUpToDate": {
+    "title": "All caught up!",
+    "subtitle": "You've predicted every upcoming match. Nice work!"
+  },
+  "topScorerTabHint": "Set your top scorer from the tournament page.",
+  "goToTournament": "Go to tournament →",
+  "fixture": {
+    "fallbackName": "Matchday {round}",
+    "matches": "{count, plural, one {# match} other {# matches}}",
+    "closesIn": "Closes in",
+    "backToList": "← Matchdays",
+    "loadError": "Couldn't load the matchday",
+    "backToListLong": "← Back to matchdays",
+    "viewResults": "See this matchday's results →"
+  },
+  "countdown": {
+    "closed": "Closed"
+  },
+  "form": {
+    "nextClose": "Next close",
+    "closesIn": "Closes in",
+    "closed": "Predictions closed",
+    "progress": "Progress",
+    "progressValue": "{filled} of {total} matches",
+    "captainTitle": "Matchday captain",
+    "captainDesc": "Doubles the points of the chosen match",
+    "noCaptain": "No captain",
+    "saved": "Prediction saved",
+    "saveError": "Couldn't save the prediction",
+    "needOne": "Mark at least one result before saving.",
+    "savedMany": "{count, plural, one {# prediction saved} other {# predictions saved}}",
+    "saveAllError": "There was a problem saving",
+    "saving": "Saving…",
+    "saveThis": "Save this one",
+    "saveAll": "Save all predictions"
+  },
+  "match": {
+    "status": {
+      "live": "Live",
+      "finished": "Finished",
+      "cancelled": "Cancelled",
+      "open": "Open"
+    },
+    "scoreBonus": "Score bonus (+3 pts)",
+    "captainCheck": "Captain (x2)"
+  },
+  "results": {
+    "back": "← Back to predictions",
+    "title": "Results",
+    "yourPoints": "Your points",
+    "pending": "Pending",
+    "real": "Actual",
+    "yourPick": "Your pick",
+    "noPick": "Not set",
+    "points": "Points",
+    "outcome": {
+      "home": "Home",
+      "draw": "Draw",
+      "away": "Away"
+    },
+    "badgeResult": "+3 Result",
+    "badgeExact": "+3 Exact score",
+    "badgeCaptain": "x2 Captain"
+  }
+}

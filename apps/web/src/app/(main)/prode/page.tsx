@@ -1,49 +1,124 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ChevronRight, Trophy } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { ChevronRight, Trophy, Check } from 'lucide-react';
 import type { FixtureWithMatches } from '@prode/shared';
-import { fixtures } from '@/lib/endpoints';
+import {
+  bracketPick,
+  fixtures,
+  pronosticos,
+  topScorerPick,
+  type BracketPickResponse,
+  type TopScorerPickResponse,
+} from '@/lib/endpoints';
 import { apiClient } from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Empty, EmptyContent, EmptyHeader, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
 import { Countdown } from '@/components/prode/Countdown';
 import { TeamFlag } from '@/components/torneo/TeamFlag';
+import { PredictionsProgressCard } from '@/components/prode/PredictionsProgressCard';
+import {
+  PredictionsFilterTabs,
+  type PredictionsFilter,
+} from '@/components/prode/PredictionsFilterTabs';
+import { FeaturedPickCard } from '@/components/prode/FeaturedPickCard';
 
 interface TournamentSummary {
   id: string;
   name: string;
+  startDate: string | null;
+}
+
+function formatDeadline(date: string | null): string {
+  if (!date) return '—';
+  try {
+    return new Intl.DateTimeFormat(undefined, {
+      day: 'numeric',
+      month: 'short',
+    }).format(new Date(date));
+  } catch {
+    return '—';
+  }
 }
 
 export default function ProdePage() {
+  const t = useTranslations('prode');
+  const tFeat = useTranslations('prode.featured');
   const [tournament, setTournament] = useState<TournamentSummary | null>(null);
   const [items, setItems] = useState<FixtureWithMatches[]>([]);
+  const [predictedMatchIds, setPredictedMatchIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const [champPick, setChampPick] = useState<BracketPickResponse | null>(null);
+  const [topPick, setTopPick] = useState<TopScorerPickResponse | null>(null);
+  const [filter, setFilter] = useState<PredictionsFilter>('pending');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([
-      apiClient.get<TournamentSummary>('/tournaments/active').then((r) => r.data).catch(() => null),
+      apiClient
+        .get<TournamentSummary>('/tournaments/active')
+        .then((r) => r.data)
+        .catch(() => null),
       fixtures.active(),
+      pronosticos
+        .myFixtures()
+        .catch(() => [] as Array<{ predictions?: Array<{ matchId: string }> }>),
     ])
-      .then(([tour, fx]) => {
+      .then(([tour, fx, mine]) => {
         setTournament(tour);
         setItems(fx);
+        const ids = new Set<string>();
+        for (const f of mine as Array<{
+          predictions?: Array<{ matchId: string }>;
+        }>) {
+          for (const p of f.predictions ?? []) ids.add(p.matchId);
+        }
+        setPredictedMatchIds(ids);
       })
-      .catch((e) => setError(e?.message ?? 'Error al cargar fechas'))
+      .catch((e) => setError(e?.message ?? t('list.loadError')))
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [t]);
+
+  useEffect(() => {
+    if (!tournament?.id) return;
+    bracketPick.mine(tournament.id).then(setChampPick).catch(() => {});
+    topScorerPick.mine(tournament.id).then(setTopPick).catch(() => {});
+  }, [tournament?.id]);
+
+  const allMatches = useMemo(() => items.flatMap((f) => f.matches), [items]);
+  const predicted = useMemo(
+    () => allMatches.filter((m) => predictedMatchIds.has(m.id)).length,
+    [allMatches, predictedMatchIds],
+  );
+  const total = allMatches.length;
+  const live = allMatches.filter((m) => m.status === 'LIVE').length;
+  const finished = allMatches.filter((m) => m.status === 'FINISHED').length;
+  const pending = Math.max(total - predicted - live - finished, 0);
+  const counts = {
+    pending,
+    predicted,
+    live,
+    results: finished,
+    topScorer: topPick ? 1 : 0,
+  };
+
+  const deadlineLabel = formatDeadline(tournament?.startDate ?? null);
 
   return (
     <main className="pt-24 pb-24 px-4 max-w-3xl mx-auto">
-      <header className="mb-10">
+      <header className="mb-8">
         <p className="font-display text-xs uppercase tracking-[0.3em] text-neon mb-2">
-          Mi Prode
+          {t('list.eyebrow')}
         </p>
         <h1 className="font-display font-extrabold text-foreground tracking-[-0.04em] text-[clamp(2.5rem,7vw,5rem)] leading-[0.95]">
-          Cargá<br />tus pronósticos.
+          {t('list.titleLine1')}
+          <br />
+          {t('list.titleLine2')}
         </h1>
         {tournament && (
           <Link
@@ -59,6 +134,36 @@ export default function ProdePage() {
         )}
       </header>
 
+      {!isLoading && !error && total > 0 && (
+        <div className="space-y-3 mb-6">
+          <PredictionsProgressCard predicted={predicted} total={total} />
+          {tournament && (
+            <div className="space-y-2">
+              <FeaturedPickCard
+                variant="champion"
+                label={tFeat('champion.label')}
+                pointsLabel={tFeat('champion.points')}
+                pickName={champPick?.champTeam?.name ?? null}
+                deadlineLabel={tFeat('deadlineUntil', { date: deadlineLabel })}
+                emptyLabel={tFeat('empty')}
+                href={`/torneo/${tournament.id}`}
+              />
+              <FeaturedPickCard
+                variant="topScorer"
+                label={tFeat('topScorer.label')}
+                pointsLabel={tFeat('topScorer.points')}
+                pickName={topPick?.player?.name ?? null}
+                pickSubtitle={topPick?.player?.position ?? null}
+                deadlineLabel={tFeat('deadlineUntil', { date: deadlineLabel })}
+                emptyLabel={tFeat('empty')}
+                href={`/torneo/${tournament.id}`}
+              />
+            </div>
+          )}
+          <PredictionsFilterTabs value={filter} onChange={setFilter} counts={counts} />
+        </div>
+      )}
+
       {isLoading && (
         <div className="space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -67,78 +172,107 @@ export default function ProdePage() {
         </div>
       )}
 
-      {error && (
-        <p className="text-sm text-destructive font-bold">{error}</p>
-      )}
+      {error && <p className="text-sm text-destructive font-bold">{error}</p>}
 
       {!isLoading && !error && items.length === 0 && (
         <Empty>
           <EmptyHeader>
-            <EmptyTitle>Sin fechas abiertas</EmptyTitle>
-            <EmptyDescription>
-              No hay fechas para pronosticar por ahora. Volvé pronto.
-            </EmptyDescription>
+            <EmptyTitle>{t('list.emptyTitle')}</EmptyTitle>
+            <EmptyDescription>{t('list.emptyDesc')}</EmptyDescription>
           </EmptyHeader>
         </Empty>
       )}
 
-      <ul className="space-y-4">
-        {items.map((fx) => {
-          const previews = fx.matches.slice(0, 4);
-          return (
-            <li key={fx.id}>
-              <Link
-                href={`/prode/${fx.id}`}
-                className="block group"
-              >
-                <Card className="bg-surface-1 border-line hover:border-neon/60 transition-colors">
-                  <CardContent className="p-6">
-                    <div className="flex justify-between items-start mb-4 gap-4">
-                      <div>
-                        <h2 className="font-display font-extrabold text-2xl text-foreground tracking-tight">
-                          {fx.name ?? `Fecha ${fx.round}`}
-                        </h2>
-                        <p className="text-xs uppercase tracking-[0.18em] font-display font-bold text-ink-dim mt-1">
-                          {fx.matches.length} partidos
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[10px] uppercase tracking-[0.2em] font-display font-bold text-ink-muted mb-1">
-                          Cierra en
-                        </p>
-                        <Countdown targetDate={new Date(fx.closeAt)} />
-                      </div>
-                    </div>
+      {!isLoading && !error && filter === 'topScorer' && (
+        <Card className="bg-surface-1 border-line">
+          <CardContent className="p-6 text-center text-sm text-ink-muted">
+            {t('topScorerTabHint')}
+            {tournament && (
+              <div className="mt-3">
+                <Link
+                  href={`/torneo/${tournament.id}`}
+                  className="font-display font-bold text-neon hover:underline"
+                >
+                  {t('goToTournament')}
+                </Link>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
-                    <div className="flex items-center gap-3 flex-wrap">
-                      {previews.map((m) => (
-                        <div
-                          key={m.id}
-                          className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-surface-2"
-                        >
-                          <TeamFlag size="xs" src={m.homeTeam?.flagUrl ?? null} alt={m.homeTeamName} />
-                          <span className="text-[10px] font-display font-bold text-ink-muted">vs</span>
-                          <TeamFlag size="xs" src={m.awayTeam?.flagUrl ?? null} alt={m.awayTeamName} />
+      {!isLoading && !error && filter === 'pending' && pending === 0 && total > 0 && (
+        <Card className="bg-surface-1 border-line">
+          <CardContent className="p-6 text-center">
+            <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-md bg-surface-2 text-neon">
+              <Check size={20} />
+            </div>
+            <h3 className="font-display font-extrabold text-base">
+              {t('allUpToDate.title')}
+            </h3>
+            <p className="text-sm text-ink-muted mt-1">
+              {t('allUpToDate.subtitle')}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {filter !== 'topScorer' && (
+        <ul className="space-y-4">
+          {items.map((fx) => {
+            const previews = fx.matches.slice(0, 4);
+            return (
+              <li key={fx.id}>
+                <Link href={`/prode/${fx.id}`} className="block group">
+                  <Card className="bg-surface-1 border-line hover:border-neon/60 transition-colors">
+                    <CardContent className="p-6">
+                      <div className="flex justify-between items-start mb-4 gap-4">
+                        <div>
+                          <h2 className="font-display font-extrabold text-2xl text-foreground tracking-tight">
+                            {fx.name ?? t('fixture.fallbackName', { round: fx.round })}
+                          </h2>
+                          <p className="text-xs uppercase tracking-[0.18em] font-display font-bold text-ink-dim mt-1">
+                            {t('fixture.matches', { count: fx.matches.length })}
+                          </p>
                         </div>
-                      ))}
-                      {fx.matches.length > previews.length && (
-                        <span className="text-xs font-display text-ink-dim">
-                          +{fx.matches.length - previews.length}
-                        </span>
-                      )}
-                    </div>
+                        <div className="text-right">
+                          <p className="text-[10px] uppercase tracking-[0.2em] font-display font-bold text-ink-muted mb-1">
+                            {t('fixture.closesIn')}
+                          </p>
+                          <Countdown targetDate={new Date(fx.closeAt)} />
+                        </div>
+                      </div>
 
-                    <div className="mt-5 flex items-center gap-1 text-xs font-display font-bold text-neon group-hover:underline">
-                      Pronosticar
-                      <ChevronRight className="size-3" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+                      <div className="flex items-center gap-3 flex-wrap">
+                        {previews.map((m) => (
+                          <div
+                            key={m.id}
+                            className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-surface-2"
+                          >
+                            <TeamFlag size="xs" src={m.homeTeam?.flagUrl ?? null} alt={m.homeTeamName} />
+                            <span className="text-[10px] font-display font-bold text-ink-muted">vs</span>
+                            <TeamFlag size="xs" src={m.awayTeam?.flagUrl ?? null} alt={m.awayTeamName} />
+                          </div>
+                        ))}
+                        {fx.matches.length > previews.length && (
+                          <span className="text-xs font-display text-ink-dim">
+                            +{fx.matches.length - previews.length}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="mt-5 flex items-center gap-1 text-xs font-display font-bold text-neon group-hover:underline">
+                        {t('list.predict')}
+                        <ChevronRight className="size-3" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </main>
   );
 }

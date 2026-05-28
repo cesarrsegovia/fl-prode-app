@@ -1,0 +1,57 @@
+{
+  "title": "Preguntas Frecuentes",
+  "trigger": "Ayuda",
+  "items": {
+    "pointSystem": {
+      "q": "¿Cómo funciona el sistema de puntos?",
+      "a": "Sumás puntos prediciendo los resultados: acertar el ganador suma 3 pts; acertar el resultado exacto suma 2 pts adicionales. Si predecís el resultado exacto, sumás 5 pts en total."
+    },
+    "winner": {
+      "q": "¿Qué significa acertar el ganador?",
+      "a": "Significa predecir correctamente quién gana el partido (local, visitante o empate). Si predecís 2-1 y el resultado real es 3-0, acertaste al ganador (local) y sumás 3 puntos."
+    },
+    "exact": {
+      "q": "¿Qué significa resultado exacto?",
+      "a": "Significa acertar los goles exactos de cada equipo. Si predecís 2-1 y el resultado es exactamente 2-1, sumás 5 puntos en total (3 por el ganador + 2 por el exacto)."
+    },
+    "champion": {
+      "q": "¿Qué es la predicción de campeón?",
+      "a": "En algunos torneos podés elegir qué equipo creés que va a salir campeón. Si acertás, sumás 15 pts extra. Tenés hasta una fecha límite para cambiar tu elección; pasada esa fecha, queda bloqueada."
+    },
+    "topScorer": {
+      "q": "¿Qué es la predicción de goleador?",
+      "a": "Elegís al jugador que creés que va a ser el goleador del torneo. Si acertás, sumás 15 pts. Tenés hasta una fecha límite para cambiar tu elección."
+    },
+    "deadline": {
+      "q": "¿Hasta cuándo puedo hacer mis predicciones?",
+      "a": "Podés hacer o modificar tus predicciones hasta el momento en que comienza el partido. Una vez que arranca, tu predicción queda bloqueada."
+    },
+    "changePick": {
+      "q": "¿Puedo cambiar mi predicción?",
+      "a": "Sí, podés modificar tu predicción cuantas veces quieras antes de que comience el partido. Solo se cuenta la última predicción realizada."
+    },
+    "privateGroups": {
+      "q": "¿Cómo funcionan los grupos privados?",
+      "a": "Los grupos privados te permiten competir con amigos en un ranking separado. Podés crear un grupo y compartir el código de invitación. Cada grupo tiene su propio ranking basado en los mismos puntos del torneo general."
+    },
+    "noPrediction": {
+      "q": "¿Qué pasa si no hago predicción en un partido?",
+      "a": "Si no realizás una predicción para un partido, simplemente no sumás puntos por ese partido. No hay penalización."
+    },
+    "etPenalties": {
+      "q": "¿Qué pasa con el tiempo extra y los penales?",
+      "a": "Los goles del alargue cuentan normalmente. Si el partido se define por penales, se considera empate. Los penales solo determinan quién avanza, pero no cambian el marcador."
+    },
+    "tieBreak": {
+      "q": "¿Cómo se desempata si dos jugadores tienen los mismos puntos?",
+      "a": "Cuando varios jugadores tienen la misma cantidad de puntos, el ranking los desempata en este orden: 1) mayor cantidad de ganadores acertados, 2) mayor cantidad de resultados exactos, 3) mayor suma de goles en resultados exactos, 4) quien hizo antes su primera predicción.",
+      "exampleTitle": "Por ejemplo:",
+      "exampleNote": "Ana y Pablo tienen los mismos puntos y exactos. Ana aparece primera porque tiene mayor sumatoria de goles en sus resultados exactos (3 vs 1).",
+      "colPos": "Pos.",
+      "colPlayer": "Jugador",
+      "colPoints": "Pts",
+      "colExact": "Exactos",
+      "colGoals": "Suma goles"
+    }
+  }
+}

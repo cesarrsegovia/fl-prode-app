@@ -11,6 +11,7 @@ import { VenueCard } from '@/components/torneo/VenueCard';
 import { BracketPickCard } from '@/components/torneo/BracketPickCard';
 import { TopScorerPickCard } from '@/components/torneo/TopScorerPickCard';
 import { R32PicksCard } from '@/components/torneo/R32PicksCard';
+import { TournamentAlertChips } from '@/components/torneo/TournamentAlertChips';
 import { TournamentTabs } from './TournamentTabs';
 
 interface Props {
@@ -62,6 +63,8 @@ export default async function TorneoPage({ params }: Props) {
       <TournamentHero tournament={tournament} />
 
       <div className="px-6 max-w-6xl mx-auto space-y-10">
+        <TournamentAlertChips tournamentId={tournament.id} />
+
         <BracketPickCard
           tournamentId={tournament.id}
           tournamentStartDate={tournament.startDate}

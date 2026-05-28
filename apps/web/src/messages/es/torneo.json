@@ -93,5 +93,9 @@
     "locked": "Predicciones cerradas",
     "saveError": "No se pudo guardar tu predicción",
     "emptyPlayers": "Lista de jugadores próximamente"
+  },
+  "alerts": {
+    "missingChampion": "Falta tu campeón",
+    "missingTopScorer": "Falta tu goleador"
   }
 }

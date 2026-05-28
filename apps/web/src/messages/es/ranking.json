@@ -1,0 +1,13 @@
+{
+  "title": "Ranking",
+  "subtitle": "Actualización en tiempo real al calcularse los puntos.",
+  "global": "Global",
+  "empty": "Todavía no hay datos en el ranking.",
+  "streak": "Racha x{count}",
+  "points": "pts",
+  "subStats": {
+    "correctWinners": "Ganadores acertados",
+    "exactScores": "Resultados exactos",
+    "exactGoalsSum": "Suma de goles en exactos"
+  }
+}

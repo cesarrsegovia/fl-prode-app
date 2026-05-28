@@ -93,5 +93,9 @@
     "locked": "Tipps geschlossen",
     "saveError": "Tipp konnte nicht gespeichert werden",
     "emptyPlayers": "Spielerliste folgt in Kürze"
+  },
+  "alerts": {
+    "missingChampion": "Dein Meister fehlt",
+    "missingTopScorer": "Dein Torschützenkönig fehlt"
   }
 }

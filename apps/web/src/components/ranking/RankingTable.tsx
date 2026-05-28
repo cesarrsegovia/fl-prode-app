@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import type { RankingEntry } from '@prode/shared';
 import { PositionBadge } from './PositionBadge';
 
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function RankingTable({ entries, isLoading, highlightUserId }: Props) {
+  const t = useTranslations('ranking');
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -31,7 +33,7 @@ export function RankingTable({ entries, isLoading, highlightUserId }: Props) {
         style={{ background: 'var(--surface-container-low)' }}
       >
         <p className="text-sm text-on-surface-variant">
-          Todavía no hay datos en el ranking.
+          {t('empty')}
         </p>
       </div>
     );
@@ -64,16 +66,27 @@ export function RankingTable({ entries, isLoading, highlightUserId }: Props) {
             )}
             <div className="flex-1 min-w-0">
               <p className="font-bold text-white truncate">{e.username}</p>
+              <div className="flex items-center gap-2 mt-0.5 text-[10px] font-bold text-on-surface-variant">
+                <span title={t('subStats.correctWinners')}>
+                  ✓ {e.correctWinners ?? 0}
+                </span>
+                <span title={t('subStats.exactScores')}>
+                  🎯 {e.exactScores ?? 0}
+                </span>
+                <span title={t('subStats.exactGoalsSum')}>
+                  ⚽ {e.exactGoalsSum ?? 0}
+                </span>
+              </div>
               {e.streak > 0 && (
-                <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
-                  Racha x{e.streak}
+                <p className="text-[10px] font-bold uppercase tracking-widest text-primary mt-0.5">
+                  {t('streak', { count: e.streak })}
                 </p>
               )}
             </div>
             <div className="text-right">
               <p className="text-lg font-black text-white">{e.total}</p>
               <p className="text-[10px] font-bold uppercase text-on-surface-variant">
-                pts
+                {t('points')}
               </p>
             </div>
           </li>
