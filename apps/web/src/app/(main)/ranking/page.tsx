@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
 import type { MyGroupEntry } from '@/lib/endpoints';
 import { grupos } from '@/lib/endpoints';
 import { useRanking } from '@/hooks/useRanking';
 import { RankingTable } from '@/components/ranking/RankingTable';
 
 export default function RankingPage() {
+  const t = useTranslations('ranking');
   const { data: session } = useSession();
   const [myGroups, setMyGroups] = useState<MyGroupEntry[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<string | 'global'>('global');
@@ -27,10 +29,10 @@ export default function RankingPage() {
     <main className="pt-24 pb-24 px-4 max-w-3xl mx-auto">
       <header className="mb-8">
         <h1 className="text-4xl font-extrabold text-white tracking-tight">
-          Ranking
+          {t('title')}
         </h1>
         <p className="text-sm text-on-surface-variant mt-1">
-          Actualización en tiempo real al calcularse los puntos.
+          {t('subtitle')}
         </p>
       </header>
 
@@ -43,7 +45,7 @@ export default function RankingPage() {
               : 'bg-surface-container-low text-on-surface-variant'
           }`}
         >
-          Global
+          {t('global')}
         </button>
         {myGroups.map((m) => (
           <button

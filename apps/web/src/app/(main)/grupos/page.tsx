@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { MyGroupEntry } from '@/lib/endpoints';
 import { grupos } from '@/lib/endpoints';
 import { GroupCard } from '@/components/grupos/GroupCard';
 
 export default function GruposPage() {
+  const t = useTranslations('grupos.list');
   const [items, setItems] = useState<MyGroupEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -16,7 +18,7 @@ export default function GruposPage() {
     grupos
       .mine()
       .then(setItems)
-      .catch((e) => setError(e?.message ?? 'No se pudieron cargar tus grupos'))
+      .catch((e) => setError(e?.message ?? t('loadError')))
       .finally(() => setIsLoading(false));
   };
 
@@ -29,10 +31,10 @@ export default function GruposPage() {
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
         <div>
           <h1 className="text-4xl font-extrabold text-white tracking-tight">
-            Mis grupos
+            {t('title')}
           </h1>
           <p className="text-sm text-on-surface-variant mt-1">
-            Creá grupos privados o unite con un código.
+            {t('subtitle')}
           </p>
         </div>
         <div className="flex gap-3">
@@ -40,13 +42,13 @@ export default function GruposPage() {
             onClick={() => setMode(mode === 'join' ? 'none' : 'join')}
             className="border border-primary/40 text-primary px-4 py-2 rounded-xl font-bold text-sm hover:bg-primary/10 transition-colors"
           >
-            Unirme con código
+            {t('joinWithCode')}
           </button>
           <button
             onClick={() => setMode(mode === 'create' ? 'none' : 'create')}
             className="bg-primary text-black px-4 py-2 rounded-xl font-bold text-sm active:scale-95"
           >
-            Crear grupo
+            {t('createGroup')}
           </button>
         </div>
       </header>
@@ -86,8 +88,7 @@ export default function GruposPage() {
           style={{ background: 'var(--surface-container-low)' }}
         >
           <p className="text-sm text-on-surface-variant">
-            Todavía no estás en ningún grupo. Creá uno o pedí un código a algún
-            amigo.
+            {t('empty')}
           </p>
         </div>
       ) : (
@@ -102,6 +103,7 @@ export default function GruposPage() {
 }
 
 function CreateGroupForm({ onCreated }: { onCreated: () => void }) {
+  const t = useTranslations('grupos.create');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -115,7 +117,7 @@ function CreateGroupForm({ onCreated }: { onCreated: () => void }) {
       await grupos.create({ name, description: description || undefined });
       onCreated();
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? 'No se pudo crear el grupo');
+      setError(err?.response?.data?.message ?? t('error'));
     } finally {
       setSubmitting(false);
     }
@@ -130,13 +132,13 @@ function CreateGroupForm({ onCreated }: { onCreated: () => void }) {
       <input
         required
         minLength={3}
-        placeholder="Nombre del grupo"
+        placeholder={t('namePlaceholder')}
         value={name}
         onChange={(e) => setName(e.target.value)}
         className="w-full bg-surface-container-highest rounded-lg px-4 py-3 text-white placeholder:text-on-surface-variant"
       />
       <textarea
-        placeholder="Descripción (opcional)"
+        placeholder={t('descPlaceholder')}
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         className="w-full bg-surface-container-highest rounded-lg px-4 py-3 text-white placeholder:text-on-surface-variant"
@@ -148,13 +150,14 @@ function CreateGroupForm({ onCreated }: { onCreated: () => void }) {
         disabled={submitting}
         className="bg-primary text-black px-4 py-2 rounded-xl font-bold text-sm disabled:opacity-50"
       >
-        {submitting ? 'Creando…' : 'Crear'}
+        {submitting ? t('submitting') : t('submit')}
       </button>
     </form>
   );
 }
 
 function JoinGroupForm({ onJoined }: { onJoined: () => void }) {
+  const t = useTranslations('grupos.join');
   const [inviteCode, setInviteCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -167,7 +170,7 @@ function JoinGroupForm({ onJoined }: { onJoined: () => void }) {
       await grupos.join(inviteCode.trim());
       onJoined();
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? 'Código inválido');
+      setError(err?.response?.data?.message ?? t('error'));
     } finally {
       setSubmitting(false);
     }
@@ -181,14 +184,14 @@ function JoinGroupForm({ onJoined }: { onJoined: () => void }) {
     >
       <div className="flex-1">
         <label className="text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1 block">
-          Código de invitación
+          {t('label')}
         </label>
         <input
           required
           value={inviteCode}
           onChange={(e) => setInviteCode(e.target.value)}
           className="w-full bg-surface-container-highest rounded-lg px-4 py-3 text-white"
-          placeholder="Pegá el código que te pasaron"
+          placeholder={t('placeholder')}
         />
         {error && (
           <p className="text-xs text-red-400 font-bold mt-2">{error}</p>
@@ -199,7 +202,7 @@ function JoinGroupForm({ onJoined }: { onJoined: () => void }) {
         disabled={submitting}
         className="bg-primary text-black px-4 py-2 rounded-xl font-bold text-sm disabled:opacity-50"
       >
-        {submitting ? 'Uniendo…' : 'Unirme'}
+        {submitting ? t('submitting') : t('submit')}
       </button>
     </form>
   );

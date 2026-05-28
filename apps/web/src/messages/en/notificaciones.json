@@ -1,0 +1,15 @@
+{
+  "eyebrow": "Inbox",
+  "title": "Notifications.",
+  "markAllRead": "Mark all as read ({count})",
+  "emptyTitle": "Empty inbox",
+  "emptyDesc": "When points are calculated, a deadline approaches, or you climb the ranking, you'll see them here.",
+  "types": {
+    "FIXTURE_CLOSING": "Closing soon",
+    "RESULT_CALCULATED": "Points",
+    "RANKING_CHANGE": "Ranking",
+    "GROUP_INVITE": "Group",
+    "ACHIEVEMENT_UNLOCKED": "Achievement",
+    "fallback": "Notif."
+  }
+}

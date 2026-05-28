@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useFormatter, useTranslations } from 'next-intl';
 import { Trophy, Check, AlertCircle } from 'lucide-react';
 import {
   R32_BEST_THIRDS_TOTAL,
@@ -37,6 +38,9 @@ function initialState(picks: R32PickResponse[]): PicksState {
 }
 
 export function R32PicksCard({ tournamentId, teams }: Props) {
+  const t = useTranslations('torneo.r32');
+  const tCommon = useTranslations('torneo.common');
+  const format = useFormatter();
   const [state, setState] = useState<PicksState>({});
   const [loaded, setLoaded] = useState(false);
   const [deadline, setDeadline] = useState<Date | null>(null);
@@ -110,7 +114,7 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
     const groupCount = top2ByGroup.get(groupName) ?? 0;
     if (groupCount >= R32_TOP2_PER_GROUP) {
       setError(
-        `Ya elegiste ${R32_TOP2_PER_GROUP} equipos del Grupo ${groupName}. Sacá uno antes.`,
+        t('errTooManyTop2', { max: R32_TOP2_PER_GROUP, group: groupName }),
       );
       return;
     }
@@ -125,15 +129,11 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
       return;
     }
     if (current === R32PickKind.TOP2) {
-      setError(
-        'Ese equipo ya está como Top-2 del grupo. Sacalo de Top-2 si querés marcarlo como mejor tercero.',
-      );
+      setError(t('errThirdIsTop2'));
       return;
     }
     if (counts.thirds >= R32_BEST_THIRDS_TOTAL) {
-      setError(
-        `Ya elegiste ${R32_BEST_THIRDS_TOTAL} mejores terceros. Sacá uno antes.`,
-      );
+      setError(t('errTooManyThirds', { max: R32_BEST_THIRDS_TOTAL }));
       return;
     }
     setKind(team.id, R32PickKind.BEST_THIRD);
@@ -142,7 +142,7 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
   const submit = async () => {
     if (counts.total !== R32_TOTAL_QUALIFIERS) {
       setError(
-        `Te faltan picks: ${counts.total} de ${R32_TOTAL_QUALIFIERS}.`,
+        t('errIncomplete', { count: counts.total, total: R32_TOTAL_QUALIFIERS }),
       );
       return;
     }
@@ -153,10 +153,10 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
         .filter(([, k]) => !!k)
         .map(([teamId, kind]) => ({ teamId, kind: kind as PickKind }));
       await r32Picks.set(tournamentId, payload);
-      setSuccess('Picks guardados');
+      setSuccess(t('saved'));
       setTimeout(() => setSuccess(null), 2000);
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? 'No se pudo guardar');
+      setError(err?.response?.data?.message ?? t('saveError'));
     } finally {
       setSubmitting(false);
     }
@@ -173,15 +173,14 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
         <div className="flex items-center gap-2 mb-2">
           <Trophy className="size-4 text-neon" />
           <span className="font-display text-xs uppercase tracking-[0.25em] text-neon">
-            Clasificados a 16vos
+            {t('eyebrow')}
           </span>
         </div>
         <h3 className="font-display font-extrabold text-2xl text-foreground tracking-tight">
-          ¿Quiénes pasan a la Ronda de 32?
+          {t('title')}
         </h3>
         <p className="text-sm text-ink-muted mt-1">
-          Elegí 2 equipos por grupo (Top-2) y 8 mejores terceros. Cierra el día
-          previo al inicio de la 3ra fecha de grupos.
+          {t('subtitle')}
         </p>
 
         <div className="mt-4 flex flex-wrap gap-2 text-xs">
@@ -189,13 +188,13 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
             variant="outline"
             className={cn(counts.top2 === 24 && 'border-neon text-neon')}
           >
-            Top-2: {counts.top2}/24
+            {t('top2Badge', { count: counts.top2 })}
           </Badge>
           <Badge
             variant="outline"
             className={cn(counts.thirds === 8 && 'border-neon text-neon')}
           >
-            Mejores terceros: {counts.thirds}/{R32_BEST_THIRDS_TOTAL}
+            {t('thirdsBadge', { count: counts.thirds, total: R32_BEST_THIRDS_TOTAL })}
           </Badge>
           <Badge
             variant="outline"
@@ -203,16 +202,22 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
               counts.total === R32_TOTAL_QUALIFIERS && 'border-neon text-neon',
             )}
           >
-            Total: {counts.total}/{R32_TOTAL_QUALIFIERS}
+            {t('totalBadge', { count: counts.total, total: R32_TOTAL_QUALIFIERS })}
           </Badge>
           {deadline && (
             <Badge variant="outline">
-              Cierra {deadline.toLocaleDateString()}
+              {t('closesOn', {
+                date: format.dateTime(deadline, {
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                }),
+              })}
             </Badge>
           )}
           {locked && (
             <Badge variant="outline" className="text-red-400 border-red-400/50">
-              Cerrado
+              {t('closed')}
             </Badge>
           )}
         </div>
@@ -220,13 +225,13 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
 
       <CardContent>
         {!loaded ? (
-          <p className="text-sm text-ink-muted">Cargando...</p>
+          <p className="text-sm text-ink-muted">{tCommon('loading')}</p>
         ) : (
           <>
             <div className="space-y-6">
               <section>
                 <h4 className="font-display font-bold text-sm uppercase tracking-widest text-on-surface-variant mb-3">
-                  Top-2 por grupo
+                  {t('top2Section')}
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   {teamsByGroup.map(([groupName, gTeams]) => {
@@ -238,7 +243,7 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
                       >
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-display font-bold text-foreground">
-                            Grupo {groupName}
+                            {tCommon('group', { name: groupName })}
                           </span>
                           <span
                             className={cn(
@@ -252,15 +257,15 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
                           </span>
                         </div>
                         <div className="space-y-1">
-                          {gTeams.map((t) => {
-                            const isTop2 = state[t.id] === R32PickKind.TOP2;
+                          {gTeams.map((team) => {
+                            const isTop2 = state[team.id] === R32PickKind.TOP2;
                             const isThird =
-                              state[t.id] === R32PickKind.BEST_THIRD;
+                              state[team.id] === R32PickKind.BEST_THIRD;
                             return (
                               <button
-                                key={t.id}
+                                key={team.id}
                                 type="button"
-                                onClick={() => onTop2Click(t)}
+                                onClick={() => onTop2Click(team)}
                                 disabled={locked}
                                 className={cn(
                                   'w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors',
@@ -272,18 +277,18 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
                               >
                                 <TeamFlag
                                   size="sm"
-                                  src={t.flagUrl}
-                                  alt={t.name}
+                                  src={team.flagUrl}
+                                  alt={team.name}
                                 />
                                 <span className="flex-1 text-sm text-foreground">
-                                  {t.name}
+                                  {team.name}
                                 </span>
                                 {isTop2 && (
                                   <Check className="size-4 text-neon" />
                                 )}
                                 {isThird && (
                                   <span className="text-[10px] uppercase tracking-widest font-bold text-violet-400">
-                                    3ro
+                                    {t('thirdMark')}
                                   </span>
                                 )}
                               </button>
@@ -298,11 +303,10 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
 
               <section>
                 <h4 className="font-display font-bold text-sm uppercase tracking-widest text-on-surface-variant mb-3">
-                  Mejores terceros ({counts.thirds}/{R32_BEST_THIRDS_TOTAL})
+                  {t('thirdsSection', { count: counts.thirds, total: R32_BEST_THIRDS_TOTAL })}
                 </h4>
                 <p className="text-xs text-ink-muted mb-3">
-                  De los equipos que no marcaste como Top-2, elegí 8 que creés
-                  que clasifican como mejores terceros.
+                  {t('thirdsHelp')}
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
                   {nonTop2Teams.map((t) => {
@@ -355,8 +359,8 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
                 className="mt-6 w-full h-14 bg-primary text-black font-extrabold text-lg rounded-xl active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting
-                  ? 'Guardando…'
-                  : `Guardar ${counts.total}/${R32_TOTAL_QUALIFIERS} picks`}
+                  ? tCommon('saving')
+                  : t('submit', { count: counts.total, total: R32_TOTAL_QUALIFIERS })}
               </button>
             )}
           </>

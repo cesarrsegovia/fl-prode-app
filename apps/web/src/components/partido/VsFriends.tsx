@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
 import { Lock, Star, Users } from 'lucide-react';
 import {
   grupos,
@@ -27,11 +28,16 @@ interface GroupBlock {
   picks: MatchGroupPicks;
 }
 
-function pickLabel(p: GroupMemberPick['prediction'], home: string, away: string) {
+function pickLabel(
+  p: GroupMemberPick['prediction'],
+  home: string,
+  away: string,
+  drawLabel: string,
+) {
   if (!p) return null;
   if (p.result === 'HOME') return home;
   if (p.result === 'AWAY') return away;
-  return 'Empate';
+  return drawLabel;
 }
 
 function pickTone(p: GroupMemberPick['prediction']) {
@@ -42,6 +48,7 @@ function pickTone(p: GroupMemberPick['prediction']) {
 }
 
 export function VsFriends({ matchId, homeTeamShort, awayTeamShort }: Props) {
+  const t = useTranslations('partido');
   const { status } = useSession();
   const [blocks, setBlocks] = useState<GroupBlock[] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -84,7 +91,7 @@ export function VsFriends({ matchId, homeTeamShort, awayTeamShort }: Props) {
     <section>
       <h3 className="font-display font-extrabold text-xl text-foreground mb-4 tracking-tight flex items-center gap-2">
         <Users className="size-5 text-neon" />
-        Vs amigos
+        {t('friends.title')}
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {blocks.map(({ entry, picks }) => (
@@ -99,14 +106,14 @@ export function VsFriends({ matchId, homeTeamShort, awayTeamShort }: Props) {
               {!picks.closed && (
                 <p className="text-[10px] uppercase tracking-[0.18em] font-display font-bold text-ink-dim flex items-center gap-1">
                   <Lock className="size-3" />
-                  Picks ocultos hasta el cierre de la fecha
+                  {t('friends.hidden')}
                 </p>
               )}
             </CardHeader>
             <CardContent className="pb-4">
               {picks.members.length === 0 ? (
                 <p className="text-xs text-ink-muted">
-                  Este grupo todavía no tiene miembros.
+                  {t('friends.noMembers')}
                 </p>
               ) : (
                 <ul className="divide-y divide-line/40">
@@ -142,7 +149,7 @@ export function VsFriends({ matchId, homeTeamShort, awayTeamShort }: Props) {
                               pickTone(m.prediction),
                             )}
                           >
-                            {pickLabel(m.prediction, homeTeamShort, awayTeamShort)}
+                            {pickLabel(m.prediction, homeTeamShort, awayTeamShort, t('poll.draw'))}
                           </span>
                           {m.prediction.homeScoreGuess !== null &&
                             m.prediction.awayScoreGuess !== null && (
@@ -167,7 +174,7 @@ export function VsFriends({ matchId, homeTeamShort, awayTeamShort }: Props) {
                         </div>
                       ) : (
                         <span className="text-[10px] uppercase tracking-[0.18em] font-display font-bold text-ink-dim shrink-0">
-                          {picks.closed ? 'No pronosticó' : '—'}
+                          {picks.closed ? t('friends.noPick') : '—'}
                         </span>
                       )}
                     </li>

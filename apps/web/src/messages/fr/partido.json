@@ -1,0 +1,35 @@
+{
+  "metaTitle": "{home} vs {away} · Prode",
+  "metaFallback": "Match · Prode",
+  "group": "Groupe {name}",
+  "fixtureFallback": "Journée {round}",
+  "live": "EN DIRECT",
+  "vs": "vs",
+  "info": {
+    "kickoff": "Coup d'envoi",
+    "venue": "Stade",
+    "referee": "Arbitre"
+  },
+  "poll": {
+    "title": "Qu'en pense le public ?",
+    "empty": "Personne n'a encore pronostiqué ce match.",
+    "loadPrediction": "Saisir un pronostic",
+    "home": "Victoire à domicile",
+    "draw": "Match nul",
+    "away": "Victoire à l'extérieur",
+    "totalPredictions": "{count, plural, one {# pronostic enregistré} other {# pronostics enregistrés}}"
+  },
+  "cta": "Saisir les pronostics de cette journée",
+  "friends": {
+    "title": "Vs amis",
+    "hidden": "Pronostics masqués jusqu'à la clôture de la journée",
+    "noMembers": "Ce groupe n'a pas encore de membres.",
+    "noPick": "Pas de pronostic"
+  },
+  "groupStats": {
+    "title": "Qu'en pense ton équipe ?",
+    "submitted": "{total}/{members} ont pronostiqué",
+    "pending": " · {count} en attente",
+    "empty": "Aucun pronostic enregistré pour l'instant."
+  }
+}

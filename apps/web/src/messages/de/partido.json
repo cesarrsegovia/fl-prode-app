@@ -1,0 +1,35 @@
+{
+  "metaTitle": "{home} vs {away} · Prode",
+  "metaFallback": "Spiel · Prode",
+  "group": "Gruppe {name}",
+  "fixtureFallback": "Spieltag {round}",
+  "live": "LIVE",
+  "vs": "vs",
+  "info": {
+    "kickoff": "Anpfiff",
+    "venue": "Stadion",
+    "referee": "Schiedsrichter"
+  },
+  "poll": {
+    "title": "Was denken die Leute?",
+    "empty": "Noch niemand hat dieses Spiel getippt.",
+    "loadPrediction": "Tipp abgeben",
+    "home": "Heimsieg",
+    "draw": "Unentschieden",
+    "away": "Auswärtssieg",
+    "totalPredictions": "{count, plural, one {# Tipp abgegeben} other {# Tipps abgegeben}}"
+  },
+  "cta": "Tipps für diesen Spieltag abgeben",
+  "friends": {
+    "title": "Vs Freunde",
+    "hidden": "Tipps bis zum Spieltagsschluss verborgen",
+    "noMembers": "Diese Gruppe hat noch keine Mitglieder.",
+    "noPick": "Nicht getippt"
+  },
+  "groupStats": {
+    "title": "Was denkt deine Crew?",
+    "submitted": "{total}/{members} getippt",
+    "pending": " · {count} ausstehend",
+    "empty": "Noch keine Tipps abgegeben."
+  }
+}

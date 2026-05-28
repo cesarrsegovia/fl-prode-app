@@ -1,0 +1,74 @@
+{
+  "list": {
+    "title": "My groups",
+    "subtitle": "Create private groups or join with a code.",
+    "joinWithCode": "Join with code",
+    "createGroup": "Create group",
+    "loadError": "Couldn't load your groups",
+    "empty": "You're not in any group yet. Create one or ask a friend for a code."
+  },
+  "create": {
+    "namePlaceholder": "Group name",
+    "descPlaceholder": "Description (optional)",
+    "error": "Couldn't create the group",
+    "submitting": "Creating…",
+    "submit": "Create"
+  },
+  "join": {
+    "label": "Invite code",
+    "placeholder": "Paste the code you were given",
+    "error": "Invalid code",
+    "submitting": "Joining…",
+    "submit": "Join"
+  },
+  "card": {
+    "admin": "Admin",
+    "members": "{count, plural, one {member} other {members}}",
+    "private": "Private"
+  },
+  "detail": {
+    "back": "← My groups",
+    "backShort": "← Back",
+    "memberCount": "{count, plural, one {# member} other {# members}}",
+    "private": "Private",
+    "public": "Public",
+    "deleteGroup": "Delete group",
+    "leaveGroup": "Leave group",
+    "loadError": "Couldn't load the group",
+    "confirmLeave": "Leave the group?",
+    "leaveError": "Couldn't leave the group",
+    "confirmDelete": "Delete the group? This action is irreversible.",
+    "deleteError": "Couldn't delete the group",
+    "tabs": {
+      "ranking": "Ranking",
+      "activity": "Activity",
+      "chat": "Chat",
+      "members": "Members ({count})"
+    },
+    "invite": {
+      "title": "Invite code",
+      "subtitle": "Share it to add members to the group.",
+      "codeLabel": "Code:",
+      "copy": "Copy",
+      "copied": "Copied!",
+      "regenerate": "Regenerate"
+    }
+  },
+  "members": {
+    "since": "Since {date}",
+    "you": "(you)",
+    "admin": "Admin"
+  },
+  "activity": {
+    "emptyTitle": "No activity in this group yet.",
+    "emptyDesc": "When predictions are submitted or points are calculated, you'll see it here."
+  },
+  "chat": {
+    "emptyTitle": "No messages in this group yet.",
+    "emptyDesc": "Send the first one 👇",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "placeholder": "Write a message…",
+    "send": "Send"
+  }
+}

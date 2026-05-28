@@ -1,0 +1,23 @@
+{
+  "eyebrow": "Mein Verlauf",
+  "title": "Meine Tipps.",
+  "filters": {
+    "all": "Alle",
+    "hit": "Treffer",
+    "miss": "Daneben"
+  },
+  "emptyTitle": "Keine Tipps anzuzeigen",
+  "emptyDescAll": "Gib deine ersten Tipps ab, um den Verlauf zu sehen.",
+  "emptyDescFiltered": "Ändere den Filter oder warte, bis weitere Punkte berechnet werden.",
+  "loadMore": "Mehr laden",
+  "fixtureFallback": "Spieltag {round}",
+  "youPicked": "Du hast getippt",
+  "captain": "Kapitän",
+  "points": "{points} Pkt.",
+  "exact": "Exakt",
+  "outcome": {
+    "home": "Heim",
+    "draw": "Unentschieden",
+    "away": "Auswärts"
+  }
+}

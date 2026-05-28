@@ -1,0 +1,74 @@
+{
+  "list": {
+    "title": "Meine Gruppen",
+    "subtitle": "Erstelle private Gruppen oder tritt mit einem Code bei.",
+    "joinWithCode": "Mit Code beitreten",
+    "createGroup": "Gruppe erstellen",
+    "loadError": "Deine Gruppen konnten nicht geladen werden",
+    "empty": "Du bist noch in keiner Gruppe. Erstelle eine oder frag einen Freund nach einem Code."
+  },
+  "create": {
+    "namePlaceholder": "Gruppenname",
+    "descPlaceholder": "Beschreibung (optional)",
+    "error": "Gruppe konnte nicht erstellt werden",
+    "submitting": "Erstellen…",
+    "submit": "Erstellen"
+  },
+  "join": {
+    "label": "Einladungscode",
+    "placeholder": "Füge den erhaltenen Code ein",
+    "error": "Ungültiger Code",
+    "submitting": "Beitreten…",
+    "submit": "Beitreten"
+  },
+  "card": {
+    "admin": "Admin",
+    "members": "{count, plural, one {Mitglied} other {Mitglieder}}",
+    "private": "Privat"
+  },
+  "detail": {
+    "back": "← Meine Gruppen",
+    "backShort": "← Zurück",
+    "memberCount": "{count, plural, one {# Mitglied} other {# Mitglieder}}",
+    "private": "Privat",
+    "public": "Öffentlich",
+    "deleteGroup": "Gruppe löschen",
+    "leaveGroup": "Gruppe verlassen",
+    "loadError": "Gruppe konnte nicht geladen werden",
+    "confirmLeave": "Gruppe verlassen?",
+    "leaveError": "Gruppe konnte nicht verlassen werden",
+    "confirmDelete": "Gruppe löschen? Diese Aktion ist unwiderruflich.",
+    "deleteError": "Gruppe konnte nicht gelöscht werden",
+    "tabs": {
+      "ranking": "Rangliste",
+      "activity": "Aktivität",
+      "chat": "Chat",
+      "members": "Mitglieder ({count})"
+    },
+    "invite": {
+      "title": "Einladungscode",
+      "subtitle": "Teile ihn, um Mitglieder zur Gruppe hinzuzufügen.",
+      "codeLabel": "Code:",
+      "copy": "Kopieren",
+      "copied": "Kopiert!",
+      "regenerate": "Neu generieren"
+    }
+  },
+  "members": {
+    "since": "Seit {date}",
+    "you": "(du)",
+    "admin": "Admin"
+  },
+  "activity": {
+    "emptyTitle": "Noch keine Aktivität in dieser Gruppe.",
+    "emptyDesc": "Sobald Tipps abgegeben oder Punkte berechnet werden, siehst du es hier."
+  },
+  "chat": {
+    "emptyTitle": "Noch keine Nachrichten in dieser Gruppe.",
+    "emptyDesc": "Schick die erste 👇",
+    "today": "Heute",
+    "yesterday": "Gestern",
+    "placeholder": "Schreibe eine Nachricht…",
+    "send": "Senden"
+  }
+}

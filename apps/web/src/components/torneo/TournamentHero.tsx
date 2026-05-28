@@ -1,20 +1,5 @@
+import { useFormatter, useTranslations } from 'next-intl';
 import type { TournamentDto } from '@/lib/server-endpoints';
-
-function formatDateRange(start: string | null, end: string | null) {
-  if (!start || !end) return null;
-  const s = new Date(start);
-  const e = new Date(end);
-  const sameMonth = s.getMonth() === e.getMonth();
-  const fmtDay = new Intl.DateTimeFormat('es-AR', { day: 'numeric' });
-  const fmtMonth = new Intl.DateTimeFormat('es-AR', { month: 'short' });
-  const fmtFull = new Intl.DateTimeFormat('es-AR', {
-    day: 'numeric',
-    month: 'short',
-  });
-  return sameMonth
-    ? `${fmtDay.format(s)}–${fmtDay.format(e)} ${fmtMonth.format(e)}`
-    : `${fmtFull.format(s)} → ${fmtFull.format(e)}`;
-}
 
 function daysUntil(date: string | null) {
   if (!date) return null;
@@ -27,7 +12,16 @@ interface Props {
 }
 
 export function TournamentHero({ tournament }: Props) {
-  const dates = formatDateRange(tournament.startDate, tournament.endDate);
+  const t = useTranslations('torneo');
+  const format = useFormatter();
+  const dates =
+    tournament.startDate && tournament.endDate
+      ? format.dateTimeRange(
+          new Date(tournament.startDate),
+          new Date(tournament.endDate),
+          { day: 'numeric', month: 'short' },
+        )
+      : null;
   const days = daysUntil(tournament.startDate);
   const upcoming = days !== null && days > 0;
   const year = tournament.endDate
@@ -41,10 +35,10 @@ export function TournamentHero({ tournament }: Props) {
           <div>
             <p className="font-display text-xs uppercase tracking-[0.3em] text-neon mb-3">
               {tournament.type === 'INTERNATIONAL'
-                ? 'Torneo Internacional'
+                ? t('type.international')
                 : tournament.type === 'CUP'
-                  ? 'Copa'
-                  : 'Liga'}
+                  ? t('type.cup')
+                  : t('type.league')}
               {tournament.country && ` · ${tournament.country}`}
             </p>
             <h1 className="font-display font-extrabold tracking-[-0.04em] leading-[0.92] text-foreground text-[clamp(3rem,9vw,7rem)]">
@@ -69,7 +63,7 @@ export function TournamentHero({ tournament }: Props) {
                   {days}
                 </span>
                 <span className="font-display text-xs uppercase tracking-[0.2em] text-ink-muted">
-                  días<br />para el inicio
+                  {t('hero.days', { count: days })}<br />{t('hero.untilStart')}
                 </span>
               </div>
             )}
@@ -79,7 +73,7 @@ export function TournamentHero({ tournament }: Props) {
                   <strong className="text-foreground tabular-nums">
                     {tournament._count.teams}
                   </strong>{' '}
-                  selecciones
+                  {t('hero.teams')}
                 </span>
               ) : null}
               {tournament._count?.matches ? (
@@ -87,7 +81,7 @@ export function TournamentHero({ tournament }: Props) {
                   <strong className="text-foreground tabular-nums">
                     {tournament._count.matches}
                   </strong>{' '}
-                  partidos
+                  {t('hero.matches')}
                 </span>
               ) : null}
             </div>

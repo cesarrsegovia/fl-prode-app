@@ -1,0 +1,12 @@
+{
+  "metaTitle": "{name} · Prode",
+  "metaFallback": "Nationalmannschaft · Prode",
+  "eyebrow": "Nationalmannschaft",
+  "group": "Gruppe {name}",
+  "schedule": "Spielplan",
+  "noMatchesTitle": "Noch keine Spiele",
+  "noMatchesDesc": "Sie erscheinen hier, sobald der Spielplan veröffentlicht ist.",
+  "squad": "Kader",
+  "noSquadTitle": "Kader nicht veröffentlicht",
+  "noSquadDesc": "Trainer veröffentlichen Kader näher am Turnierstart."
+}

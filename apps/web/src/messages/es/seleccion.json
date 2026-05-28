@@ -1,0 +1,12 @@
+{
+  "metaTitle": "{name} · Prode",
+  "metaFallback": "Selección · Prode",
+  "eyebrow": "Selección",
+  "group": "Grupo {name}",
+  "schedule": "Calendario",
+  "noMatchesTitle": "Sin partidos cargados",
+  "noMatchesDesc": "Cuando se publique el calendario aparecerán acá.",
+  "squad": "Plantilla",
+  "noSquadTitle": "Plantilla no cargada",
+  "noSquadDesc": "Los DT publican plantillas más cerca del inicio del torneo."
+}

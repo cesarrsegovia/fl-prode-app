@@ -1,0 +1,41 @@
+{
+  "greeting": "Salut, {name}",
+  "playerFallback": "Joueur",
+  "heroLine1": "Le stade",
+  "heroLine2": "est à vous.",
+  "tournament": {
+    "active": "Tournoi actif",
+    "daysLabel": "{count, plural, one {jour} other {jours}}",
+    "untilStart": "avant le coup d'envoi",
+    "view": "Voir le tournoi"
+  },
+  "nextFixture": {
+    "title": "Prochaine journée ouverte",
+    "fallbackName": "Journée {round}",
+    "matches": "{count, plural, one {# match} other {# matchs}}",
+    "closesIn": "Clôture dans",
+    "loadPredictions": "Saisir les pronostics",
+    "none": "Aucune journée ouverte pour le moment."
+  },
+  "myRanking": {
+    "title": "Votre classement global",
+    "totalPoints": "<b>{points, number}</b> points au total",
+    "viewFull": "Voir le classement complet",
+    "empty": "Pronostiquez une journée pour entrer au classement."
+  },
+  "myGroups": {
+    "title": "Mes groupes",
+    "viewAll": "Voir tout",
+    "empty": "Vous n'êtes encore dans aucun groupe.",
+    "createOrJoin": "En créer un ou en rejoindre →"
+  },
+  "top5": {
+    "title": "Top 5 mondial",
+    "empty": "Pas encore de données.",
+    "points": "{points, number} pts"
+  },
+  "activity": {
+    "title": "Activité récente",
+    "empty": "Rien de neuf pour l'instant."
+  }
+}

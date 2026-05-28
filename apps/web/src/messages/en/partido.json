@@ -1,0 +1,35 @@
+{
+  "metaTitle": "{home} vs {away} · Prode",
+  "metaFallback": "Match · Prode",
+  "group": "Group {name}",
+  "fixtureFallback": "Matchday {round}",
+  "live": "LIVE",
+  "vs": "vs",
+  "info": {
+    "kickoff": "Kickoff",
+    "venue": "Venue",
+    "referee": "Referee"
+  },
+  "poll": {
+    "title": "What does everyone think?",
+    "empty": "No one has predicted this match yet.",
+    "loadPrediction": "Enter prediction",
+    "home": "Home win",
+    "draw": "Draw",
+    "away": "Away win",
+    "totalPredictions": "{count, plural, one {# prediction submitted} other {# predictions submitted}}"
+  },
+  "cta": "Enter predictions for this matchday",
+  "friends": {
+    "title": "Vs friends",
+    "hidden": "Picks hidden until the matchday closes",
+    "noMembers": "This group has no members yet.",
+    "noPick": "No prediction"
+  },
+  "groupStats": {
+    "title": "What does your crew think?",
+    "submitted": "{total}/{members} predicted",
+    "pending": " · {count} pending",
+    "empty": "No predictions submitted yet."
+  }
+}

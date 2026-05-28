@@ -1,0 +1,15 @@
+{
+  "eyebrow": "Inbox",
+  "title": "Notifications.",
+  "markAllRead": "Tout marquer comme lu ({count})",
+  "emptyTitle": "Boîte vide",
+  "emptyDesc": "Lorsque des points sont calculés, qu'une clôture approche ou que vous montez au classement, vous les verrez ici.",
+  "types": {
+    "FIXTURE_CLOSING": "Clôture proche",
+    "RESULT_CALCULATED": "Points",
+    "RANKING_CHANGE": "Classement",
+    "GROUP_INVITE": "Groupe",
+    "ACHIEVEMENT_UNLOCKED": "Succès",
+    "fallback": "Notif."
+  }
+}

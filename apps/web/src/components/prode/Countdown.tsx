@@ -1,12 +1,14 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useCountdown } from '@/hooks/useCountdown';
 
 export function Countdown({ targetDate }: { targetDate: Date }) {
+  const t = useTranslations('prode.countdown');
   const { days, hours, minutes, seconds, expired } = useCountdown(targetDate);
 
   if (expired) {
-    return <span className="text-red-400 font-medium">Cerrado</span>;
+    return <span className="text-red-400 font-medium">{t('closed')}</span>;
   }
 
   return (

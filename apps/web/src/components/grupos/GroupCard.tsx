@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import type { MyGroupEntry } from '@/lib/endpoints';
 
 export function GroupCard({ entry }: { entry: MyGroupEntry }) {
+  const t = useTranslations('grupos.card');
   const { group, role } = entry;
   const memberCount = group._count?.members ?? 0;
 
@@ -24,7 +26,7 @@ export function GroupCard({ entry }: { entry: MyGroupEntry }) {
         </div>
         {role === 'ADMIN' && (
           <span className="text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary px-2 py-1 rounded-full">
-            Admin
+            {t('admin')}
           </span>
         )}
       </div>
@@ -33,12 +35,12 @@ export function GroupCard({ entry }: { entry: MyGroupEntry }) {
         <div className="flex items-center gap-2 text-on-surface-variant">
           <span className="text-sm font-bold">{memberCount}</span>
           <span className="text-xs uppercase tracking-widest">
-            {memberCount === 1 ? 'miembro' : 'miembros'}
+            {t('members', { count: memberCount })}
           </span>
         </div>
         {group.isPrivate && (
           <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
-            Privado
+            {t('private')}
           </span>
         )}
       </div>

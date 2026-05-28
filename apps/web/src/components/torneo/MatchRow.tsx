@@ -1,24 +1,9 @@
 import Link from 'next/link';
+import { useFormatter, useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import type { MatchDto } from '@/lib/server-endpoints';
 import { TeamFlag } from './TeamFlag';
-
-function formatKickoff(iso: string) {
-  const d = new Date(iso);
-  return {
-    weekday: new Intl.DateTimeFormat('es-AR', { weekday: 'short' })
-      .format(d)
-      .replace('.', ''),
-    day: new Intl.DateTimeFormat('es-AR', { day: '2-digit' }).format(d),
-    month: new Intl.DateTimeFormat('es-AR', { month: 'short' }).format(d),
-    time: new Intl.DateTimeFormat('es-AR', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    }).format(d),
-  };
-}
 
 function TeamCell({
   name,
@@ -65,7 +50,19 @@ interface Props {
 }
 
 export function MatchRow({ match, href }: Props) {
-  const ts = formatKickoff(match.startTime);
+  const t = useTranslations('torneo');
+  const format = useFormatter();
+  const kickoff = new Date(match.startTime);
+  const ts = {
+    weekday: format.dateTime(kickoff, { weekday: 'short' }).replace('.', ''),
+    day: format.dateTime(kickoff, { day: '2-digit' }),
+    month: format.dateTime(kickoff, { month: 'short' }),
+    time: format.dateTime(kickoff, {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }),
+  };
   const live = match.status === 'LIVE';
   const finished = match.status === 'FINISHED';
   const cancelled = match.status === 'CANCELLED';
@@ -104,14 +101,14 @@ export function MatchRow({ match, href }: Props) {
             {live ? (
               <Badge className="bg-neon text-primary-foreground gap-1.5">
                 <span className="size-1.5 rounded-full bg-current animate-pulse" />
-                EN VIVO
+                {t('matchRow.live')}
               </Badge>
             ) : finished ? (
               <span className="text-[10px] uppercase tracking-[0.2em] text-ink-dim font-display">
-                Final
+                {t('matchRow.final')}
               </span>
             ) : cancelled ? (
-              <Badge variant="secondary">Cancelado</Badge>
+              <Badge variant="secondary">{t('matchRow.cancelled')}</Badge>
             ) : (
               <span className="font-display font-bold text-lg text-foreground tabular-nums">
                 {ts.time}
@@ -132,7 +129,7 @@ export function MatchRow({ match, href }: Props) {
       {match.venue && (
         <div className="px-4 pb-3 -mt-1 flex items-center gap-2 text-[10px] uppercase tracking-[0.15em] text-ink-dim font-display">
           {match.group && (
-            <span className="text-neon">Grupo {match.group.name}</span>
+            <span className="text-neon">{t('common.group', { name: match.group.name })}</span>
           )}
           {match.group && <span>·</span>}
           <span className="truncate">

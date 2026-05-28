@@ -1,5 +1,6 @@
 'use client';
 
+import { useFormatter, useTranslations } from 'next-intl';
 import type { ActivityFeedType, ActivityItem } from '@/lib/endpoints';
 
 const ICONS: Record<ActivityFeedType, string> = {
@@ -20,20 +21,6 @@ const ACCENTS: Record<ActivityFeedType, string> = {
   ACHIEVEMENT_UNLOCKED: 'border-l-pink-400',
 };
 
-function formatRelative(iso: string) {
-  const ts = new Date(iso).getTime();
-  const diffSec = Math.floor((Date.now() - ts) / 1000);
-  if (diffSec < 60) return 'ahora';
-  if (diffSec < 3600) return `hace ${Math.floor(diffSec / 60)} min`;
-  if (diffSec < 86400) return `hace ${Math.floor(diffSec / 3600)} h`;
-  const days = Math.floor(diffSec / 86400);
-  if (days < 7) return `hace ${days} d`;
-  return new Date(iso).toLocaleDateString('es-AR', {
-    day: '2-digit',
-    month: 'short',
-  });
-}
-
 export function ActivityFeed({
   items,
   isLoading,
@@ -43,6 +30,9 @@ export function ActivityFeed({
   isLoading: boolean;
   error: string | null;
 }) {
+  const t = useTranslations('grupos.activity');
+  const format = useFormatter();
+
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -68,10 +58,10 @@ export function ActivityFeed({
         style={{ background: 'var(--surface-container-low)' }}
       >
         <p className="text-sm text-on-surface-variant">
-          Todavía no hay actividad en este grupo.
+          {t('emptyTitle')}
         </p>
         <p className="text-xs text-on-surface-variant mt-1">
-          Cuando carguen pronósticos o se calculen puntos vas a verlo acá.
+          {t('emptyDesc')}
         </p>
       </div>
     );
@@ -91,7 +81,7 @@ export function ActivityFeed({
           <div className="flex-1 min-w-0">
             <p className="text-sm text-white leading-tight">{item.message}</p>
             <p className="text-xs text-on-surface-variant mt-1">
-              {formatRelative(item.createdAt)}
+              {format.relativeTime(new Date(item.createdAt))}
             </p>
           </div>
           {item.user.avatarUrl ? (

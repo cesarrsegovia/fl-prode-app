@@ -2,6 +2,7 @@
 
 import { use, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import type { FixtureWithMatches, Match, Prediction } from '@prode/shared';
 import { MatchStatus, Result } from '@prode/shared';
 import { fixtures, pronosticos } from '@/lib/endpoints';
@@ -18,10 +19,10 @@ function resultFrom(match: Match): Result | null {
   return Result.DRAW;
 }
 
-const RESULT_LABEL: Record<Result, string> = {
-  [Result.HOME]: 'Local',
-  [Result.DRAW]: 'Empate',
-  [Result.AWAY]: 'Visitante',
+const OUTCOME_KEY: Record<Result, string> = {
+  [Result.HOME]: 'home',
+  [Result.DRAW]: 'draw',
+  [Result.AWAY]: 'away',
 };
 
 function teamSide(match: Match, side: 'home' | 'away') {
@@ -36,6 +37,7 @@ export default function ResultadosPage({
 }: {
   params: Promise<{ fechaId: string }>;
 }) {
+  const t = useTranslations('prode');
   const { fechaId } = use(params);
   const [fixture, setFixture] = useState<FixtureWithMatches | null>(null);
   const [preds, setPreds] = useState<Prediction[]>([]);
@@ -50,7 +52,7 @@ export default function ResultadosPage({
         setFixture(fx);
         setPreds(ps as Prediction[]);
       })
-      .catch((e) => setError(e?.message ?? 'No se pudo cargar la fecha'));
+      .catch((e) => setError(e?.message ?? t('fixture.loadError')));
   }, [fechaId]);
 
   const totalPoints = useMemo(
@@ -82,21 +84,21 @@ export default function ResultadosPage({
         href={`/prode/${fixture.id}`}
         className="text-[10px] font-display font-bold text-ink-muted hover:text-neon uppercase tracking-[0.18em]"
       >
-        ← Volver a pronósticos
+        {t('results.back')}
       </Link>
 
       <header className="mt-3 mb-8 flex items-end justify-between">
         <div>
           <p className="font-display text-xs uppercase tracking-[0.2em] text-neon mb-2">
-            Resultados
+            {t('results.title')}
           </p>
           <h1 className="font-display font-extrabold text-4xl text-foreground tracking-tight">
-            {fixture.name ?? `Fecha ${fixture.round}`}
+            {fixture.name ?? t('fixture.fallbackName', { round: fixture.round })}
           </h1>
         </div>
         <div className="text-right">
           <p className="text-[10px] font-display font-bold uppercase tracking-[0.18em] text-ink-muted">
-            Tus puntos
+            {t('results.yourPoints')}
           </p>
           <p className="text-4xl font-display font-extrabold text-neon tabular-nums">
             {totalPoints}
@@ -137,25 +139,25 @@ export default function ResultadosPage({
                   <span className="text-xs uppercase tracking-[0.18em] font-display font-bold text-ink-muted tabular-nums">
                     {finished
                       ? `${match.homeScore} - ${match.awayScore}`
-                      : 'Pendiente'}
+                      : t('results.pending')}
                   </span>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 text-xs">
                   <div>
                     <p className="text-ink-dim uppercase tracking-[0.15em] font-display font-bold mb-1">
-                      Real
+                      {t('results.real')}
                     </p>
                     <p className="text-foreground font-bold">
-                      {realResult ? RESULT_LABEL[realResult] : '—'}
+                      {realResult ? t(`results.outcome.${OUTCOME_KEY[realResult]}`) : '—'}
                     </p>
                   </div>
                   <div>
                     <p className="text-ink-dim uppercase tracking-[0.15em] font-display font-bold mb-1">
-                      Tu pick
+                      {t('results.yourPick')}
                     </p>
                     <p className="text-foreground font-bold">
-                      {pred ? RESULT_LABEL[pred.result] : 'Sin cargar'}
+                      {pred ? t(`results.outcome.${OUTCOME_KEY[pred.result]}`) : t('results.noPick')}
                       {pred?.isCaptain && (
                         <span className="ml-2 text-neon">(C)</span>
                       )}
@@ -163,7 +165,7 @@ export default function ResultadosPage({
                   </div>
                   <div className="text-right">
                     <p className="text-ink-dim uppercase tracking-[0.15em] font-display font-bold mb-1">
-                      Puntos
+                      {t('results.points')}
                     </p>
                     <p
                       className={cn(
@@ -182,17 +184,17 @@ export default function ResultadosPage({
                   <div className="mt-3 flex gap-2 flex-wrap">
                     {hit && (
                       <Badge className="bg-neon/10 text-neon hover:bg-neon/15">
-                        +3 Resultado
+                        {t('results.badgeResult')}
                       </Badge>
                     )}
                     {exact && (
                       <Badge className="bg-neon/10 text-neon hover:bg-neon/15">
-                        +3 Marcador exacto
+                        {t('results.badgeExact')}
                       </Badge>
                     )}
                     {pred.isCaptain && (pred.pointsEarned ?? 0) > 0 && (
                       <Badge className="bg-citrus/10 text-citrus hover:bg-citrus/15">
-                        x2 Capitán
+                        {t('results.badgeCaptain')}
                       </Badge>
                     )}
                   </div>

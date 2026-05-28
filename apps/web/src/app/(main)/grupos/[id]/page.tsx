@@ -4,6 +4,7 @@ import { use, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { useFormatter, useTranslations } from 'next-intl';
 import type { RankingEntry } from '@prode/shared';
 import { grupos } from '@/lib/endpoints';
 import { useRanking } from '@/hooks/useRanking';
@@ -37,6 +38,7 @@ export default function GrupoDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const t = useTranslations('grupos.detail');
   const router = useRouter();
   const { data: session } = useSession();
   const myUserId = (session?.user as { id?: string } | undefined)?.id;
@@ -58,7 +60,8 @@ export default function GrupoDetailPage({
     grupos
       .one(id)
       .then((g) => setGroup(g as GroupDetail))
-      .catch((e) => setError(e?.response?.data?.message ?? 'No se pudo cargar el grupo'));
+      .catch((e) => setError(e?.response?.data?.message ?? t('loadError')));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   useEffect(() => {
@@ -94,22 +97,22 @@ export default function GrupoDetailPage({
   };
 
   const leaveGroup = async () => {
-    if (!confirm('¿Salir del grupo?')) return;
+    if (!confirm(t('confirmLeave'))) return;
     try {
       await grupos.leave(id);
       router.push('/grupos');
     } catch (e: any) {
-      alert(e?.response?.data?.message ?? 'No se pudo salir del grupo');
+      alert(e?.response?.data?.message ?? t('leaveError'));
     }
   };
 
   const deleteGroup = async () => {
-    if (!confirm('¿Eliminar el grupo? Esta acción es irreversible.')) return;
+    if (!confirm(t('confirmDelete'))) return;
     try {
       await grupos.remove(id);
       router.push('/grupos');
     } catch (e: any) {
-      alert(e?.response?.data?.message ?? 'No se pudo eliminar el grupo');
+      alert(e?.response?.data?.message ?? t('deleteError'));
     }
   };
 
@@ -118,7 +121,7 @@ export default function GrupoDetailPage({
       <main className="pt-24 pb-12 px-4 max-w-3xl mx-auto">
         <p className="text-sm text-red-400 font-bold">{error}</p>
         <Link href="/grupos" className="text-primary underline text-sm">
-          ← Volver
+          {t('backShort')}
         </Link>
       </main>
     );
@@ -141,7 +144,7 @@ export default function GrupoDetailPage({
         href="/grupos"
         className="text-xs font-bold text-on-surface-variant hover:text-primary uppercase tracking-widest"
       >
-        ← Mis grupos
+        {t('back')}
       </Link>
 
       <header className="mt-2 mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -155,7 +158,8 @@ export default function GrupoDetailPage({
             </p>
           )}
           <p className="text-xs uppercase tracking-widest font-bold text-on-surface-variant mt-2">
-            {group.members.length} miembros · {group.isPrivate ? 'Privado' : 'Público'}
+            {t('memberCount', { count: group.members.length })} ·{' '}
+            {group.isPrivate ? t('private') : t('public')}
           </p>
         </div>
 
@@ -165,14 +169,14 @@ export default function GrupoDetailPage({
               onClick={deleteGroup}
               className="text-sm font-bold text-red-400 hover:bg-red-500/10 px-3 py-2 rounded-lg transition-colors"
             >
-              Eliminar grupo
+              {t('deleteGroup')}
             </button>
           ) : (
             <button
               onClick={leaveGroup}
               className="text-sm font-bold text-on-surface-variant hover:text-white hover:bg-white/5 px-3 py-2 rounded-lg transition-colors"
             >
-              Salir del grupo
+              {t('leaveGroup')}
             </button>
           )}
         </div>
@@ -182,16 +186,16 @@ export default function GrupoDetailPage({
         <div className="lg:col-span-2">
           <div className="flex gap-2 mb-4 flex-wrap">
             <TabButton active={tab === 'ranking'} onClick={() => setTab('ranking')}>
-              Ranking
+              {t('tabs.ranking')}
             </TabButton>
             <TabButton active={tab === 'activity'} onClick={() => setTab('activity')}>
-              Actividad
+              {t('tabs.activity')}
             </TabButton>
             <TabButton active={tab === 'chat'} onClick={() => setTab('chat')}>
-              Chat
+              {t('tabs.chat')}
             </TabButton>
             <TabButton active={tab === 'members'} onClick={() => setTab('members')}>
-              Miembros ({group.members.length})
+              {t('tabs.members', { count: group.members.length })}
             </TabButton>
           </div>
 
@@ -223,10 +227,10 @@ export default function GrupoDetailPage({
             style={{ background: 'var(--surface-container-low)' }}
           >
             <h2 className="text-sm font-bold text-white uppercase tracking-widest">
-              Código de invitación
+              {t('invite.title')}
             </h2>
             <p className="text-sm text-on-surface-variant mt-1">
-              Compartilo para sumar miembros al grupo.
+              {t('invite.subtitle')}
             </p>
             <div
               className="mt-4 p-3 rounded-lg font-mono text-xs break-all"
@@ -235,14 +239,14 @@ export default function GrupoDetailPage({
               {inviteUrl}
             </div>
             <p className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant mt-2">
-              Código: <span className="font-mono normal-case tracking-normal">{group.inviteCode}</span>
+              {t('invite.codeLabel')} <span className="font-mono normal-case tracking-normal">{group.inviteCode}</span>
             </p>
             <div className="flex gap-2 mt-3">
               <button
                 onClick={copyInvite}
                 className="flex-1 bg-primary text-black text-sm font-bold py-2 rounded-lg active:scale-95 transition-transform"
               >
-                {inviteCopied ? '¡Copiado!' : 'Copiar'}
+                {inviteCopied ? t('invite.copied') : t('invite.copy')}
               </button>
               {isAdmin && (
                 <button
@@ -250,7 +254,7 @@ export default function GrupoDetailPage({
                   disabled={regenerating}
                   className="border border-white/10 text-white text-sm font-bold py-2 px-3 rounded-lg hover:bg-white/5 disabled:opacity-50"
                 >
-                  {regenerating ? '…' : 'Regenerar'}
+                  {regenerating ? '…' : t('invite.regenerate')}
                 </button>
               )}
             </div>
@@ -291,6 +295,8 @@ function MembersList({
   members: GroupMemberDto[];
   myUserId?: string;
 }) {
+  const t = useTranslations('grupos.members');
+  const format = useFormatter();
   const sorted = [...members].sort((a, b) => {
     if (a.role === b.role) return a.user.username.localeCompare(b.user.username);
     return a.role === 'ADMIN' ? -1 : 1;
@@ -324,16 +330,22 @@ function MembersList({
               <p className="text-sm font-bold text-white truncate">
                 {m.user.username}
                 {isMe && (
-                  <span className="ml-2 text-xs text-primary">(vos)</span>
+                  <span className="ml-2 text-xs text-primary">{t('you')}</span>
                 )}
               </p>
               <p className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">
-                Desde {new Date(m.joinedAt).toLocaleDateString('es-AR')}
+                {t('since', {
+                  date: format.dateTime(new Date(m.joinedAt), {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                  }),
+                })}
               </p>
             </div>
             {m.role === 'ADMIN' && (
               <span className="text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary px-2 py-1 rounded-full">
-                Admin
+                {t('admin')}
               </span>
             )}
           </li>

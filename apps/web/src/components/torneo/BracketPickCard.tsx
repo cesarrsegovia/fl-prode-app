@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Trophy, Check } from 'lucide-react';
 import { championPickDeadline } from '@prode/shared';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -28,6 +29,8 @@ export function BracketPickCard({
   tournamentStartDate,
   teams,
 }: Props) {
+  const t = useTranslations('torneo.champion');
+  const tCommon = useTranslations('torneo.common');
   const [current, setCurrent] = useState<BracketPickResponse | null>(null);
   const [submitting, setSubmitting] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -70,7 +73,7 @@ export function BracketPickCard({
     } catch (err: any) {
       const apiMsg = err?.response?.data?.message;
       const status = err?.response?.status;
-      const fallback = err?.message ?? 'No se pudo guardar tu predicción';
+      const fallback = err?.message ?? t('saveError');
       setError(apiMsg ?? (status ? `${status}: ${fallback}` : fallback));
       console.error('BracketPick set error', err);
     } finally {
@@ -84,15 +87,14 @@ export function BracketPickCard({
         <div className="flex items-center gap-2 mb-2">
           <Trophy className="size-4 text-neon" />
           <span className="font-display text-xs uppercase tracking-[0.25em] text-neon">
-            Predicción del campeón
+            {t('eyebrow')}
           </span>
         </div>
         <h3 className="font-display font-extrabold text-2xl text-foreground tracking-tight">
-          {current ? '¿Cambiás de candidato?' : '¿Quién levanta la copa?'}
+          {current ? t('titleChange') : t('titleInitial')}
         </h3>
         <p className="text-sm text-ink-muted mt-1">
-          Elegí una selección antes del inicio del torneo. Bonus al final si
-          acertás.
+          {t('subtitle')}
         </p>
         {current && (
           <div className="mt-4 flex items-center gap-3 px-4 py-3 rounded-xl bg-neon/10 border border-neon/40">
@@ -103,7 +105,7 @@ export function BracketPickCard({
             />
             <div className="flex-1">
               <p className="text-[10px] uppercase tracking-[0.2em] font-display font-bold text-neon">
-                Tu pick actual
+                {t('currentPick')}
               </p>
               <p className="font-display font-extrabold text-foreground">
                 {current.champTeam.name}
@@ -114,14 +116,14 @@ export function BracketPickCard({
         )}
         {locked && (
           <Badge variant="outline" className="mt-3 w-fit">
-            Predicciones cerradas
+            {t('locked')}
           </Badge>
         )}
       </CardHeader>
 
       <CardContent>
         {!loaded ? (
-          <p className="text-sm text-ink-muted">Cargando...</p>
+          <p className="text-sm text-ink-muted">{tCommon('loading')}</p>
         ) : (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
             {teamsByConfederation.map((t) => {

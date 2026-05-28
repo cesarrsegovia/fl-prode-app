@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { FixtureWithMatches, Prediction, Result } from '@prode/shared';
 import {
   isKnockoutStage,
@@ -31,6 +32,7 @@ function buildInitialPicks(preds?: Prediction[]): PickMap {
 }
 
 export function ProdeForm({ fixture, initialPredictions }: Props) {
+  const t = useTranslations('prode.form');
   const [picks, setPicks] = useState<PickMap>(() =>
     buildInitialPicks(initialPredictions),
   );
@@ -119,11 +121,11 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
         awayScoreGuess: pick.awayScoreGuess,
         isCaptain: pick.isCaptain,
       });
-      setSuccessMsg('Pronóstico guardado');
+      setSuccessMsg(t('saved'));
       setTimeout(() => setSuccessMsg(null), 1500);
     } catch (err: any) {
       setSubmitError(
-        err?.response?.data?.message ?? 'No se pudo guardar el pronóstico',
+        err?.response?.data?.message ?? t('saveError'),
       );
     } finally {
       setSavingMatchId(null);
@@ -136,7 +138,7 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
       ([matchId, p]) => p.result && !isMatchClosed(matchId),
     );
     if (!entries.length) {
-      setSubmitError('Marcá al menos un resultado antes de guardar.');
+      setSubmitError(t('needOne'));
       return;
     }
     try {
@@ -150,11 +152,11 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
           isCaptain: pick.isCaptain,
         });
       }
-      setSuccessMsg(`${entries.length} pronósticos guardados`);
+      setSuccessMsg(t('savedMany', { count: entries.length }));
       setTimeout(() => setSuccessMsg(null), 2000);
     } catch (err: any) {
       setSubmitError(
-        err?.response?.data?.message ?? 'Hubo un problema al guardar',
+        err?.response?.data?.message ?? t('saveAllError'),
       );
     }
   };
@@ -167,22 +169,22 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
       >
         <div>
           <p className="text-xs uppercase tracking-widest text-on-surface-variant font-bold">
-            {isKnockoutFixture ? 'Próximo cierre' : 'Cierra en'}
+            {isKnockoutFixture ? t('nextClose') : t('closesIn')}
           </p>
           {nextOpenDeadline ? (
             <Countdown targetDate={nextOpenDeadline} />
           ) : (
             <p className="text-sm font-bold text-on-surface-variant">
-              Pronósticos cerrados
+              {t('closed')}
             </p>
           )}
         </div>
         <div className="text-right">
           <p className="text-xs uppercase tracking-widest text-on-surface-variant font-bold">
-            Progreso
+            {t('progress')}
           </p>
           <p className="text-sm font-bold text-white">
-            {filledCount} de {totalMatches} partidos
+            {t('progressValue', { filled: filledCount, total: totalMatches })}
           </p>
           <div className="w-40 bg-surface-container-highest rounded-full h-1.5 mt-1">
             <div
@@ -202,10 +204,10 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
         >
           <div>
             <p className="text-xs uppercase tracking-widest text-on-surface-variant font-bold">
-              Capitán de la fecha
+              {t('captainTitle')}
             </p>
             <p className="text-sm font-bold text-white">
-              Dobla los puntos del partido elegido
+              {t('captainDesc')}
             </p>
           </div>
           <select
@@ -213,7 +215,7 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
             value={captainId ?? ''}
             onChange={(e) => setCaptainId(e.target.value || null)}
           >
-            <option value="">Sin capitán</option>
+            <option value="">{t('noCaptain')}</option>
             {fixture.matches.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.homeTeamName} vs {m.awayTeamName}
@@ -244,8 +246,8 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
                     className="text-xs font-bold text-primary hover:underline disabled:opacity-50"
                   >
                     {savingMatchId === match.id
-                      ? 'Guardando…'
-                      : 'Guardar este'}
+                      ? t('saving')
+                      : t('saveThis')}
                   </button>
                 </div>
               )}
@@ -267,7 +269,7 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
           onClick={saveAll}
           className="w-full h-14 bg-primary text-black font-extrabold text-lg rounded-xl active:scale-[0.98] transition-transform"
         >
-          Guardar todos los pronósticos
+          {t('saveAll')}
         </button>
       )}
     </div>

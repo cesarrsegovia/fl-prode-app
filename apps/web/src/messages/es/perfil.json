@@ -1,0 +1,32 @@
+{
+  "eyebrowMe": "Mi perfil",
+  "eyebrowOther": "Jugador",
+  "memberSince": "Desde {date}",
+  "loadError": "No se pudo cargar el perfil",
+  "statsTitle": "Stats",
+  "stats": {
+    "globalPosition": "Posición global",
+    "globalPositionHintPoints": "{points} puntos",
+    "globalPositionHintNone": "Sin ranking",
+    "hits": "Aciertos",
+    "exactScores": "Marcadores exactos",
+    "exactScoresHint": "bonus +3 c/u",
+    "captain": "Capitán",
+    "captainHint": "{hits}/{played} aciertos"
+  },
+  "bestFixture": {
+    "label": "Mejor fecha",
+    "summary": "{hits} aciertos · {matches} partidos",
+    "points": "pts"
+  },
+  "noStatsTitle": "Sin estadísticas todavía",
+  "noStatsDesc": "Cuando cargues pronósticos y se calculen puntos, vas a verlos acá.",
+  "achievementsTitle": "Logros",
+  "noAchievementsTitle": "Sin logros configurados",
+  "unlockedOn": "Desbloqueado {date}",
+  "links": {
+    "ranking": "Ver ranking →",
+    "myPredictions": "Mis pronósticos →",
+    "predict": "Cargar pronósticos →"
+  }
+}

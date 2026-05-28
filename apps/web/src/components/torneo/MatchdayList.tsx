@@ -1,3 +1,4 @@
+import { useFormatter, useTranslations } from 'next-intl';
 import type { FixtureScheduleDto, MatchDto } from '@/lib/server-endpoints';
 import { MatchRow } from './MatchRow';
 
@@ -12,20 +13,20 @@ function groupMatchesByDate(matches: MatchDto[]) {
   return [...map.entries()].sort(([a], [b]) => a.localeCompare(b));
 }
 
-function formatDateHeading(isoDate: string) {
-  const d = new Date(`${isoDate}T12:00:00Z`);
-  return new Intl.DateTimeFormat('es-AR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  }).format(d);
-}
-
 interface Props {
   schedule: FixtureScheduleDto[];
 }
 
 export function MatchdayList({ schedule }: Props) {
+  const t = useTranslations('torneo.matchday');
+  const format = useFormatter();
+  const formatDateHeading = (isoDate: string) =>
+    format.dateTime(new Date(`${isoDate}T12:00:00Z`), {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+    });
+
   return (
     <div className="space-y-12">
       {schedule.map((fixture) => {
@@ -34,11 +35,10 @@ export function MatchdayList({ schedule }: Props) {
           <section key={fixture.id}>
             <header className="flex items-baseline justify-between gap-4 mb-4 px-1">
               <h3 className="font-display font-extrabold text-2xl text-foreground tracking-tight">
-                {fixture.name ?? `Fecha ${fixture.round}`}
+                {fixture.name ?? t('fallbackName', { round: fixture.round })}
               </h3>
               <span className="text-xs uppercase tracking-[0.2em] text-ink-dim font-display">
-                {fixture.matches.length}{' '}
-                {fixture.matches.length === 1 ? 'partido' : 'partidos'}
+                {t('matchesCount', { count: fixture.matches.length })}
               </span>
             </header>
 

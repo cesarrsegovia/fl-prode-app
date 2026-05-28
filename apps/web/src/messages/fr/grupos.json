@@ -1,0 +1,74 @@
+{
+  "list": {
+    "title": "Mes groupes",
+    "subtitle": "Créez des groupes privés ou rejoignez avec un code.",
+    "joinWithCode": "Rejoindre avec un code",
+    "createGroup": "Créer un groupe",
+    "loadError": "Impossible de charger vos groupes",
+    "empty": "Vous n'êtes encore dans aucun groupe. Créez-en un ou demandez un code à un ami."
+  },
+  "create": {
+    "namePlaceholder": "Nom du groupe",
+    "descPlaceholder": "Description (facultatif)",
+    "error": "Impossible de créer le groupe",
+    "submitting": "Création…",
+    "submit": "Créer"
+  },
+  "join": {
+    "label": "Code d'invitation",
+    "placeholder": "Collez le code qu'on vous a donné",
+    "error": "Code invalide",
+    "submitting": "Adhésion…",
+    "submit": "Rejoindre"
+  },
+  "card": {
+    "admin": "Admin",
+    "members": "{count, plural, one {membre} other {membres}}",
+    "private": "Privé"
+  },
+  "detail": {
+    "back": "← Mes groupes",
+    "backShort": "← Retour",
+    "memberCount": "{count, plural, one {# membre} other {# membres}}",
+    "private": "Privé",
+    "public": "Public",
+    "deleteGroup": "Supprimer le groupe",
+    "leaveGroup": "Quitter le groupe",
+    "loadError": "Impossible de charger le groupe",
+    "confirmLeave": "Quitter le groupe ?",
+    "leaveError": "Impossible de quitter le groupe",
+    "confirmDelete": "Supprimer le groupe ? Cette action est irréversible.",
+    "deleteError": "Impossible de supprimer le groupe",
+    "tabs": {
+      "ranking": "Classement",
+      "activity": "Activité",
+      "chat": "Chat",
+      "members": "Membres ({count})"
+    },
+    "invite": {
+      "title": "Code d'invitation",
+      "subtitle": "Partagez-le pour ajouter des membres au groupe.",
+      "codeLabel": "Code :",
+      "copy": "Copier",
+      "copied": "Copié !",
+      "regenerate": "Régénérer"
+    }
+  },
+  "members": {
+    "since": "Depuis {date}",
+    "you": "(vous)",
+    "admin": "Admin"
+  },
+  "activity": {
+    "emptyTitle": "Aucune activité dans ce groupe pour l'instant.",
+    "emptyDesc": "Lorsque des pronostics sont saisis ou des points calculés, vous le verrez ici."
+  },
+  "chat": {
+    "emptyTitle": "Aucun message dans ce groupe pour l'instant.",
+    "emptyDesc": "Envoyez le premier 👇",
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "placeholder": "Écrivez un message…",
+    "send": "Envoyer"
+  }
+}
