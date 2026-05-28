@@ -1,0 +1,13 @@
+{
+  "title": "Ranking",
+  "subtitle": "Updates in real time as points are calculated.",
+  "global": "Global",
+  "empty": "No ranking data yet.",
+  "streak": "Streak x{count}",
+  "points": "pts",
+  "subStats": {
+    "correctWinners": "Correct winners",
+    "exactScores": "Exact scores",
+    "exactGoalsSum": "Sum of goals in exact scores"
+  }
+}

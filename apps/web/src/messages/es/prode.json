@@ -1,0 +1,100 @@
+{
+  "list": {
+    "eyebrow": "Mi Prode",
+    "titleLine1": "Cargá",
+    "titleLine2": "tus pronósticos.",
+    "loadError": "Error al cargar fechas",
+    "emptyTitle": "Sin fechas abiertas",
+    "emptyDesc": "No hay fechas para pronosticar por ahora. Volvé pronto.",
+    "predict": "Pronosticar"
+  },
+  "progress": {
+    "title": "Tu Progreso",
+    "predicted": "{predicted} de {total} partidos pronosticados",
+    "pending": "{pending} pendientes",
+    "percent": "{pct}% completo"
+  },
+  "tabs": {
+    "pending": "Pendientes",
+    "predicted": "Predichos",
+    "live": "En Vivo",
+    "results": "Resultados",
+    "topScorer": "Goleadores"
+  },
+  "featured": {
+    "champion": {
+      "label": "Tu Campeón",
+      "points": "Vale 15 pts"
+    },
+    "topScorer": {
+      "label": "Tu Goleador",
+      "points": "Vale 15 pts"
+    },
+    "deadlineUntil": "Hasta {date}",
+    "empty": "Sin elegir"
+  },
+  "allUpToDate": {
+    "title": "¡Todo al día!",
+    "subtitle": "Predijiste todos los partidos próximos. ¡Bien hecho!"
+  },
+  "topScorerTabHint": "Definí tu goleador desde la página del torneo.",
+  "goToTournament": "Ir al torneo →",
+  "fixture": {
+    "fallbackName": "Fecha {round}",
+    "matches": "{count, plural, one {# partido} other {# partidos}}",
+    "closesIn": "Cierra en",
+    "backToList": "← Fechas",
+    "loadError": "No se pudo cargar la fecha",
+    "backToListLong": "← Volver a fechas",
+    "viewResults": "Ver resultados de esta fecha →"
+  },
+  "countdown": {
+    "closed": "Cerrado"
+  },
+  "form": {
+    "nextClose": "Próximo cierre",
+    "closesIn": "Cierra en",
+    "closed": "Pronósticos cerrados",
+    "progress": "Progreso",
+    "progressValue": "{filled} de {total} partidos",
+    "captainTitle": "Capitán de la fecha",
+    "captainDesc": "Dobla los puntos del partido elegido",
+    "noCaptain": "Sin capitán",
+    "saved": "Pronóstico guardado",
+    "saveError": "No se pudo guardar el pronóstico",
+    "needOne": "Marcá al menos un resultado antes de guardar.",
+    "savedMany": "{count, plural, one {# pronóstico guardado} other {# pronósticos guardados}}",
+    "saveAllError": "Hubo un problema al guardar",
+    "saving": "Guardando…",
+    "saveThis": "Guardar este",
+    "saveAll": "Guardar todos los pronósticos"
+  },
+  "match": {
+    "status": {
+      "live": "En juego",
+      "finished": "Finalizado",
+      "cancelled": "Cancelado",
+      "open": "Abierto"
+    },
+    "scoreBonus": "Bonus marcador (+3 pts)",
+    "captainCheck": "Capitán (x2)"
+  },
+  "results": {
+    "back": "← Volver a pronósticos",
+    "title": "Resultados",
+    "yourPoints": "Tus puntos",
+    "pending": "Pendiente",
+    "real": "Real",
+    "yourPick": "Tu pick",
+    "noPick": "Sin cargar",
+    "points": "Puntos",
+    "outcome": {
+      "home": "Local",
+      "draw": "Empate",
+      "away": "Visitante"
+    },
+    "badgeResult": "+3 Resultado",
+    "badgeExact": "+3 Marcador exacto",
+    "badgeCaptain": "x2 Capitán"
+  }
+}

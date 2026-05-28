@@ -1,0 +1,57 @@
+{
+  "title": "FAQ",
+  "trigger": "Help",
+  "items": {
+    "pointSystem": {
+      "q": "How does the point system work?",
+      "a": "You earn points by predicting results: a correct winner scores 3 pts; the exact score adds 2 more. A perfect prediction is worth 5 pts in total."
+    },
+    "winner": {
+      "q": "What does picking the winner mean?",
+      "a": "It means correctly predicting who wins (home, away, or draw). If you pick 2-1 and the actual result is 3-0, you still nailed the winner (home) and score 3 pts."
+    },
+    "exact": {
+      "q": "What does exact score mean?",
+      "a": "Nailing the exact goals for each team. If you pick 2-1 and the result is exactly 2-1, you score 5 pts (3 for the winner + 2 for the exact)."
+    },
+    "champion": {
+      "q": "What is the champion prediction?",
+      "a": "In some tournaments you can pick the team you think will win it all. Get it right and you score 15 bonus pts. You can change your pick until the deadline."
+    },
+    "topScorer": {
+      "q": "What is the top scorer prediction?",
+      "a": "You pick the player you think will be the tournament's top scorer. If you nail it, you get 15 bonus pts. You can change your pick until the deadline."
+    },
+    "deadline": {
+      "q": "When can I make my predictions?",
+      "a": "You can make or change predictions up until kickoff. Once the match starts, your pick is locked."
+    },
+    "changePick": {
+      "q": "Can I change my prediction?",
+      "a": "Yes, change it as many times as you want before kickoff. Only the last prediction counts."
+    },
+    "privateGroups": {
+      "q": "How do private groups work?",
+      "a": "Private groups let you compete with friends on a separate leaderboard. Create a group and share the invite code. Each group has its own ranking, but uses the same tournament points."
+    },
+    "noPrediction": {
+      "q": "What happens if I don't predict a match?",
+      "a": "If you don't predict a match, you just score 0 for that match. No penalty."
+    },
+    "etPenalties": {
+      "q": "What about extra time and penalties?",
+      "a": "Extra time goals count normally. If the match goes to penalties, it counts as a draw — penalties only decide who advances, not the scoreline."
+    },
+    "tieBreak": {
+      "q": "How are ties broken between players with the same points?",
+      "a": "When multiple players are tied on points, the ranking breaks ties in this order: 1) most correct winners, 2) most exact scores, 3) highest sum of goals in exact scores, 4) earliest first prediction.",
+      "exampleTitle": "For example:",
+      "exampleNote": "Ana and Pablo have the same points and exact scores. Ana ranks first because her sum of goals in exact scores is higher (3 vs 1).",
+      "colPos": "Pos.",
+      "colPlayer": "Player",
+      "colPoints": "Pts",
+      "colExact": "Exact",
+      "colGoals": "Goals"
+    }
+  }
+}

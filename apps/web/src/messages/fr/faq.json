@@ -1,0 +1,57 @@
+{
+  "title": "FAQ",
+  "trigger": "Aide",
+  "items": {
+    "pointSystem": {
+      "q": "Comment fonctionne le système de points ?",
+      "a": "Vous gagnez des points en pronostiquant les résultats : trouver le vainqueur rapporte 3 pts ; le score exact ajoute 2 pts. Un pronostic parfait vaut 5 pts au total."
+    },
+    "winner": {
+      "q": "Que signifie 'trouver le vainqueur' ?",
+      "a": "Pronostiquer correctement qui gagne (domicile, extérieur ou nul). Si vous pronostiquez 2-1 et que le résultat est 3-0, vous trouvez quand même le vainqueur (domicile) et gagnez 3 pts."
+    },
+    "exact": {
+      "q": "Que signifie 'score exact' ?",
+      "a": "Pronostiquer les buts exacts de chaque équipe. Si vous mettez 2-1 et le résultat est exactement 2-1, vous gagnez 5 pts (3 pour le vainqueur + 2 pour l'exact)."
+    },
+    "champion": {
+      "q": "Qu'est-ce que le pronostic du champion ?",
+      "a": "Dans certains tournois vous pouvez choisir l'équipe qui sera championne. Si vous visez juste, vous gagnez 15 pts bonus. Vous pouvez changer jusqu'à la deadline."
+    },
+    "topScorer": {
+      "q": "Qu'est-ce que le pronostic du meilleur buteur ?",
+      "a": "Vous choisissez le joueur que vous voyez meilleur buteur du tournoi. Si vous visez juste, vous gagnez 15 pts bonus. Vous pouvez changer jusqu'à la deadline."
+    },
+    "deadline": {
+      "q": "Jusqu'à quand puis-je pronostiquer ?",
+      "a": "Jusqu'au coup d'envoi. Une fois le match lancé, votre pronostic est verrouillé."
+    },
+    "changePick": {
+      "q": "Puis-je changer mon pronostic ?",
+      "a": "Oui, autant de fois que vous voulez avant le coup d'envoi. Seul le dernier pronostic compte."
+    },
+    "privateGroups": {
+      "q": "Comment fonctionnent les groupes privés ?",
+      "a": "Les groupes privés vous permettent de jouer entre amis avec un classement à part. Créez un groupe et partagez le code d'invitation. Chaque groupe a son propre classement basé sur les mêmes points du tournoi."
+    },
+    "noPrediction": {
+      "q": "Que se passe-t-il si je ne pronostique pas un match ?",
+      "a": "Sans pronostic, vous marquez simplement 0 pt pour ce match. Aucune pénalité."
+    },
+    "etPenalties": {
+      "q": "Et la prolongation et les penalties ?",
+      "a": "Les buts en prolongation comptent normalement. Si le match va aux penalties, il est considéré comme nul — les penalties décident seulement de la qualification."
+    },
+    "tieBreak": {
+      "q": "Comment départage-t-on les joueurs à égalité ?",
+      "a": "En cas d'égalité de points, le classement départage dans cet ordre : 1) plus de vainqueurs trouvés, 2) plus de scores exacts, 3) plus haute somme de buts dans les scores exacts, 4) première prédiction la plus tôt.",
+      "exampleTitle": "Par exemple :",
+      "exampleNote": "Ana et Pablo ont les mêmes points et exacts. Ana passe devant car sa somme de buts dans les scores exacts est plus élevée (3 contre 1).",
+      "colPos": "Pos.",
+      "colPlayer": "Joueur",
+      "colPoints": "Pts",
+      "colExact": "Exacts",
+      "colGoals": "Buts"
+    }
+  }
+}

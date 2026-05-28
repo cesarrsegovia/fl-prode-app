@@ -1,0 +1,13 @@
+{
+  "title": "Rangliste",
+  "subtitle": "Aktualisiert in Echtzeit, sobald Punkte berechnet werden.",
+  "global": "Global",
+  "empty": "Noch keine Ranglistendaten.",
+  "streak": "Serie x{count}",
+  "points": "Pkt.",
+  "subStats": {
+    "correctWinners": "Richtige Sieger",
+    "exactScores": "Exakte Ergebnisse",
+    "exactGoalsSum": "Tore-Summe bei exakten Ergebnissen"
+  }
+}

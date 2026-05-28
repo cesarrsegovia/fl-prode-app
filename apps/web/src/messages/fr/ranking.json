@@ -1,0 +1,13 @@
+{
+  "title": "Classement",
+  "subtitle": "Mise à jour en temps réel au calcul des points.",
+  "global": "Global",
+  "empty": "Pas encore de données de classement.",
+  "streak": "Série x{count}",
+  "points": "pts",
+  "subStats": {
+    "correctWinners": "Vainqueurs trouvés",
+    "exactScores": "Scores exacts",
+    "exactGoalsSum": "Somme des buts en scores exacts"
+  }
+}

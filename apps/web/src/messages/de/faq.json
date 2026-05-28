@@ -1,0 +1,57 @@
+{
+  "title": "Häufige Fragen",
+  "trigger": "Hilfe",
+  "items": {
+    "pointSystem": {
+      "q": "Wie funktioniert das Punktesystem?",
+      "a": "Du sammelst Punkte mit Tipps: Den Sieger richtig zu tippen gibt 3 Pkt; das exakte Ergebnis gibt 2 weitere. Ein perfekter Tipp bringt also 5 Pkt insgesamt."
+    },
+    "winner": {
+      "q": "Was bedeutet 'Sieger getippt'?",
+      "a": "Den Ausgang richtig zu tippen (Heim, Auswärts oder Unentschieden). Wenn du 2-1 tippst und das Ergebnis 3-0 ist, hast du trotzdem den Sieger (Heim) und bekommst 3 Pkt."
+    },
+    "exact": {
+      "q": "Was bedeutet 'exaktes Ergebnis'?",
+      "a": "Die exakten Tore beider Teams richtig zu tippen. Wenn du 2-1 tippst und das Ergebnis genau 2-1 ist, gibt es 5 Pkt insgesamt (3 für den Sieger + 2 für das Exakte)."
+    },
+    "champion": {
+      "q": "Was ist der Meister-Tipp?",
+      "a": "Bei manchen Turnieren wählst du das Team, das du als Sieger siehst. Wenn du richtig liegst, gibt es 15 Bonus-Pkt. Bis zur Deadline kannst du ändern."
+    },
+    "topScorer": {
+      "q": "Was ist der Torschützenkönig-Tipp?",
+      "a": "Du wählst den Spieler, den du als Torschützenkönig siehst. Bei richtigem Tipp gibt es 15 Bonus-Pkt. Bis zur Deadline kannst du ändern."
+    },
+    "deadline": {
+      "q": "Bis wann kann ich tippen?",
+      "a": "Bis zum Anpfiff. Sobald das Spiel beginnt, ist dein Tipp gesperrt."
+    },
+    "changePick": {
+      "q": "Kann ich meinen Tipp ändern?",
+      "a": "Ja, beliebig oft vor Anpfiff. Nur der letzte Tipp zählt."
+    },
+    "privateGroups": {
+      "q": "Wie funktionieren private Gruppen?",
+      "a": "Private Gruppen lassen dich mit Freunden in einer separaten Rangliste antreten. Erstelle eine Gruppe und teile den Einladungscode. Jede Gruppe hat ihre eigene Wertung mit denselben Turnierpunkten."
+    },
+    "noPrediction": {
+      "q": "Was passiert, wenn ich nicht tippe?",
+      "a": "Wenn du nicht tippst, bekommst du einfach 0 Pkt für dieses Spiel. Keine Strafe."
+    },
+    "etPenalties": {
+      "q": "Was ist mit Verlängerung und Elfmeter?",
+      "a": "Tore in der Verlängerung zählen normal. Wenn es ins Elfmeterschießen geht, gilt das Spiel als Unentschieden — Elfmeter entscheiden nur den Aufstieg, nicht das Ergebnis."
+    },
+    "tieBreak": {
+      "q": "Wie wird bei Punktgleichheit entschieden?",
+      "a": "Bei Gleichstand entscheiden in dieser Reihenfolge: 1) meiste richtige Sieger, 2) meiste exakte Ergebnisse, 3) höchste Summe der Tore bei exakten Ergebnissen, 4) wer zuerst getippt hat.",
+      "exampleTitle": "Beispiel:",
+      "exampleNote": "Ana und Pablo haben gleich viele Punkte und exakte Tipps. Ana steht oben, weil ihre Summe der Tore bei exakten Tipps höher ist (3 vs 1).",
+      "colPos": "Pos.",
+      "colPlayer": "Spieler",
+      "colPoints": "Pkt",
+      "colExact": "Exakt",
+      "colGoals": "Tore"
+    }
+  }
+}
