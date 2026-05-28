@@ -1,6 +1,8 @@
 export const POINTS_CORRECT_RESULT = 3;
-export const POINTS_EXACT_SCORE = 3;
+export const POINTS_EXACT_SCORE = 2; // antes 3 — alineado a Prode Lemon (3+2=5)
 export const CAPTAIN_MULTIPLIER = 2;
+export const POINTS_CHAMPION = 15;
+export const POINTS_TOP_SCORER = 15;
 
 // Mundial 2026: 12 grupos × 4 equipos. Top-2 de cada grupo + 8 mejores terceros.
 export const R32_GROUPS_COUNT = 12;
