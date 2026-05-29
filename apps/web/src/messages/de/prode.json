@@ -19,7 +19,8 @@
     "predicted": "Getippt",
     "live": "Live",
     "results": "Ergebnisse",
-    "topScorer": "Torschützenkönig"
+    "topScorer": "Torschützenkönig",
+    "aria": "Tipps filtern"
   },
   "featured": {
     "champion": {
@@ -77,7 +78,10 @@
       "open": "Offen"
     },
     "scoreBonus": "Ergebnis-Bonus (+3 Pkt.)",
-    "captainCheck": "Kapitän (x2)"
+    "captainCheck": "Kapitän (x2)",
+    "homeScoreLabel": "Tore von {team}",
+    "awayScoreLabel": "Tore von {team}",
+    "pickAria": { "home": "Heimsieg", "draw": "Unentschieden", "away": "Auswärtssieg" }
   },
   "results": {
     "back": "← Zurück zu den Tipps",

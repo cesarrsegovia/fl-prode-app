@@ -19,7 +19,8 @@
     "predicted": "Predicted",
     "live": "Live",
     "results": "Results",
-    "topScorer": "Top Scorer"
+    "topScorer": "Top Scorer",
+    "aria": "Filter predictions"
   },
   "featured": {
     "champion": {
@@ -77,7 +78,10 @@
       "open": "Open"
     },
     "scoreBonus": "Score bonus (+3 pts)",
-    "captainCheck": "Captain (x2)"
+    "captainCheck": "Captain (x2)",
+    "homeScoreLabel": "{team} goals",
+    "awayScoreLabel": "{team} goals",
+    "pickAria": { "home": "Home win", "draw": "Draw", "away": "Away win" }
   },
   "results": {
     "back": "← Back to predictions",

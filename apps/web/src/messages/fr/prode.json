@@ -19,7 +19,8 @@
     "predicted": "Pronostiqués",
     "live": "En direct",
     "results": "Résultats",
-    "topScorer": "Buteurs"
+    "topScorer": "Buteurs",
+    "aria": "Filtrer les pronostics"
   },
   "featured": {
     "champion": {
@@ -77,7 +78,10 @@
       "open": "Ouvert"
     },
     "scoreBonus": "Bonus score (+3 pts)",
-    "captainCheck": "Capitaine (x2)"
+    "captainCheck": "Capitaine (x2)",
+    "homeScoreLabel": "Buts de {team}",
+    "awayScoreLabel": "Buts de {team}",
+    "pickAria": { "home": "Victoire à domicile", "draw": "Match nul", "away": "Victoire à l'extérieur" }
   },
   "results": {
     "back": "← Retour aux pronostics",

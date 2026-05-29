@@ -19,7 +19,8 @@
     "predicted": "Predichos",
     "live": "En Vivo",
     "results": "Resultados",
-    "topScorer": "Goleadores"
+    "topScorer": "Goleadores",
+    "aria": "Filtrar pronósticos"
   },
   "featured": {
     "champion": {
@@ -77,7 +78,10 @@
       "open": "Abierto"
     },
     "scoreBonus": "Bonus marcador (+3 pts)",
-    "captainCheck": "Capitán (x2)"
+    "captainCheck": "Capitán (x2)",
+    "homeScoreLabel": "Goles de {team}",
+    "awayScoreLabel": "Goles de {team}",
+    "pickAria": { "home": "Gana el local", "draw": "Empate", "away": "Gana el visitante" }
   },
   "results": {
     "back": "← Volver a pronósticos",
