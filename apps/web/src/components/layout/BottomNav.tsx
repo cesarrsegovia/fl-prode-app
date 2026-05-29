@@ -2,24 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  Home,
-  ListChecks,
-  Users,
-  Trophy,
-  ClipboardList,
-} from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
-
-const NAV = [
-  { href: '/home', labelKey: 'home', icon: Home, match: (p: string) => p === '/home' || p === '/' },
-  { href: '/prode', labelKey: 'prode', icon: ClipboardList, match: (p: string) => p.startsWith('/prode') },
-  { href: '/mundial', labelKey: 'worldCup', icon: Trophy, match: (p: string) => p.startsWith('/mundial') || p.startsWith('/torneo') },
-  { href: '/grupos', labelKey: 'groups', icon: Users, match: (p: string) => p.startsWith('/grupos') },
-  { href: '/ranking', labelKey: 'ranking', icon: ListChecks, match: (p: string) => p.startsWith('/ranking') },
-] as const;
+import { NAV_ITEMS, isNavItemActive } from '@/lib/navigation';
 
 /**
  * Tab bar inferior visible solo en mobile (md:hidden).
@@ -41,13 +27,14 @@ export function BottomNav() {
       className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-background/85 backdrop-blur-xl border-t border-line/40 pb-safe"
     >
       <ul className="grid grid-cols-5">
-        {NAV.map((item) => {
-          const active = item.match(pathname);
+        {NAV_ITEMS.map((item) => {
+          const active = isNavItemActive(item, pathname);
           const Icon = item.icon;
           return (
             <li key={item.href}>
               <Link
                 href={item.href}
+                aria-current={active ? 'page' : undefined}
                 className={cn(
                   'flex flex-col items-center gap-1 py-2.5',
                   active ? 'text-neon' : 'text-ink-muted',
