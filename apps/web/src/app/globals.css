@@ -20,6 +20,15 @@
   --brand:         #e9ac36;
   --brand-700:     #c79a2e;
   --accent-gold:   #f4d69c;
+
+  /* Marca en componentes RGB para alphas (rgb(var(--brand-rgb) / α)) */
+  --brand-rgb:     233 172 54;   /* = #e9ac36 */
+
+  /* ----- Medallas (ranking top 3) ----- */
+  --medal-gold:    #f4c430;
+  --medal-silver:  #c0c0c0;
+  --medal-bronze:  #cd7f32;
+
   --glow:          #181b22;
   --providercard:  #191919;
   --button1:       #0b0b0b;
@@ -74,7 +83,19 @@
 
   --radius:               0.625rem;
 
-  /* ----- Legacy aliases (compat con componentes existentes) ----- */
+  /* ===== @deprecated — Tokens legacy (Material). NO usar en código nuevo. =====
+     Equivalencias para migración (Fases 1–6):
+       surface-container-lowest  → surface  (--bg)
+       surface-container-low     → surface-1
+       surface-container / -high → surface-2
+       surface-container-highest → surface-3
+       on-surface / on-surface-variant → ink / ink-muted
+       primary-container / primary-fixed-dim → neon / accent-gold
+       outline-variant           → line
+       text-white  (literal)     → text-foreground
+       text-black  (literal)     → text-primary-foreground
+       text-red-400 (literal)    → text-destructive
+     Se elimina al cerrar las fases de dominio. ===== */
   --surface-container-lowest:  var(--bg);
   --surface-container-low:     var(--surface-1);
   --surface-container:         var(--surface-2);
@@ -128,6 +149,9 @@
   --color-chalk:                var(--chalk);
   --color-brand:                var(--brand);
   --color-brand-700:            var(--brand-700);
+  --color-medal-gold:   var(--medal-gold);
+  --color-medal-silver: var(--medal-silver);
+  --color-medal-bronze: var(--medal-bronze);
   --color-barra:                var(--barra);
   --color-providercard:         var(--providercard);
   --color-button1:              var(--button1);
@@ -175,10 +199,11 @@
   --font-heading: var(--font-display), system-ui, sans-serif;
   --font-display: var(--font-display), system-ui, sans-serif;
 
-  /* Glows reutilizables */
-  --shadow-glow:        0 0 24px rgba(240, 194, 75, 0.35);
+  /* Glows reutilizables — derivados del dorado de marca */
+  --shadow-glow:        0 0 24px rgb(var(--brand-rgb) / 0.35);
   --shadow-neon:        var(--shadow-glow);
-  --shadow-neon-strong: 0 0 44px rgba(240, 194, 75, 0.5);
+  --shadow-neon-sm:     0 0 8px rgb(var(--brand-rgb) / 0.30);
+  --shadow-neon-strong: 0 0 44px rgb(var(--brand-rgb) / 0.50);
   --shadow-elev:        0 14px 36px rgb(0 0 0 / 0.48);
 }
 
@@ -234,7 +259,7 @@
 
   /* Selección gold */
   ::selection {
-    background: rgb(233 172 54 / 0.42);
+    background: rgb(var(--brand-rgb) / 0.42);
     color: var(--chalk);
   }
 
@@ -274,7 +299,7 @@
   /* Text con leve neon glow para títulos del torneo */
   .text-neon-glow {
     color: var(--neon);
-    text-shadow: 0 0 24px rgb(240 194 75 / 0.55);
+    text-shadow: 0 0 24px rgb(var(--brand-rgb) / 0.55);
   }
 
   /* Borde-tarjeta destacado */
@@ -288,6 +313,14 @@
   }
   .bg-surface-bright {
     background: var(--surface-3);
+  }
+
+  /* Safe-area (notch / home indicator iOS) */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .pb-nav {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom));
   }
 }
 
@@ -307,4 +340,14 @@ input:disabled,
 select:disabled,
 textarea:disabled {
   cursor: not-allowed;
+}
+
+/* Respeta la preferencia del sistema de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
