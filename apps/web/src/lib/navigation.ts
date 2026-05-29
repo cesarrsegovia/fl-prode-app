@@ -33,7 +33,7 @@ export const ADMIN_NAV_ITEM = {
 } as const;
 
 export function isNavItemActive(
-  item: { matchPrefixes: string[]; matchRoot?: boolean },
+  item: { matchPrefixes: readonly string[]; matchRoot?: boolean },
   pathname: string,
 ): boolean {
   if (item.matchRoot && pathname === '/') return true;
