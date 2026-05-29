@@ -322,6 +322,14 @@
   .pb-nav {
     padding-bottom: calc(4rem + env(safe-area-inset-bottom));
   }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* Cursor pointer global — fuera de @layer para ganarle al Preflight de
