@@ -10,6 +10,7 @@ import {
 import { pronosticos } from '@/lib/endpoints';
 import { MatchCard, type MatchPick } from './MatchCard';
 import { Countdown } from './Countdown';
+import { PercentBar } from '@/components/ui/percent-bar';
 
 interface Props {
   fixture: FixtureWithMatches;
@@ -163,55 +164,48 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
 
   return (
     <div className="space-y-6">
-      <div
-        className="rounded-xl p-4 flex items-center justify-between"
-        style={{ background: 'var(--surface-container-low)' }}
-      >
+      <div className="rounded-xl p-4 flex items-center justify-between gap-4 bg-surface-1">
         <div>
-          <p className="text-xs uppercase tracking-widest text-on-surface-variant font-bold">
+          <p className="text-xs uppercase tracking-widest text-ink-muted font-bold">
             {isKnockoutFixture ? t('nextClose') : t('closesIn')}
           </p>
           {nextOpenDeadline ? (
             <Countdown targetDate={nextOpenDeadline} />
           ) : (
-            <p className="text-sm font-bold text-on-surface-variant">
-              {t('closed')}
-            </p>
+            <p className="text-sm font-bold text-ink-muted">{t('closed')}</p>
           )}
         </div>
-        <div className="text-right">
-          <p className="text-xs uppercase tracking-widest text-on-surface-variant font-bold">
+        <div className="text-right min-w-0">
+          <p className="text-xs uppercase tracking-widest text-ink-muted font-bold">
             {t('progress')}
           </p>
-          <p className="text-sm font-bold text-white">
+          <p className="text-sm font-bold text-foreground">
             {t('progressValue', { filled: filledCount, total: totalMatches })}
           </p>
-          <div className="w-40 bg-surface-container-highest rounded-full h-1.5 mt-1">
-            <div
-              className="bg-primary h-full rounded-full transition-all"
-              style={{
-                width: `${totalMatches ? (filledCount / totalMatches) * 100 : 0}%`,
-              }}
-            />
-          </div>
+          <PercentBar
+            value={filledCount}
+            max={totalMatches}
+            tone="neon"
+            label={t('progressValue', { filled: filledCount, total: totalMatches })}
+            className="mt-1 w-32 sm:w-40 ml-auto"
+          />
         </div>
       </div>
 
       {!allClosed && !isKnockoutFixture && (
-        <div
-          className="rounded-xl p-4 flex items-center justify-between gap-4"
-          style={{ background: 'var(--surface-container-low)' }}
-        >
+        <div className="rounded-xl p-4 flex items-center justify-between gap-4 bg-surface-1">
           <div>
-            <p className="text-xs uppercase tracking-widest text-on-surface-variant font-bold">
+            <p
+              id="captain-label"
+              className="text-xs uppercase tracking-widest text-ink-muted font-bold"
+            >
               {t('captainTitle')}
             </p>
-            <p className="text-sm font-bold text-white">
-              {t('captainDesc')}
-            </p>
+            <p className="text-sm font-bold text-foreground">{t('captainDesc')}</p>
           </div>
           <select
-            className="bg-surface-container-highest text-white text-sm rounded-lg py-2 px-3 font-medium"
+            aria-labelledby="captain-label"
+            className="bg-surface-2 text-foreground text-sm rounded-lg py-2 px-3 font-medium focus-visible:ring-2 focus-visible:ring-neon focus-visible:outline-none"
             value={captainId ?? ''}
             onChange={(e) => setCaptainId(e.target.value || null)}
           >
@@ -243,7 +237,7 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
                     type="button"
                     onClick={() => savePick(match.id)}
                     disabled={savingMatchId === match.id}
-                    className="text-xs font-bold text-primary hover:underline disabled:opacity-50"
+                    className="text-xs font-bold text-neon hover:underline disabled:opacity-50"
                   >
                     {savingMatchId === match.id
                       ? t('saving')
@@ -257,17 +251,21 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
       </div>
 
       {submitError && (
-        <p className="text-sm font-bold text-red-400">{submitError}</p>
+        <p role="alert" className="text-sm font-bold text-destructive">
+          {submitError}
+        </p>
       )}
       {successMsg && (
-        <p className="text-sm font-bold text-primary">{successMsg}</p>
+        <p aria-live="polite" className="text-sm font-bold text-neon">
+          {successMsg}
+        </p>
       )}
 
       {!allClosed && (
         <button
           type="button"
           onClick={saveAll}
-          className="w-full h-14 bg-primary text-black font-extrabold text-lg rounded-xl active:scale-[0.98] transition-transform"
+          className="w-full h-14 bg-neon text-primary-foreground font-extrabold text-lg rounded-xl active:scale-[0.98] transition-transform"
         >
           {t('saveAll')}
         </button>
