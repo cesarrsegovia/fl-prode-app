@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { cn } from '@/lib/utils';
+import { PillTabs, type PillTab } from '@/components/ui/pill-tabs';
 
 export type PredictionsFilter =
   | 'pending'
@@ -26,41 +26,20 @@ interface Props {
 
 export function PredictionsFilterTabs({ value, onChange, counts }: Props) {
   const t = useTranslations('prode.tabs');
+  const tabs: PillTab<PredictionsFilter>[] = ORDER.map((k) => ({
+    value: k,
+    label: t(k),
+    count: counts?.[k],
+  }));
+
   return (
-    <div className="-mx-4 overflow-x-auto px-4">
-      <div className="flex gap-2 w-max">
-        {ORDER.map((k) => {
-          const active = value === k;
-          const count = counts?.[k];
-          return (
-            <button
-              key={k}
-              type="button"
-              onClick={() => onChange(k)}
-              className={cn(
-                'flex shrink-0 items-center gap-2 rounded-full px-3 py-1.5 text-sm font-display font-bold transition-colors',
-                active
-                  ? 'bg-neon text-primary-foreground'
-                  : 'bg-surface-2 text-ink-muted hover:bg-surface-3 hover:text-foreground',
-              )}
-            >
-              <span>{t(k)}</span>
-              {typeof count === 'number' && (
-                <span
-                  className={cn(
-                    'rounded-full px-1.5 text-[10px]',
-                    active
-                      ? 'bg-primary-foreground/20'
-                      : 'bg-foreground/10 text-foreground',
-                  )}
-                >
-                  {count}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
+    <div className="-mx-4 px-4">
+      <PillTabs
+        tabs={tabs}
+        value={value}
+        onValueChange={onChange}
+        aria-label={t('aria')}
+      />
     </div>
   );
 }
