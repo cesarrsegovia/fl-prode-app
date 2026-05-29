@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { ChevronRight, Trophy, Check } from 'lucide-react';
 import type { FixtureWithMatches } from '@prode/shared';
+import { MatchStatus } from '@prode/shared';
 import {
   bracketPick,
   fixtures,
@@ -25,6 +26,7 @@ import {
   type PredictionsFilter,
 } from '@/components/prode/PredictionsFilterTabs';
 import { FeaturedPickCard } from '@/components/prode/FeaturedPickCard';
+import { formatDeadline } from '@/lib/date';
 
 interface TournamentSummary {
   id: string;
@@ -32,21 +34,10 @@ interface TournamentSummary {
   startDate: string | null;
 }
 
-function formatDeadline(date: string | null): string {
-  if (!date) return '—';
-  try {
-    return new Intl.DateTimeFormat(undefined, {
-      day: 'numeric',
-      month: 'short',
-    }).format(new Date(date));
-  } catch {
-    return '—';
-  }
-}
-
 export default function ProdePage() {
   const t = useTranslations('prode');
   const tFeat = useTranslations('prode.featured');
+  const locale = useLocale();
   const [tournament, setTournament] = useState<TournamentSummary | null>(null);
   const [items, setItems] = useState<FixtureWithMatches[]>([]);
   const [predictedMatchIds, setPredictedMatchIds] = useState<Set<string>>(
@@ -88,8 +79,8 @@ export default function ProdePage() {
     [allMatches, predictedMatchIds],
   );
   const total = allMatches.length;
-  const live = allMatches.filter((m) => m.status === 'LIVE').length;
-  const finished = allMatches.filter((m) => m.status === 'FINISHED').length;
+  const live = allMatches.filter((m) => m.status === MatchStatus.LIVE).length;
+  const finished = allMatches.filter((m) => m.status === MatchStatus.FINISHED).length;
   const pending = Math.max(total - predicted - live - finished, 0);
   const counts = {
     pending,
@@ -99,7 +90,7 @@ export default function ProdePage() {
     topScorer: topPick ? 1 : 0,
   };
 
-  const deadlineLabel = formatDeadline(tournament?.startDate ?? null);
+  const deadlineLabel = formatDeadline(tournament?.startDate ?? null, locale);
 
   return (
     <main className="pt-24 pb-24 px-4 max-w-3xl mx-auto">
