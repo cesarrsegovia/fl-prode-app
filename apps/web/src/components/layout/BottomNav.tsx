@@ -36,7 +36,10 @@ export function BottomNav() {
   if (pathname.startsWith('/admin')) return null;
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-background/85 backdrop-blur-xl border-t border-line/40">
+    <nav
+      aria-label={t('landmarks.bottom')}
+      className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-background/85 backdrop-blur-xl border-t border-line/40 pb-safe"
+    >
       <ul className="grid grid-cols-5">
         {NAV.map((item) => {
           const active = item.match(pathname);
