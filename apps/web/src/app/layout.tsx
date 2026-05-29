@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Bricolage_Grotesque, Inter_Tight } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
@@ -32,6 +32,10 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+export const viewport: Viewport = {
+  viewportFit: 'cover',
+};
+
 export default async function RootLayout({
   children,
 }: {
@@ -55,7 +59,7 @@ export default async function RootLayout({
           <AuthProvider>
             <RealtimeProvider>
               <Navbar />
-              <div className="flex-1 relative z-10 pb-16 md:pb-0">
+              <div className="flex-1 relative z-10 pb-nav md:pb-0">
                 {children}
               </div>
               <Footer />
