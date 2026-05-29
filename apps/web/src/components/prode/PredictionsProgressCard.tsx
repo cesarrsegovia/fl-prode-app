@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { TrendingUp } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { PercentBar } from '@/components/ui/percent-bar';
 
 interface Props {
   predicted: number;
@@ -30,12 +31,13 @@ export function PredictionsProgressCard({ predicted, total }: Props) {
             <TrendingUp size={18} />
           </div>
         </div>
-        <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-surface-2">
-          <div
-            className="h-full rounded-full bg-neon transition-all"
-            style={{ width: `${pct}%` }}
-          />
-        </div>
+        <PercentBar
+          value={predicted}
+          max={total}
+          tone="neon"
+          label={t('percent', { pct })}
+          className="mt-3"
+        />
         <div className="mt-2 flex items-center justify-between text-xs font-display font-bold">
           <span className="text-ink-muted">{t('pending', { pending })}</span>
           <span className="text-foreground">{t('percent', { pct })}</span>
