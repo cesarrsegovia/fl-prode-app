@@ -1,15 +1,16 @@
 'use client';
 
-import { use, useEffect, useMemo, useState } from 'react';
+import { use, useMemo } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import type { FixtureWithMatches, Match, Prediction } from '@prode/shared';
+import type { Match } from '@prode/shared';
 import { MatchStatus, Result } from '@prode/shared';
-import { fixtures, pronosticos } from '@/lib/endpoints';
+import { useFixtureWithPredictions } from '@/hooks/useFixtureWithPredictions';
 import { TeamFlag } from '@/components/torneo/TeamFlag';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
 import { cn } from '@/lib/utils';
 
 function resultFrom(match: Match): Result | null {
@@ -39,21 +40,8 @@ export default function ResultadosPage({
 }) {
   const t = useTranslations('prode');
   const { fechaId } = use(params);
-  const [fixture, setFixture] = useState<FixtureWithMatches | null>(null);
-  const [preds, setPreds] = useState<Prediction[]>([]);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    Promise.all([
-      fixtures.one(fechaId),
-      pronosticos.byFixture(fechaId).catch(() => []),
-    ])
-      .then(([fx, ps]) => {
-        setFixture(fx);
-        setPreds(ps as Prediction[]);
-      })
-      .catch((e) => setError(e?.message ?? t('fixture.loadError')));
-  }, [fechaId]);
+  const { fixture, predictions: preds, isLoading, error } =
+    useFixtureWithPredictions(fechaId);
 
   const totalPoints = useMemo(
     () => preds.reduce((acc, p) => acc + (p.pointsEarned ?? 0), 0),
@@ -63,12 +51,14 @@ export default function ResultadosPage({
   if (error) {
     return (
       <main className="pt-24 pb-12 px-4 max-w-3xl mx-auto">
-        <p className="text-sm text-destructive font-bold">{error}</p>
+        <p role="alert" className="text-sm text-destructive font-bold">
+          {error instanceof Error ? error.message : t('fixture.loadError')}
+        </p>
       </main>
     );
   }
 
-  if (!fixture) {
+  if (isLoading || !fixture) {
     return (
       <main className="pt-24 pb-12 px-4 max-w-3xl mx-auto">
         <Skeleton className="h-64 w-full" />
@@ -106,8 +96,16 @@ export default function ResultadosPage({
         </div>
       </header>
 
-      <ul className="space-y-3">
-        {fixture.matches.map((match) => {
+      {fixture.matches.length === 0 ? (
+        <Empty>
+          <EmptyHeader>
+            <EmptyTitle>{t('list.emptyTitle')}</EmptyTitle>
+            <EmptyDescription>{t('list.emptyDesc')}</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      ) : (
+        <ul className="space-y-3">
+          {fixture.matches.map((match) => {
           const realResult = resultFrom(match);
           const pred = predByMatch.get(match.id);
           const finished = match.status === MatchStatus.FINISHED;
@@ -123,20 +121,20 @@ export default function ResultadosPage({
             <Card key={match.id} className="bg-surface-1 border-line/60">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
                     <TeamFlag size="sm" src={home.flagUrl} alt={home.name} />
-                    <span className="font-display font-bold text-sm text-foreground">
+                    <span className="font-display font-bold text-sm text-foreground truncate">
                       {home.name}
                     </span>
                     <span className="font-display font-bold text-sm text-ink-dim">
                       vs
                     </span>
-                    <span className="font-display font-bold text-sm text-foreground">
+                    <span className="font-display font-bold text-sm text-foreground truncate">
                       {away.name}
                     </span>
                     <TeamFlag size="sm" src={away.flagUrl} alt={away.name} />
                   </div>
-                  <span className="text-xs uppercase tracking-[0.18em] font-display font-bold text-ink-muted tabular-nums">
+                  <span className="shrink-0 text-xs uppercase tracking-[0.18em] font-display font-bold text-ink-muted tabular-nums">
                     {finished
                       ? `${match.homeScore} - ${match.awayScore}`
                       : t('results.pending')}
@@ -202,8 +200,9 @@ export default function ResultadosPage({
               </CardContent>
             </Card>
           );
-        })}
-      </ul>
+          })}
+        </ul>
+      )}
     </main>
   );
 }
