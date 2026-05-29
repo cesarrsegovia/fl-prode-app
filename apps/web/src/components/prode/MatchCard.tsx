@@ -28,6 +28,12 @@ const RESULT_LABELS: Record<Result, string> = {
   [Result.AWAY]: '2',
 };
 
+const RESULT_ARIA_KEY: Record<Result, string> = {
+  [Result.HOME]: 'home',
+  [Result.DRAW]: 'draw',
+  [Result.AWAY]: 'away',
+};
+
 function teamFlag(match: Match, side: 'home' | 'away') {
   return side === 'home'
     ? (match.homeTeam?.flagUrl ?? null)
@@ -100,7 +106,7 @@ export function MatchCard({
         isLocked && 'opacity-60',
       )}
     >
-      <div className="p-5">
+      <div className="p-4 sm:p-5">
         <div className="flex justify-between items-center mb-4">
           <span className="text-[10px] font-display font-bold uppercase tracking-[0.18em] text-ink-muted">
             {kickoffLabel}
@@ -121,14 +127,14 @@ export function MatchCard({
           </span>
         </div>
 
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex-1 flex flex-col items-center gap-2">
+        <div className="flex items-center justify-between gap-2 sm:gap-4">
+          <div className="flex-1 min-w-0 flex flex-col items-center gap-2">
             <TeamFlag
               size="lg"
               src={teamFlag(match, 'home')}
               alt={teamName(match, 'home')}
             />
-            <p className="text-xs font-display font-bold uppercase tracking-tight text-foreground text-center">
+            <p className="text-xs font-display font-bold uppercase tracking-tight text-foreground text-center max-w-full truncate">
               {teamName(match, 'home')}
             </p>
             {match.status === MatchStatus.FINISHED &&
@@ -139,7 +145,7 @@ export function MatchCard({
               )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             {(Object.keys(RESULT_LABELS) as Result[]).map((r) => {
               const active = pick?.result === r;
               return (
@@ -147,9 +153,11 @@ export function MatchCard({
                   key={r}
                   type="button"
                   disabled={isLocked}
+                  aria-pressed={active}
+                  aria-label={t(`pickAria.${RESULT_ARIA_KEY[r]}`)}
                   onClick={() => setResult(r)}
                   className={cn(
-                    'size-12 rounded-lg font-display font-extrabold text-lg transition-all',
+                    'size-10 sm:size-12 rounded-lg font-display font-extrabold text-lg transition-all',
                     active
                       ? 'bg-neon text-primary-foreground glow-neon'
                       : 'bg-surface-2 text-foreground hover:bg-surface-3',
@@ -162,13 +170,13 @@ export function MatchCard({
             })}
           </div>
 
-          <div className="flex-1 flex flex-col items-center gap-2">
+          <div className="flex-1 min-w-0 flex flex-col items-center gap-2">
             <TeamFlag
               size="lg"
               src={teamFlag(match, 'away')}
               alt={teamName(match, 'away')}
             />
-            <p className="text-xs font-display font-bold uppercase tracking-tight text-foreground text-center">
+            <p className="text-xs font-display font-bold uppercase tracking-tight text-foreground text-center max-w-full truncate">
               {teamName(match, 'away')}
             </p>
             {match.status === MatchStatus.FINISHED &&
@@ -189,6 +197,8 @@ export function MatchCard({
               <input
                 className="w-10 h-8 bg-surface-2 rounded text-center text-sm font-display font-bold focus:ring-1 focus:ring-neon p-0 tabular-nums"
                 type="number"
+                inputMode="numeric"
+                aria-label={t('homeScoreLabel', { team: teamName(match, 'home') })}
                 min={0}
                 placeholder="0"
                 value={pick?.homeScoreGuess ?? ''}
@@ -198,6 +208,8 @@ export function MatchCard({
               <input
                 className="w-10 h-8 bg-surface-2 rounded text-center text-sm font-display font-bold focus:ring-1 focus:ring-neon p-0 tabular-nums"
                 type="number"
+                inputMode="numeric"
+                aria-label={t('awayScoreLabel', { team: teamName(match, 'away') })}
                 min={0}
                 placeholder="0"
                 value={pick?.awayScoreGuess ?? ''}
@@ -212,6 +224,7 @@ export function MatchCard({
             <label className="flex items-center gap-2 text-xs font-display font-bold text-ink-muted">
               <input
                 type="checkbox"
+                className="accent-neon focus-visible:ring-2 focus-visible:ring-neon focus-visible:outline-none"
                 checked={pick?.isCaptain ?? false}
                 onChange={(e) =>
                   onChange({ ...pick, isCaptain: e.target.checked })
