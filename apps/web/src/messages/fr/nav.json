@@ -35,5 +35,7 @@
   "language": {
     "label": "Langue"
   },
-  "faqTrigger": "Aide"
+  "faqTrigger": "Aide",
+  "skipToContent": "Aller au contenu",
+  "landmarks": { "primary": "Navigation principale", "bottom": "Navigation inférieure" }
 }

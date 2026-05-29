@@ -35,5 +35,7 @@
   "language": {
     "label": "Sprache"
   },
-  "faqTrigger": "Hilfe"
+  "faqTrigger": "Hilfe",
+  "skipToContent": "Zum Inhalt springen",
+  "landmarks": { "primary": "Hauptnavigation", "bottom": "Untere Navigation" }
 }
