@@ -64,17 +64,21 @@ export function Chat({
 
   return (
     <div
-      className="flex flex-col rounded-2xl overflow-hidden"
-      style={{ background: 'var(--surface-container-low)', height: '70vh' }}
+      className="flex flex-col rounded-2xl overflow-hidden bg-surface-1"
+      style={{ height: '70dvh' }}
     >
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto p-4 space-y-3"
+        aria-live="polite"
+        aria-atomic="false"
+      >
         {isLoading && (
           <div className="space-y-2">
             {Array.from({ length: 5 }).map((_, i) => (
               <div
                 key={i}
-                className="h-10 rounded-xl animate-pulse"
-                style={{ background: 'var(--surface-container-highest)' }}
+                className="h-10 rounded-xl animate-pulse bg-surface-3"
               />
             ))}
           </div>
@@ -82,10 +86,10 @@ export function Chat({
 
         {!isLoading && !items.length && (
           <div className="text-center pt-12">
-            <p className="text-sm text-on-surface-variant">
+            <p className="text-sm text-ink-muted">
               {t('emptyTitle')}
             </p>
-            <p className="text-xs text-on-surface-variant mt-1">
+            <p className="text-xs text-ink-muted mt-1">
               {t('emptyDesc')}
             </p>
           </div>
@@ -94,7 +98,7 @@ export function Chat({
         {grouped.map((g) => (
           <div key={g.day} className="space-y-2">
             <div className="flex justify-center">
-              <span className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant px-3 py-1 rounded-full" style={{ background: 'var(--surface-container-highest)' }}>
+              <span className="text-[10px] uppercase tracking-widest font-bold text-ink-muted bg-surface-3 px-3 py-1 rounded-full">
                 {g.day}
               </span>
             </div>
@@ -103,8 +107,7 @@ export function Chat({
               return (
                 <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
                   <div
-                    className={`max-w-[78%] px-3 py-2 rounded-2xl ${mine ? 'bg-primary text-black rounded-br-sm' : 'text-white rounded-bl-sm'}`}
-                    style={!mine ? { background: 'var(--surface-container-highest)' } : undefined}
+                    className={`max-w-[78%] px-3 py-2 rounded-2xl ${mine ? 'bg-neon text-primary-foreground rounded-br-sm' : 'bg-surface-3 text-foreground rounded-bl-sm'}`}
                   >
                     {!mine && (
                       <p className="text-[11px] font-bold opacity-80 mb-0.5">
@@ -114,7 +117,7 @@ export function Chat({
                     <p className="text-sm whitespace-pre-wrap wrap-break-word leading-snug">
                       {m.content}
                     </p>
-                    <p className={`text-[10px] mt-0.5 ${mine ? 'text-black/60' : 'opacity-60'}`}>
+                    <p className={`text-[10px] mt-0.5 ${mine ? 'text-primary-foreground/60' : 'opacity-60'}`}>
                       {formatTime(m.createdAt)}
                     </p>
                   </div>
@@ -126,28 +129,27 @@ export function Chat({
       </div>
 
       {error && (
-        <p className="text-xs text-red-400 px-4 pb-1">{error}</p>
+        <p role="alert" className="text-xs text-destructive px-4 pb-1">{error}</p>
       )}
 
       <form
         onSubmit={onSubmit}
-        className="flex gap-2 p-3 border-t border-white/5"
-        style={{ background: 'var(--surface-container)' }}
+        className="flex gap-2 p-3 border-t border-line bg-surface-2"
       >
         <input
           type="text"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder={t('placeholder')}
+          aria-label={t('placeholder')}
           maxLength={2000}
-          className="flex-1 bg-transparent px-3 py-2 rounded-lg text-sm text-white placeholder:text-on-surface-variant focus:outline-none"
-          style={{ background: 'var(--surface-container-low)' }}
+          className="flex-1 bg-surface-1 px-3 py-2 rounded-lg text-sm text-foreground placeholder:text-ink-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-neon"
           autoComplete="off"
         />
         <button
           type="submit"
           disabled={sending || !draft.trim()}
-          className="bg-primary text-black text-sm font-bold px-4 rounded-lg active:scale-95 transition-transform disabled:opacity-40 disabled:active:scale-100"
+          className="bg-neon text-primary-foreground text-sm font-bold px-4 rounded-lg active:scale-95 transition-transform disabled:opacity-40 disabled:active:scale-100"
         >
           {sending ? '…' : t('send')}
         </button>

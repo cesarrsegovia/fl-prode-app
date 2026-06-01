@@ -56,7 +56,8 @@
       "copy": "Copier",
       "copied": "Copié !",
       "copyFailed": "Impossible de copier",
-      "regenerate": "Régénérer"
+      "regenerate": "Régénérer",
+      "regenerateError": "Impossible de régénérer le code"
     }
   },
   "invitePage": {
