@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { AlertCircle, Loader2 } from 'lucide-react';
 
 function safeNext(raw: string | null): string {
   if (!raw) return '/home';
@@ -48,27 +49,20 @@ export default function LaunchPage() {
         {!error ? (
           <>
             <div className="flex items-center justify-center gap-2">
-              <span
-                className="animate-spin material-symbols-outlined text-primary-container text-4xl"
-                style={{ fontVariationSettings: "'FILL' 1" }}
-              >
-                progress_activity
-              </span>
+              <Loader2 className="size-9 animate-spin text-neon" />
             </div>
-            <p className="text-on-surface-variant text-sm font-medium tracking-wide uppercase">
+            <p className="text-ink-muted text-sm font-medium tracking-wide uppercase">
               Iniciando tu sesión…
             </p>
           </>
         ) : (
           <>
-            <span className="material-symbols-outlined text-error text-5xl">
-              error
-            </span>
-            <h1 className="text-2xl font-bold text-white">No pudimos ingresarte</h1>
-            <p className="text-sm text-on-surface-variant">{error}</p>
+            <AlertCircle className="mx-auto size-12 text-destructive" />
+            <h1 className="text-2xl font-bold text-foreground">No pudimos ingresarte</h1>
+            <p className="text-sm text-ink-muted">{error}</p>
             <button
               type="button"
-              className="text-primary-container font-bold hover:underline"
+              className="text-neon font-bold hover:underline"
               onClick={() => router.replace('/auth')}
             >
               Ir al login manual

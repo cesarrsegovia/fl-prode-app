@@ -127,7 +127,7 @@ export default function AdminGruposPage() {
                   )}
                 </div>
 
-                <div className="flex items-center gap-4 text-[10px] uppercase tracking-[0.18em] font-display font-bold text-ink-dim">
+                <div className="hidden md:flex items-center gap-4 text-[10px] uppercase tracking-[0.18em] font-display font-bold text-ink-dim">
                   <span>{t('members', { count: g._count.members })}</span>
                   <span>{t('messages', { count: g._count.messages })}</span>
                   <span>{t('events', { count: g._count.activities })}</span>

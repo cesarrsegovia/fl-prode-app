@@ -64,22 +64,23 @@ export default function AdminTorneosPage() {
         ),
       );
       if (unset) setPlayerId('');
-    } catch (e: any) {
-      const apiMsg = e?.response?.data?.message;
-      setError(apiMsg ?? e?.message ?? null);
+    } catch (e: unknown) {
+      const apiMsg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      const msg = e instanceof Error ? e.message : null;
+      setError(apiMsg ?? msg ?? null);
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <div className="mx-auto max-w-2xl p-6 space-y-4">
-      <h1 className="font-display text-2xl font-extrabold">{t('title')}</h1>
+    <div className="space-y-4">
       <p className="text-sm text-ink-muted">{t('description')}</p>
 
-      <label className="block text-sm font-bold">{t('tournamentLabel')}</label>
+      <label htmlFor="torneo-select" className="block text-sm font-bold">{t('tournamentLabel')}</label>
       <select
-        className="w-full rounded-md border border-line/40 bg-surface-1 px-3 py-2"
+        id="torneo-select"
+        className="w-full rounded border border-line bg-surface-1 px-3 py-2"
         value={selected}
         onChange={(e) => setSelected(e.target.value)}
       >
@@ -93,12 +94,13 @@ export default function AdminTorneosPage() {
 
       {selected && (
         <>
-          <label className="block text-sm font-bold">{t('playerLabel')}</label>
+          <label htmlFor="player-select" className="block text-sm font-bold">{t('playerLabel')}</label>
           {players.length === 0 ? (
             <p className="text-sm text-ink-muted">{t('noPlayers')}</p>
           ) : (
             <select
-              className="w-full rounded-md border border-line/40 bg-surface-1 px-3 py-2"
+              id="player-select"
+              className="w-full rounded border border-line bg-surface-1 px-3 py-2"
               value={playerId}
               onChange={(e) => setPlayerId(e.target.value)}
             >
@@ -117,7 +119,7 @@ export default function AdminTorneosPage() {
               type="button"
               disabled={!playerId || saving}
               onClick={() => save(false)}
-              className="rounded-md bg-neon px-3 py-2 text-sm font-bold text-background disabled:opacity-50"
+              className="rounded bg-neon px-3 py-2 text-sm font-bold text-primary-foreground disabled:opacity-50"
             >
               {t('saveCta')}
             </button>
@@ -125,7 +127,7 @@ export default function AdminTorneosPage() {
               type="button"
               disabled={saving}
               onClick={() => save(true)}
-              className="rounded-md border border-line/40 px-3 py-2 text-sm"
+              className="rounded border border-line px-3 py-2 text-sm"
             >
               {t('clearCta')}
             </button>

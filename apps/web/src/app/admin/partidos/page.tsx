@@ -199,8 +199,9 @@ function MatchEditor({
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 1500);
-    } catch (e: any) {
-      setError(e?.response?.data?.message ?? t('saveError'));
+    } catch (e: unknown) {
+      const m = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setError(m ?? t('saveError'));
     } finally {
       setSaving(false);
     }
@@ -216,8 +217,8 @@ function MatchEditor({
   return (
     <Card className="bg-surface-1 border-line">
       <CardContent className="p-4">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center gap-3 flex-wrap min-w-0">
             <TeamFlag
               size="sm"
               src={match.homeTeam?.flagUrl ?? null}
@@ -253,7 +254,7 @@ function MatchEditor({
             />
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <select
               value={status}
               onChange={(e) =>
@@ -291,7 +292,7 @@ function MatchEditor({
           </div>
         </div>
 
-        <div className="mt-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] font-display font-bold text-ink-dim">
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.18em] font-display font-bold text-ink-dim">
           <span>{kickoff}</span>
           {match.group && (
             <>

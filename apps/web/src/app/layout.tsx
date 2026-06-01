@@ -49,12 +49,6 @@ export default async function RootLayout({
       lang={locale}
       className={cn('dark', display.variable, body.variable)}
     >
-      <head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-          rel="stylesheet"
-        />
-      </head>
       <body className="min-h-screen flex flex-col relative">
         <a
           href="#main-content"

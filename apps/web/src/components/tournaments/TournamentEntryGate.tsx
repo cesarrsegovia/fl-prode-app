@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import {
   tournamentEntry,
   type TournamentEntryDto,
@@ -49,9 +50,7 @@ export function TournamentEntryGate({
   if (entry === undefined) {
     return (
       <div className="flex items-center justify-center p-6">
-        <span className="animate-spin material-symbols-outlined text-on-surface-variant">
-          progress_activity
-        </span>
+        <Loader2 className="size-6 animate-spin text-ink-muted" />
       </div>
     );
   }
@@ -75,25 +74,25 @@ export function TournamentEntryGate({
   };
 
   return (
-    <div className="glass-panel border border-outline-variant/10 rounded-2xl p-8 text-center space-y-4">
-      <h2 className="text-2xl font-bold text-white">
+    <div className="bg-surface-1 border border-line rounded-2xl p-8 text-center space-y-4">
+      <h2 className="text-2xl font-bold text-foreground">
         Inscripción al torneo
         {tournamentName ? ` · ${tournamentName}` : ''}
       </h2>
-      <p className="text-on-surface-variant">
+      <p className="text-ink-muted">
         Para participar tenés que abonar la entrada.
       </p>
-      <div className="text-4xl font-black text-primary-container">
+      <div className="text-4xl font-black text-neon">
         {fee.toLocaleString(undefined, {
           style: 'currency',
           currency,
         })}
       </div>
       {error && (
-        <p className="text-error text-sm font-medium">{error}</p>
+        <p role="alert" className="text-destructive text-sm font-medium">{error}</p>
       )}
       <button
-        className="w-full neon-gradient text-on-primary font-black py-4 rounded-xl uppercase tracking-tight disabled:opacity-50"
+        className="w-full bg-neon text-primary-foreground font-black py-4 rounded-xl uppercase tracking-tight disabled:opacity-50"
         type="button"
         disabled={submitting}
         onClick={handleJoin}
