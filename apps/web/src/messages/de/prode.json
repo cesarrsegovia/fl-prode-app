@@ -6,7 +6,8 @@
     "loadError": "Spieltage konnten nicht geladen werden",
     "emptyTitle": "Keine offenen Spieltage",
     "emptyDesc": "Derzeit gibt es keine Spieltage zum Tippen. Schau bald wieder vorbei.",
-    "predict": "Tippen"
+    "predict": "Tippen",
+    "noneInFilter": "Nichts in diesem Filter"
   },
   "progress": {
     "title": "Dein Fortschritt",
@@ -81,7 +82,11 @@
     "captainCheck": "Kapitän (x2)",
     "homeScoreLabel": "Tore von {team}",
     "awayScoreLabel": "Tore von {team}",
-    "pickAria": { "home": "Heimsieg", "draw": "Unentschieden", "away": "Auswärtssieg" }
+    "pickAria": {
+      "home": "Heimsieg",
+      "draw": "Unentschieden",
+      "away": "Auswärtssieg"
+    }
   },
   "results": {
     "back": "← Zurück zu den Tipps",

@@ -8,6 +8,7 @@
   "empty": "Todavía no hay datos en el ranking.",
   "streak": "Racha x{count}",
   "points": "pts",
+  "showMore": "Ver más",
   "subStats": {
     "correctWinners": "Ganadores acertados",
     "exactScores": "Resultados exactos",

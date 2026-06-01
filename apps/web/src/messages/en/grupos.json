@@ -93,6 +93,8 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "placeholder": "Write a message…",
-    "send": "Send"
+    "send": "Send",
+    "sendFailed": "Could not send",
+    "retry": "Retry"
   }
 }

@@ -2,6 +2,7 @@
   "eyebrow": "Inbox",
   "title": "Notifications.",
   "markAllRead": "Mark all as read ({count})",
+  "loadError": "Could not load notifications. Please try again.",
   "emptyTitle": "Empty inbox",
   "emptyDesc": "When points are calculated, a deadline approaches, or you climb the ranking, you'll see them here.",
   "types": {
