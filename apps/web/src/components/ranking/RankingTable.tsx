@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import type { RankingEntry } from '@prode/shared';
 import { PositionBadge } from './PositionBadge';
+import { UserAvatar } from '@/components/ui/user-avatar';
 
 interface Props {
   entries: RankingEntry[];
@@ -18,8 +19,7 @@ export function RankingTable({ entries, isLoading, highlightUserId }: Props) {
         {Array.from({ length: 5 }).map((_, i) => (
           <div
             key={i}
-            className="h-14 rounded-xl animate-pulse"
-            style={{ background: 'var(--surface-container-low)' }}
+            className="h-14 rounded-xl animate-pulse bg-surface-1"
           />
         ))}
       </div>
@@ -28,11 +28,8 @@ export function RankingTable({ entries, isLoading, highlightUserId }: Props) {
 
   if (!entries.length) {
     return (
-      <div
-        className="rounded-xl p-8 text-center"
-        style={{ background: 'var(--surface-container-low)' }}
-      >
-        <p className="text-sm text-on-surface-variant">
+      <div className="rounded-xl p-8 text-center bg-surface-1">
+        <p className="text-sm text-ink-muted">
           {t('empty')}
         </p>
       </div>
@@ -46,46 +43,40 @@ export function RankingTable({ entries, isLoading, highlightUserId }: Props) {
         return (
           <li
             key={e.userId}
-            className={`flex items-center gap-4 p-4 rounded-xl transition-colors ${
-              isMe ? 'ring-2 ring-primary' : ''
+            className={`flex items-center gap-4 p-4 rounded-xl transition-colors bg-surface-1 ${
+              isMe ? 'ring-2 ring-neon' : ''
             }`}
-            style={{ background: 'var(--surface-container-low)' }}
           >
             <PositionBadge position={e.position} />
-            {e.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={e.avatarUrl}
-                alt={e.username}
-                className="w-10 h-10 rounded-full object-cover"
-              />
-            ) : (
-              <div className="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-sm font-bold text-white">
-                {e.username?.slice(0, 2).toUpperCase() ?? '??'}
-              </div>
-            )}
+            <UserAvatar name={e.username} image={e.avatarUrl ?? null} size="default" />
             <div className="flex-1 min-w-0">
-              <p className="font-bold text-white truncate">{e.username}</p>
-              <div className="flex items-center gap-2 mt-0.5 text-[10px] font-bold text-on-surface-variant">
+              <p className="font-bold text-foreground truncate">{e.username}</p>
+              <div className="hidden sm:flex items-center gap-2 mt-0.5 text-[10px] font-bold text-ink-muted">
                 <span title={t('subStats.correctWinners')}>
-                  ✓ {e.correctWinners ?? 0}
+                  <span aria-hidden="true">✓</span>
+                  <span className="sr-only">{t('subStats.correctWinners')}: </span>
+                  {e.correctWinners ?? 0}
                 </span>
                 <span title={t('subStats.exactScores')}>
-                  🎯 {e.exactScores ?? 0}
+                  <span aria-hidden="true">🎯</span>
+                  <span className="sr-only">{t('subStats.exactScores')}: </span>
+                  {e.exactScores ?? 0}
                 </span>
                 <span title={t('subStats.exactGoalsSum')}>
-                  ⚽ {e.exactGoalsSum ?? 0}
+                  <span aria-hidden="true">⚽</span>
+                  <span className="sr-only">{t('subStats.exactGoalsSum')}: </span>
+                  {e.exactGoalsSum ?? 0}
                 </span>
               </div>
               {e.streak > 0 && (
-                <p className="text-[10px] font-bold uppercase tracking-widest text-primary mt-0.5">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-neon mt-0.5">
                   {t('streak', { count: e.streak })}
                 </p>
               )}
             </div>
             <div className="text-right">
-              <p className="text-lg font-black text-white">{e.total}</p>
-              <p className="text-[10px] font-bold uppercase text-on-surface-variant">
+              <p className="text-lg font-black text-foreground">{e.total}</p>
+              <p className="text-[10px] font-bold uppercase text-ink-muted">
                 {t('points')}
               </p>
             </div>

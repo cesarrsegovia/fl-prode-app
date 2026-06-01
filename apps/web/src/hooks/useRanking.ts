@@ -9,14 +9,19 @@ import { useRealtimeStore } from '@/store/useRealtimeStore';
 export function useRanking(groupId?: string) {
   const [entries, setEntries] = useState<RankingEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<unknown>(null);
   const socket = useRealtimeStore((s) => s.socket);
 
   const load = useCallback(() => {
     setIsLoading(true);
+    setError(null);
     const req = groupId ? ranking.group(groupId) : ranking.global();
     req
       .then(setEntries)
-      .catch((err) => console.error('ranking load', err))
+      .catch((err) => {
+        console.error('ranking load', err);
+        setError(err);
+      })
       .finally(() => setIsLoading(false));
   }, [groupId]);
 
@@ -33,5 +38,5 @@ export function useRanking(groupId?: string) {
     };
   }, [socket, load]);
 
-  return { entries, isLoading, refetch: load };
+  return { entries, isLoading, error, refetch: load };
 }
