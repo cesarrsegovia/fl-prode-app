@@ -8,6 +8,7 @@ import { admin, type AdminUserItem } from '@/lib/endpoints';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { UserAvatar } from '@/components/ui/user-avatar';
 import { cn } from '@/lib/utils';
 
 export default function AdminUsuariosPage() {
@@ -113,18 +114,7 @@ export default function AdminUsuariosPage() {
             <Card key={u.id} className="bg-surface-1 border-line">
               <CardContent className="p-4 flex items-center gap-4 flex-wrap">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  {u.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={u.avatarUrl}
-                      alt={u.username}
-                      className="h-10 w-10 rounded-full object-cover shrink-0"
-                    />
-                  ) : (
-                    <div className="h-10 w-10 rounded-full bg-surface-2 flex items-center justify-center text-xs font-display font-extrabold shrink-0">
-                      {u.username.slice(0, 2).toUpperCase()}
-                    </div>
-                  )}
+                  <UserAvatar name={u.username} image={u.avatarUrl} size="default" />
                   <div className="min-w-0">
                     <p className="font-display font-bold text-sm text-foreground truncate">
                       {u.username}
@@ -138,7 +128,7 @@ export default function AdminUsuariosPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4 text-[10px] uppercase tracking-[0.18em] font-display font-bold text-ink-dim">
+                <div className="hidden sm:flex items-center gap-4 text-[10px] uppercase tracking-[0.18em] font-display font-bold text-ink-dim">
                   <span>{t('preds', { count: u._count.predictions })}</span>
                   <span>{t('groups', { count: u._count.memberships })}</span>
                   <span>{t('since', { date: format.dateTime(new Date(u.createdAt), { day: '2-digit', month: 'short', year: 'numeric' }) })}</span>
