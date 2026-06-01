@@ -8,6 +8,7 @@
   "empty": "No ranking data yet.",
   "streak": "Streak x{count}",
   "points": "pts",
+  "showMore": "Show more",
   "subStats": {
     "correctWinners": "Correct winners",
     "exactScores": "Exact scores",

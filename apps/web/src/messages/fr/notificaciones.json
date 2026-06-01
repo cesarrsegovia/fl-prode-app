@@ -2,6 +2,7 @@
   "eyebrow": "Inbox",
   "title": "Notifications.",
   "markAllRead": "Tout marquer comme lu ({count})",
+  "loadError": "Impossible de charger les notifications. Veuillez réessayer.",
   "emptyTitle": "Boîte vide",
   "emptyDesc": "Lorsque des points sont calculés, qu'une clôture approche ou que vous montez au classement, vous les verrez ici.",
   "types": {

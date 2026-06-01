@@ -5,6 +5,18 @@ import { useFormatter, useTranslations } from 'next-intl';
 import { useGroupChat } from '@/hooks/useGroupChat';
 import type { ChatMessage } from '@/lib/endpoints';
 
+type OptimisticStatus = 'sending' | 'failed';
+
+interface OptimisticMessage {
+  tempId: string;
+  content: string;
+  status: OptimisticStatus;
+  // id real devuelto por la API una vez que el envío resolvió OK. La
+  // reconciliación se hace por este id (no por contenido), de modo que mensajes
+  // de contenido repetido no se eliminan entre sí.
+  realId?: string;
+}
+
 type Grouped = { day: string; items: ChatMessage[] };
 
 export function Chat({
@@ -18,8 +30,25 @@ export function Chat({
   const format = useFormatter();
   const { items, isLoading, error, send, sending } = useGroupChat(groupId);
   const [draft, setDraft] = useState('');
+  const [optimisticMsgs, setOptimisticMsgs] = useState<OptimisticMessage[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastIdRef = useRef<string | null>(null);
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
+
+  // Reconciliación por id real (no por contenido): una vez que `send` resuelve
+  // OK, el optimista guarda su `realId`. Cuando ese mismo id aparece en la lista
+  // real (el realtime `onNew` lo inserta y dedupea por id), quitamos el
+  // placeholder. Mensajes de contenido repetido nunca se borran entre sí.
+  useEffect(() => {
+    if (!optimisticMsgs.length) return;
+    const realIds = new Set(items.map((m) => m.id));
+    setOptimisticMsgs((prev) => {
+      const next = prev.filter((om) => !(om.realId && realIds.has(om.realId)));
+      return next.length === prev.length ? prev : next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items]);
 
   const formatTime = (iso: string) =>
     format.dateTime(new Date(iso), { hour: '2-digit', minute: '2-digit' });
@@ -57,9 +86,54 @@ export function Chat({
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const text = draft;
+    const text = draft.trim();
+    if (!text) return;
+
+    const tempId = crypto.randomUUID();
     setDraft('');
-    await send(text);
+    setOptimisticMsgs((prev) => [
+      ...prev,
+      { tempId, content: text, status: 'sending' },
+    ]);
+
+    await dispatchSend(text, tempId);
+    // En éxito: se guarda el id real en el placeholder y el useEffect lo quita
+    // cuando el realtime echoea ese mismo id. En fallo real: queda como 'failed'.
+  };
+
+  // Envía y reconcilia un placeholder por su id real. Si el envío falla de
+  // verdad (devuelve null), lo marca 'failed'. Un null por concurrencia ya no
+  // ocurre: `send` permite envíos concurrentes.
+  const dispatchSend = async (text: string, tempId: string) => {
+    const created = await send(text);
+    if (!created) {
+      setOptimisticMsgs((prev) =>
+        prev.map((om) =>
+          om.tempId === tempId ? { ...om, status: 'failed' } : om,
+        ),
+      );
+      return;
+    }
+    // Si el echo del socket ya llegó, el id real ya está en `items`: quitamos el
+    // placeholder directamente. Si todavía no llegó, guardamos el realId y el
+    // useEffect lo limpiará cuando aparezca.
+    const alreadyEchoed = itemsRef.current.some((m) => m.id === created.id);
+    setOptimisticMsgs((prev) =>
+      alreadyEchoed
+        ? prev.filter((om) => om.tempId !== tempId)
+        : prev.map((om) =>
+            om.tempId === tempId ? { ...om, realId: created.id } : om,
+          ),
+    );
+  };
+
+  const retryOptimistic = async (om: OptimisticMessage) => {
+    setOptimisticMsgs((prev) =>
+      prev.map((m) =>
+        m.tempId === om.tempId ? { ...m, status: 'sending' } : m,
+      ),
+    );
+    await dispatchSend(om.content, om.tempId);
   };
 
   return (
@@ -124,6 +198,35 @@ export function Chat({
                 </div>
               );
             })}
+          </div>
+        ))}
+
+        {optimisticMsgs.map((om) => (
+          <div key={om.tempId} className="flex justify-end">
+            <div
+              className={`max-w-[78%] px-3 py-2 rounded-2xl rounded-br-sm transition-opacity ${
+                om.status === 'sending'
+                  ? 'bg-neon text-primary-foreground opacity-50'
+                  : 'bg-destructive/15 text-destructive border border-destructive/40'
+              }`}
+            >
+              <p className="text-sm whitespace-pre-wrap wrap-break-word leading-snug">
+                {om.content}
+              </p>
+              {om.status === 'failed' && (
+                <div role="alert" className="mt-1 flex items-center gap-2">
+                  <span className="text-[10px] font-medium">{t('sendFailed')}</span>
+                  <button
+                    type="button"
+                    onClick={() => retryOptimistic(om)}
+                    disabled={sending}
+                    className="text-[10px] font-bold underline underline-offset-2 hover:no-underline disabled:opacity-40 disabled:no-underline"
+                  >
+                    {t('retry')}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         ))}
       </div>

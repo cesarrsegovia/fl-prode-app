@@ -129,42 +129,6 @@ export default function Page() {
           </div>
         </section>
 
-        <section className="py-24 bg-surface-1 relative">
-          <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="text-center space-y-2">
-              <div className="text-4xl md:text-5xl font-black text-foreground">
-                500k+
-              </div>
-              <div className="text-xs font-bold text-ink-muted uppercase tracking-widest">
-                {t("stats.predictions")}
-              </div>
-            </div>
-            <div className="text-center space-y-2">
-              <div className="text-4xl md:text-5xl font-black text-neon">
-                150+
-              </div>
-              <div className="text-xs font-bold text-ink-muted uppercase tracking-widest">
-                {t("stats.tournaments")}
-              </div>
-            </div>
-            <div className="text-center space-y-2">
-              <div className="text-4xl md:text-5xl font-black text-foreground">
-                2.5m
-              </div>
-              <div className="text-xs font-bold text-ink-muted uppercase tracking-widest">
-                {t("stats.goals")}
-              </div>
-            </div>
-            <div className="text-center space-y-2">
-              <div className="text-4xl md:text-5xl font-black text-neon">
-                #1
-              </div>
-              <div className="text-xs font-bold text-ink-muted uppercase tracking-widest">
-                {t("stats.country")}
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
     </>
   );

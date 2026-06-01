@@ -6,7 +6,8 @@
     "loadError": "Failed to load matchdays",
     "emptyTitle": "No open matchdays",
     "emptyDesc": "There are no matchdays to predict right now. Come back soon.",
-    "predict": "Predict"
+    "predict": "Predict",
+    "noneInFilter": "Nothing in this filter"
   },
   "progress": {
     "title": "Your Progress",
@@ -81,7 +82,11 @@
     "captainCheck": "Captain (x2)",
     "homeScoreLabel": "{team} goals",
     "awayScoreLabel": "{team} goals",
-    "pickAria": { "home": "Home win", "draw": "Draw", "away": "Away win" }
+    "pickAria": {
+      "home": "Home win",
+      "draw": "Draw",
+      "away": "Away win"
+    }
   },
   "results": {
     "back": "← Back to predictions",

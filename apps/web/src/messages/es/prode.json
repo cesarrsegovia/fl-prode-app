@@ -6,7 +6,8 @@
     "loadError": "Error al cargar fechas",
     "emptyTitle": "Sin fechas abiertas",
     "emptyDesc": "No hay fechas para pronosticar por ahora. Volvé pronto.",
-    "predict": "Pronosticar"
+    "predict": "Pronosticar",
+    "noneInFilter": "No hay nada en este filtro"
   },
   "progress": {
     "title": "Tu Progreso",
@@ -81,7 +82,11 @@
     "captainCheck": "Capitán (x2)",
     "homeScoreLabel": "Goles de {team}",
     "awayScoreLabel": "Goles de {team}",
-    "pickAria": { "home": "Gana el local", "draw": "Empate", "away": "Gana el visitante" }
+    "pickAria": {
+      "home": "Gana el local",
+      "draw": "Empate",
+      "away": "Gana el visitante"
+    }
   },
   "results": {
     "back": "← Volver a pronósticos",

@@ -8,6 +8,7 @@
   "empty": "Noch keine Ranglistendaten.",
   "streak": "Serie x{count}",
   "points": "Pkt.",
+  "showMore": "Mehr anzeigen",
   "subStats": {
     "correctWinners": "Richtige Sieger",
     "exactScores": "Exakte Ergebnisse",

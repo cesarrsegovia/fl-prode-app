@@ -2,6 +2,7 @@
   "eyebrow": "Inbox",
   "title": "Benachrichtigungen.",
   "markAllRead": "Alle als gelesen markieren ({count})",
+  "loadError": "Benachrichtigungen konnten nicht geladen werden. Bitte erneut versuchen.",
   "emptyTitle": "Leerer Posteingang",
   "emptyDesc": "Wenn Punkte berechnet werden, ein Schluss naht oder du in der Rangliste aufsteigst, siehst du sie hier.",
   "types": {

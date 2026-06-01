@@ -92,6 +92,32 @@ export default function ProdePage() {
 
   const deadlineLabel = formatDeadline(tournament?.startDate ?? null, locale);
 
+  // Filtra las fechas según el estado de sus partidos. Una fecha se incluye
+  // si tiene al menos un partido que coincide con el filtro activo.
+  const filteredItems = useMemo(() => {
+    if (filter === 'topScorer') return [];
+    return items.filter((fx) =>
+      fx.matches.some((m) => {
+        const isPredicted = predictedMatchIds.has(m.id);
+        switch (filter) {
+          case 'predicted':
+            return isPredicted;
+          case 'live':
+            return m.status === MatchStatus.LIVE;
+          case 'results':
+            return m.status === MatchStatus.FINISHED;
+          case 'pending':
+          default:
+            return (
+              !isPredicted &&
+              m.status !== MatchStatus.LIVE &&
+              m.status !== MatchStatus.FINISHED
+            );
+        }
+      }),
+    );
+  }, [items, filter, predictedMatchIds]);
+
   return (
     <main className="pt-24 pb-24 px-4 max-w-3xl mx-auto">
       <header className="mb-8">
@@ -200,9 +226,20 @@ export default function ProdePage() {
         </Card>
       )}
 
-      {filter !== 'topScorer' && (
+      {!isLoading && !error && filter !== 'topScorer' &&
+        filteredItems.length === 0 &&
+        !(filter === 'pending' && pending === 0) &&
+        items.length > 0 && (
+          <Empty>
+            <EmptyHeader>
+              <EmptyTitle>{t('list.noneInFilter')}</EmptyTitle>
+            </EmptyHeader>
+          </Empty>
+        )}
+
+      {filter !== 'topScorer' && filteredItems.length > 0 && (
         <ul className="space-y-4">
-          {items.map((fx) => {
+          {filteredItems.map((fx) => {
             const previews = fx.matches.slice(0, 4);
             return (
               <li key={fx.id}>

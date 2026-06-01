@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { WS_EVENTS } from '@prode/shared';
 import { messages, type ChatMessage } from '@/lib/endpoints';
 import { useRealtimeStore } from '@/store/useRealtimeStore';
@@ -10,6 +10,7 @@ export function useGroupChat(groupId: string | null | undefined) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
+  const inFlightRef = useRef(0);
 
   const socket = useRealtimeStore((s) => s.socket);
   const joinGroup = useRealtimeStore((s) => s.joinGroup);
@@ -53,23 +54,31 @@ export function useGroupChat(groupId: string | null | undefined) {
     };
   }, [socket, groupId, joinGroup, leaveGroup]);
 
+  // Devuelve el mensaje creado (con su id real) en éxito, o null si falló de
+  // verdad. Permite envíos concurrentes (no rechaza por concurrencia): el
+  // estado `sending` solo refleja el botón mientras hay al menos un envío en
+  // curso, sin marcar como fallido lo que no tuvo error real.
   const send = useCallback(
-    async (content: string) => {
+    async (content: string): Promise<ChatMessage | null> => {
       const trimmed = content.trim();
-      if (!groupId || !trimmed || sending) return;
+      if (!groupId || !trimmed) return null;
+      inFlightRef.current += 1;
       setSending(true);
       try {
-        await messages.send(groupId, trimmed);
+        const created = await messages.send(groupId, trimmed);
+        return created;
       } catch (e: unknown) {
         const message =
           (e as { response?: { data?: { message?: string } } })?.response?.data?.message ??
           'No se pudo enviar el mensaje';
         setError(message);
+        return null;
       } finally {
-        setSending(false);
+        inFlightRef.current -= 1;
+        if (inFlightRef.current === 0) setSending(false);
       }
     },
-    [groupId, sending],
+    [groupId],
   );
 
   return { items, isLoading, error, send, sending };

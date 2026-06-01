@@ -11,6 +11,7 @@ import { pronosticos } from '@/lib/endpoints';
 import { MatchCard, type MatchPick } from './MatchCard';
 import { Countdown } from './Countdown';
 import { PercentBar } from '@/components/ui/percent-bar';
+import { Loader2 } from 'lucide-react';
 
 interface Props {
   fixture: FixtureWithMatches;
@@ -38,6 +39,7 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
     buildInitialPicks(initialPredictions),
   );
   const [savingMatchId, setSavingMatchId] = useState<string | null>(null);
+  const [isSavingAll, setIsSavingAll] = useState(false);
   const [captainId, setCaptainId] = useState<string | null>(
     () =>
       initialPredictions?.find((p) => p.isCaptain)?.matchId ?? null,
@@ -142,6 +144,7 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
       setSubmitError(t('needOne'));
       return;
     }
+    setIsSavingAll(true);
     try {
       for (const [matchId, pick] of entries) {
         await pronosticos.upsert({
@@ -159,6 +162,8 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
       setSubmitError(
         err?.response?.data?.message ?? t('saveAllError'),
       );
+    } finally {
+      setIsSavingAll(false);
     }
   };
 
@@ -265,9 +270,17 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
         <button
           type="button"
           onClick={saveAll}
-          className="w-full h-14 bg-neon text-primary-foreground font-extrabold text-lg rounded-xl active:scale-[0.98] transition-transform"
+          disabled={isSavingAll}
+          className="w-full h-14 bg-neon text-primary-foreground font-extrabold text-lg rounded-xl active:scale-[0.98] transition-transform disabled:opacity-50 flex items-center justify-center gap-2"
         >
-          {t('saveAll')}
+          {isSavingAll ? (
+            <>
+              <Loader2 className="size-5 animate-spin" />
+              {t('saving')}
+            </>
+          ) : (
+            t('saveAll')
+          )}
         </button>
       )}
     </div>

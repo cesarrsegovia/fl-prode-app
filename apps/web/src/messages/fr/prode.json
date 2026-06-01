@@ -6,7 +6,8 @@
     "loadError": "Échec du chargement des journées",
     "emptyTitle": "Aucune journée ouverte",
     "emptyDesc": "Aucune journée à pronostiquer pour le moment. Revenez bientôt.",
-    "predict": "Pronostiquer"
+    "predict": "Pronostiquer",
+    "noneInFilter": "Rien dans ce filtre"
   },
   "progress": {
     "title": "Votre progression",
@@ -81,7 +82,11 @@
     "captainCheck": "Capitaine (x2)",
     "homeScoreLabel": "Buts de {team}",
     "awayScoreLabel": "Buts de {team}",
-    "pickAria": { "home": "Victoire à domicile", "draw": "Match nul", "away": "Victoire à l'extérieur" }
+    "pickAria": {
+      "home": "Victoire à domicile",
+      "draw": "Match nul",
+      "away": "Victoire à l'extérieur"
+    }
   },
   "results": {
     "back": "← Retour aux pronostics",

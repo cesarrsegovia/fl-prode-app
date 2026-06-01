@@ -9,11 +9,14 @@ import { useRanking } from '@/hooks/useRanking';
 import { RankingTable } from '@/components/ranking/RankingTable';
 import { PillTabs } from '@/components/ui/pill-tabs';
 
+const PAGE_SIZE = 20;
+
 export default function RankingPage() {
   const t = useTranslations('ranking');
   const { data: session } = useSession();
   const [myGroups, setMyGroups] = useState<MyGroupEntry[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<string>('global');
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
     if (!session) return;
@@ -31,6 +34,14 @@ export default function RankingPage() {
     ...myGroups.map((m) => ({ value: m.group.id, label: m.group.name })),
   ];
 
+  function handleGroupChange(value: string) {
+    setSelectedGroup(value);
+    setVisibleCount(PAGE_SIZE);
+  }
+
+  const visibleEntries = entries.slice(0, visibleCount);
+  const hasMore = entries.length > visibleCount;
+
   return (
     <main className="pt-24 pb-24 px-4 max-w-3xl mx-auto">
       <header className="mb-8">
@@ -45,7 +56,7 @@ export default function RankingPage() {
       <PillTabs
         tabs={tabs}
         value={selectedGroup}
-        onValueChange={setSelectedGroup}
+        onValueChange={handleGroupChange}
         aria-label={t('groupSelector')}
         className="mb-6"
       />
@@ -55,11 +66,24 @@ export default function RankingPage() {
           {t('loadError')}
         </div>
       ) : (
-        <RankingTable
-          entries={entries}
-          isLoading={isLoading}
-          highlightUserId={myUserId}
-        />
+        <>
+          <RankingTable
+            entries={visibleEntries}
+            isLoading={isLoading}
+            highlightUserId={myUserId}
+          />
+          {hasMore && (
+            <div className="mt-6 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
+                className="bg-surface-1 hover:bg-surface-2 text-foreground rounded-full px-6 py-2 font-display font-bold text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon transition-colors"
+              >
+                {t('showMore')}
+              </button>
+            </div>
+          )}
+        </>
       )}
     </main>
   );

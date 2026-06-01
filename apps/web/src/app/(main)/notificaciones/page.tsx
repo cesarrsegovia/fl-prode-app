@@ -36,6 +36,7 @@ export default function NotificacionesPage() {
   const markAllReadStore = useNotificacionStore((s) => s.markAllRead);
   const [items, setItems] = useState<NotificationDto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     notificaciones
@@ -44,15 +45,22 @@ export default function NotificacionesPage() {
         setItems(res);
         setNotifications(res as unknown as Parameters<typeof setNotifications>[0]);
       })
+      .catch(() => setLoadError(true))
       .finally(() => setLoading(false));
   }, [setNotifications]);
 
   const toggleRead = async (n: NotificationDto) => {
     if (n.read) return;
+    // Optimistic update
     setItems((prev) =>
       prev.map((x) => (x.id === n.id ? { ...x, read: true } : x)),
     );
-    await notificaciones.markOneRead(n.id).catch(() => undefined);
+    await notificaciones.markOneRead(n.id).catch(() => {
+      // Rollback optimistic update on failure
+      setItems((prev) =>
+        prev.map((x) => (x.id === n.id ? { ...x, read: false } : x)),
+      );
+    });
   };
 
   const markAll = async () => {
@@ -84,6 +92,12 @@ export default function NotificacionesPage() {
           </button>
         )}
       </header>
+
+      {loadError && (
+        <p role="alert" className="text-sm font-bold text-destructive mb-4">
+          {t('loadError')}
+        </p>
+      )}
 
       {loading ? (
         <div className="space-y-3">
