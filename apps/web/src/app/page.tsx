@@ -24,10 +24,10 @@ export default function Page() {
               {t("hero.subtitle")}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-              <Button render={(props) => <Link href="/auth" {...props} />} className="w-full sm:w-auto px-8 py-6 font-extrabold text-lg rounded-xl">
+              <Button render={<Link href="/auth" />} className="w-full sm:w-auto px-8 py-6 font-extrabold text-lg rounded-xl">
                 {t("hero.ctaPrimary")}
               </Button>
-              <Button variant="secondary" render={(props) => <Link href="/auth" {...props} />} className="w-full sm:w-auto px-8 py-6 font-bold text-lg rounded-xl">
+              <Button variant="secondary" render={<Link href="/auth" />} className="w-full sm:w-auto px-8 py-6 font-bold text-lg rounded-xl">
                 {t("hero.ctaSecondary")}
               </Button>
             </div>
