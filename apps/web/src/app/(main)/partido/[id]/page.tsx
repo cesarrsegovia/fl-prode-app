@@ -9,6 +9,7 @@ import { VsFriends } from '@/components/partido/VsFriends';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { PercentBar } from '@/components/ui/percent-bar';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -93,7 +94,7 @@ export default async function PartidoPage({ params }: Props) {
         </div>
 
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-6 sm:gap-12">
-          <article className="flex flex-col items-center gap-3 text-center">
+          <article className="flex flex-col items-center gap-3 text-center min-w-0">
             {home.teamId ? (
               <Link href={`/seleccion/${home.teamId}`}>
                 <TeamFlag size="xl" src={home.flagUrl} alt={home.name} />
@@ -101,15 +102,18 @@ export default async function PartidoPage({ params }: Props) {
             ) : (
               <TeamFlag size="xl" src={home.flagUrl} alt={home.name} />
             )}
-            <h2 className="font-display font-extrabold text-xl sm:text-2xl text-foreground">
+            <h2 className="font-display font-extrabold text-xl sm:text-2xl text-foreground wrap-break-word w-full">
               {home.name}
             </h2>
           </article>
 
           <div className="flex flex-col items-center gap-2 min-w-fit">
             {finished ? (
-              <p className="font-display font-extrabold text-5xl sm:text-7xl text-neon tabular-nums">
-                {match.homeScore} <span className="text-ink-dim">–</span>{' '}
+              <p
+                className="font-display font-extrabold text-5xl sm:text-7xl text-neon tabular-nums"
+                aria-label={`${home.name} ${match.homeScore}, ${away.name} ${match.awayScore}`}
+              >
+                {match.homeScore} <span className="text-ink-dim" aria-hidden="true">–</span>{' '}
                 {match.awayScore}
               </p>
             ) : live ? (
@@ -117,8 +121,11 @@ export default async function PartidoPage({ params }: Props) {
                 <Badge className="bg-neon text-primary-foreground animate-pulse">
                   {t('live')}
                 </Badge>
-                <p className="font-display font-extrabold text-4xl text-foreground tabular-nums">
-                  {match.homeScore ?? 0} <span className="text-ink-dim">–</span>{' '}
+                <p
+                  className="font-display font-extrabold text-4xl text-foreground tabular-nums"
+                  aria-label={`${home.name} ${match.homeScore ?? 0}, ${away.name} ${match.awayScore ?? 0}`}
+                >
+                  {match.homeScore ?? 0} <span className="text-ink-dim" aria-hidden="true">–</span>{' '}
                   {match.awayScore ?? 0}
                 </p>
               </>
@@ -137,7 +144,7 @@ export default async function PartidoPage({ params }: Props) {
             )}
           </div>
 
-          <article className="flex flex-col items-center gap-3 text-center">
+          <article className="flex flex-col items-center gap-3 text-center min-w-0">
             {away.teamId ? (
               <Link href={`/seleccion/${away.teamId}`}>
                 <TeamFlag size="xl" src={away.flagUrl} alt={away.name} />
@@ -145,7 +152,7 @@ export default async function PartidoPage({ params }: Props) {
             ) : (
               <TeamFlag size="xl" src={away.flagUrl} alt={away.name} />
             )}
-            <h2 className="font-display font-extrabold text-xl sm:text-2xl text-foreground">
+            <h2 className="font-display font-extrabold text-xl sm:text-2xl text-foreground wrap-break-word w-full">
               {away.name}
             </h2>
           </article>
@@ -218,24 +225,36 @@ export default async function PartidoPage({ params }: Props) {
         ) : (
           <Card className="bg-surface-1 border-line">
             <CardContent className="p-6 space-y-4">
-              <PercentBar
-                label={t('poll.home')}
-                value={aggregate.homePct}
-                count={aggregate.home}
-                tone="home"
-              />
-              <PercentBar
-                label={t('poll.draw')}
-                value={aggregate.drawPct}
-                count={aggregate.draw}
-                tone="draw"
-              />
-              <PercentBar
-                label={t('poll.away')}
-                value={aggregate.awayPct}
-                count={aggregate.away}
-                tone="away"
-              />
+              <div>
+                <div className="flex items-baseline justify-between mb-1">
+                  <span className="font-display font-semibold text-sm text-foreground">{t('poll.home')}</span>
+                  <span className="font-display font-extrabold text-lg text-foreground tabular-nums">
+                    {aggregate.homePct}%
+                    <span className="text-xs text-ink-dim font-normal ml-2">({aggregate.home})</span>
+                  </span>
+                </div>
+                <PercentBar value={aggregate.homePct} tone="neon" label={`${t('poll.home')}: ${aggregate.homePct}%`} />
+              </div>
+              <div>
+                <div className="flex items-baseline justify-between mb-1">
+                  <span className="font-display font-semibold text-sm text-foreground">{t('poll.draw')}</span>
+                  <span className="font-display font-extrabold text-lg text-foreground tabular-nums">
+                    {aggregate.drawPct}%
+                    <span className="text-xs text-ink-dim font-normal ml-2">({aggregate.draw})</span>
+                  </span>
+                </div>
+                <PercentBar value={aggregate.drawPct} tone="citrus" label={`${t('poll.draw')}: ${aggregate.drawPct}%`} />
+              </div>
+              <div>
+                <div className="flex items-baseline justify-between mb-1">
+                  <span className="font-display font-semibold text-sm text-foreground">{t('poll.away')}</span>
+                  <span className="font-display font-extrabold text-lg text-foreground tabular-nums">
+                    {aggregate.awayPct}%
+                    <span className="text-xs text-ink-dim font-normal ml-2">({aggregate.away})</span>
+                  </span>
+                </div>
+                <PercentBar value={aggregate.awayPct} tone="grass" label={`${t('poll.away')}: ${aggregate.awayPct}%`} />
+              </div>
               <p className="text-[10px] uppercase tracking-[0.18em] font-display font-bold text-ink-dim pt-2 border-t border-line/40">
                 {t('poll.totalPredictions', { count: aggregate.total })}
               </p>
@@ -271,42 +290,3 @@ export default async function PartidoPage({ params }: Props) {
   );
 }
 
-function PercentBar({
-  label,
-  value,
-  count,
-  tone,
-}: {
-  label: string;
-  value: number;
-  count: number;
-  tone: 'home' | 'draw' | 'away';
-}) {
-  const color =
-    tone === 'home'
-      ? 'bg-neon'
-      : tone === 'draw'
-        ? 'bg-citrus'
-        : 'bg-grass';
-  return (
-    <div>
-      <div className="flex items-baseline justify-between mb-1">
-        <span className="font-display font-semibold text-sm text-foreground">
-          {label}
-        </span>
-        <span className="font-display font-extrabold text-lg text-foreground tabular-nums">
-          {value}%
-          <span className="text-xs text-ink-dim font-normal ml-2">
-            ({count})
-          </span>
-        </span>
-      </div>
-      <div className="h-2 bg-surface-2 rounded-full overflow-hidden">
-        <div
-          className={`h-full ${color} transition-all`}
-          style={{ width: `${value}%` }}
-        />
-      </div>
-    </div>
-  );
-}

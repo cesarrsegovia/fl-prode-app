@@ -63,7 +63,7 @@ export default async function SeleccionPage({ params }: Props) {
           <p className="font-display text-xs uppercase tracking-[0.25em] text-neon mb-2">
             {t('eyebrow')}
           </p>
-          <h1 className="font-display font-extrabold text-foreground text-[clamp(2.5rem,7vw,5rem)] tracking-[-0.04em] leading-[0.95]">
+          <h1 className="font-display font-extrabold text-foreground text-[clamp(2.5rem,7vw,5rem)] tracking-[-0.04em] leading-[0.95] wrap-break-word">
             {team.name}
           </h1>
           <div className="mt-3 flex items-center gap-3 flex-wrap text-[10px] uppercase tracking-[0.2em] font-display font-bold text-ink-dim">

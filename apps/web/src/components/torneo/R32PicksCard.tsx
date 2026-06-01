@@ -6,11 +6,18 @@ import { Trophy, Check, AlertCircle } from 'lucide-react';
 import {
   R32_BEST_THIRDS_TOTAL,
   R32_TOP2_PER_GROUP,
+  R32_TOP2_TOTAL,
   R32_TOTAL_QUALIFIERS,
   R32PickKind,
 } from '@prode/shared';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+} from '@/components/ui/empty';
 import { r32Picks, type R32PickResponse } from '@/lib/endpoints';
 import { TeamFlag } from './TeamFlag';
 import { cn } from '@/lib/utils';
@@ -186,13 +193,13 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
         <div className="mt-4 flex flex-wrap gap-2 text-xs">
           <Badge
             variant="outline"
-            className={cn(counts.top2 === 24 && 'border-neon text-neon')}
+            className={cn(counts.top2 === R32_TOP2_TOTAL && 'border-neon text-neon')}
           >
             {t('top2Badge', { count: counts.top2 })}
           </Badge>
           <Badge
             variant="outline"
-            className={cn(counts.thirds === 8 && 'border-neon text-neon')}
+            className={cn(counts.thirds === R32_BEST_THIRDS_TOTAL && 'border-neon text-neon')}
           >
             {t('thirdsBadge', { count: counts.thirds, total: R32_BEST_THIRDS_TOTAL })}
           </Badge>
@@ -216,7 +223,7 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
             </Badge>
           )}
           {locked && (
-            <Badge variant="outline" className="text-red-400 border-red-400/50">
+            <Badge variant="outline" className="text-destructive border-destructive/50">
               {t('closed')}
             </Badge>
           )}
@@ -226,11 +233,18 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
       <CardContent>
         {!loaded ? (
           <p className="text-sm text-ink-muted">{tCommon('loading')}</p>
+        ) : teams.length === 0 ? (
+          <Empty>
+            <EmptyHeader>
+              <EmptyTitle>{t('title')}</EmptyTitle>
+              <EmptyDescription>{t('subtitle')}</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         ) : (
           <>
             <div className="space-y-6">
               <section>
-                <h4 className="font-display font-bold text-sm uppercase tracking-widest text-on-surface-variant mb-3">
+                <h4 className="font-display font-bold text-sm uppercase tracking-widest text-ink-muted mb-3">
                   {t('top2Section')}
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -239,7 +253,7 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
                     return (
                       <div
                         key={groupName}
-                        className="rounded-xl p-3 bg-surface-container-low"
+                        className="rounded-xl p-3 bg-surface-2"
                       >
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-display font-bold text-foreground">
@@ -267,11 +281,12 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
                                 type="button"
                                 onClick={() => onTop2Click(team)}
                                 disabled={locked}
+                                aria-pressed={isTop2}
                                 className={cn(
                                   'w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors',
                                   isTop2
                                     ? 'bg-neon/20 border border-neon/60'
-                                    : 'hover:bg-surface-container-highest border border-transparent',
+                                    : 'hover:bg-surface-3 border border-transparent',
                                   locked && 'opacity-60 cursor-not-allowed',
                                 )}
                               >
@@ -287,7 +302,7 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
                                   <Check className="size-4 text-neon" />
                                 )}
                                 {isThird && (
-                                  <span className="text-[10px] uppercase tracking-widest font-bold text-violet-400">
+                                  <span className="text-[10px] uppercase tracking-widest font-bold text-citrus">
                                     {t('thirdMark')}
                                   </span>
                                 )}
@@ -302,7 +317,7 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
               </section>
 
               <section>
-                <h4 className="font-display font-bold text-sm uppercase tracking-widest text-on-surface-variant mb-3">
+                <h4 className="font-display font-bold text-sm uppercase tracking-widest text-ink-muted mb-3">
                   {t('thirdsSection', { count: counts.thirds, total: R32_BEST_THIRDS_TOTAL })}
                 </h4>
                 <p className="text-xs text-ink-muted mb-3">
@@ -317,11 +332,12 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
                         type="button"
                         onClick={() => onThirdClick(t)}
                         disabled={locked}
+                        aria-pressed={isThird}
                         className={cn(
                           'flex items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors',
                           isThird
-                            ? 'bg-violet-500/20 border border-violet-400/60'
-                            : 'bg-surface-container-low hover:bg-surface-container-highest border border-transparent',
+                            ? 'bg-citrus/20 border border-citrus/60'
+                            : 'bg-surface-2 hover:bg-surface-3 border border-transparent',
                           locked && 'opacity-60 cursor-not-allowed',
                         )}
                       >
@@ -330,7 +346,7 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
                           {t.shortName ?? t.name}
                         </span>
                         {isThird && (
-                          <Check className="size-3.5 text-violet-400" />
+                          <Check className="size-3.5 text-citrus" />
                         )}
                       </button>
                     );
@@ -340,13 +356,13 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
             </div>
 
             {error && (
-              <p className="mt-4 text-sm font-bold text-red-400 flex items-center gap-2">
+              <p role="alert" className="mt-4 text-sm font-bold text-destructive flex items-center gap-2">
                 <AlertCircle className="size-4" />
                 {error}
               </p>
             )}
             {success && (
-              <p className="mt-4 text-sm font-bold text-neon">{success}</p>
+              <p aria-live="polite" className="mt-4 text-sm font-bold text-neon">{success}</p>
             )}
 
             {!locked && (
@@ -356,7 +372,7 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
                 disabled={
                   submitting || counts.total !== R32_TOTAL_QUALIFIERS
                 }
-                className="mt-6 w-full h-14 bg-primary text-black font-extrabold text-lg rounded-xl active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                className="mt-6 w-full h-14 bg-neon text-primary-foreground font-extrabold text-lg rounded-xl active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting
                   ? tCommon('saving')

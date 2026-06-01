@@ -112,35 +112,49 @@ export function GroupStandings({ group }: Props) {
         </div>
       </CardHeader>
       <CardContent className="pt-2">
-        <table className="w-full">
-          <thead>
-            <tr className="text-[10px] uppercase tracking-[0.15em] text-ink-dim font-display">
-              <th className="text-left pr-2 pb-1 font-medium"></th>
-              <th className="text-left pr-2 pb-1 font-medium">{t('team')}</th>
-              <th className="px-1 pb-1 text-center font-medium">{t('played')}</th>
-              <th className="hidden sm:table-cell px-1 pb-1 text-center font-medium">
-                {t('record')}
-              </th>
-              <th className="px-1 pb-1 text-center font-medium">{t('goalDiff')}</th>
-              <th className="pl-2 pb-1 text-right font-medium">{t('points')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((s) => (
-              <StandingsRow
-                key={s.id}
-                position={s.position}
-                team={s.team}
-                played={s.played}
-                won={s.won}
-                drawn={s.drawn}
-                lost={s.lost}
-                goalDiff={s.goalDiff}
-                points={s.points}
-              />
-            ))}
-          </tbody>
-        </table>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="text-[10px] uppercase tracking-[0.15em] text-ink-dim font-display">
+                <th scope="col" className="text-left pr-2 pb-1 font-medium">
+                  <span className="sr-only">{t('position')}</span>
+                </th>
+                <th scope="col" className="text-left pr-2 pb-1 font-medium">{t('team')}</th>
+                <th scope="col" className="px-1 pb-1 text-center font-medium">{t('played')}</th>
+                <th scope="col" className="hidden sm:table-cell px-1 pb-1 text-center font-medium">
+                  {t('record')}
+                </th>
+                <th scope="col" className="px-1 pb-1 text-center font-medium">{t('goalDiff')}</th>
+                <th scope="col" className="pl-2 pb-1 text-right font-medium">{t('points')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((s) => (
+                <StandingsRow
+                  key={s.id}
+                  position={s.position}
+                  team={s.team}
+                  played={s.played}
+                  won={s.won}
+                  drawn={s.drawn}
+                  lost={s.lost}
+                  goalDiff={s.goalDiff}
+                  points={s.points}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="flex items-center gap-4 mt-3 pt-2 border-t border-line/30">
+          <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.15em] text-ink-dim font-display">
+            <span className="w-0.5 h-4 rounded-full bg-neon inline-block" aria-hidden="true" />
+            {t('legendQualifies')}
+          </span>
+          <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.15em] text-ink-dim font-display">
+            <span className="w-0.5 h-4 rounded-full bg-citrus/60 inline-block" aria-hidden="true" />
+            {t('legendPlayoff')}
+          </span>
+        </div>
       </CardContent>
     </Card>
   );

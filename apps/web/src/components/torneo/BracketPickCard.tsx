@@ -6,6 +6,12 @@ import { Trophy, Check } from 'lucide-react';
 import { championPickDeadline } from '@prode/shared';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+} from '@/components/ui/empty';
 import { bracketPick, type BracketPickResponse } from '@/lib/endpoints';
 import { TeamFlag } from './TeamFlag';
 import { cn } from '@/lib/utils';
@@ -55,7 +61,7 @@ export function BracketPickCard({
   );
   const locked = lockedAt ? lockedAt <= new Date() : false;
 
-  const teamsByConfederation = useMemo(() => {
+  const sortedTeams = useMemo(() => {
     return [...teams].sort((a, b) => {
       if (a.group && b.group && a.group !== b.group) {
         return a.group.localeCompare(b.group);
@@ -124,9 +130,16 @@ export function BracketPickCard({
       <CardContent>
         {!loaded ? (
           <p className="text-sm text-ink-muted">{tCommon('loading')}</p>
+        ) : teams.length === 0 ? (
+          <Empty>
+            <EmptyHeader>
+              <EmptyTitle>{t('titleInitial')}</EmptyTitle>
+              <EmptyDescription>{t('subtitle')}</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         ) : (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-            {teamsByConfederation.map((t) => {
+            {sortedTeams.map((t) => {
               const isMine = current?.champTeamId === t.id;
               const isSaving = submitting === t.id;
               return (
@@ -135,6 +148,7 @@ export function BracketPickCard({
                   onClick={() => pick(t.id)}
                   disabled={locked || isSaving}
                   title={t.name}
+                  aria-pressed={isMine}
                   className={cn(
                     'flex flex-col items-center gap-2 p-2 rounded-lg border transition-all',
                     isMine
@@ -154,7 +168,7 @@ export function BracketPickCard({
         )}
 
         {error && (
-          <p className="text-sm text-destructive font-bold mt-3">{error}</p>
+          <p role="alert" className="text-sm text-destructive font-bold mt-3">{error}</p>
         )}
       </CardContent>
     </Card>

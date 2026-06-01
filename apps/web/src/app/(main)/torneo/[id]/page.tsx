@@ -43,11 +43,11 @@ export default async function TorneoPage({ params }: Props) {
   }
 
   const [groups, schedule, venues, bracket, teams] = await Promise.all([
-    tournamentApi.groups(id),
-    tournamentApi.schedule(id),
-    tournamentApi.venues(id),
-    tournamentApi.bracket(id),
-    tournamentApi.teams(id),
+    tournamentApi.groups(id).catch(() => []),
+    tournamentApi.schedule(id).catch(() => []),
+    tournamentApi.venues(id).catch(() => []),
+    tournamentApi.bracket(id).catch(() => []),
+    tournamentApi.teams(id).catch(() => []),
   ]);
 
   const teamOptions = teams.map((t) => ({

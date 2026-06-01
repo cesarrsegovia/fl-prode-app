@@ -15,6 +15,7 @@ import {
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { UserAvatar } from '@/components/ui/user-avatar';
 import { cn } from '@/lib/utils';
 
 interface Props {
@@ -122,18 +123,12 @@ export function VsFriends({ matchId, homeTeamShort, awayTeamShort }: Props) {
                       key={m.user.id}
                       className="flex items-center gap-3 py-2"
                     >
-                      {m.user.avatarUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={m.user.avatarUrl}
-                          alt={m.user.username}
-                          className="h-7 w-7 rounded-full object-cover shrink-0"
-                        />
-                      ) : (
-                        <div className="h-7 w-7 rounded-full bg-surface-2 flex items-center justify-center text-[10px] font-display font-extrabold shrink-0">
-                          {m.user.username.slice(0, 2).toUpperCase()}
-                        </div>
-                      )}
+                      <UserAvatar
+                        name={m.user.username}
+                        image={m.user.avatarUrl}
+                        size="sm"
+                        className="shrink-0"
+                      />
                       <span className="font-display font-bold text-sm text-foreground truncate flex-1 min-w-0">
                         {m.user.username}
                         {m.prediction?.isCaptain && (
