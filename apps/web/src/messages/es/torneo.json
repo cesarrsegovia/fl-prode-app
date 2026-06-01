@@ -26,7 +26,9 @@
   },
   "matchday": {
     "fallbackName": "Fecha {round}",
-    "matchesCount": "{count, plural, one {# partido} other {# partidos}}"
+    "matchesCount": "{count, plural, one {# partido} other {# partidos}}",
+    "emptyTitle": "Sin partidos programados",
+    "emptyDescription": "El calendario todavía no está disponible."
   },
   "matchRow": {
     "live": "EN VIVO",
@@ -39,7 +41,10 @@
     "played": "PJ",
     "record": "G-E-P",
     "goalDiff": "DG",
-    "points": "Pts"
+    "points": "Pts",
+    "position": "Posición",
+    "legendQualifies": "Clasifica",
+    "legendPlayoff": "Repechaje"
   },
   "venue": {
     "matchesCount": "{count, plural, one {# partido} other {# partidos}}",

@@ -157,6 +157,7 @@ export function TopScorerPickCard({
                         onClick={() => pick(p.playerId)}
                         disabled={locked || isSaving}
                         title={p.name}
+                        aria-pressed={isMine}
                         className={cn(
                           'flex flex-col items-start gap-1 p-2 rounded-lg border text-left transition-all',
                           isMine
@@ -182,7 +183,7 @@ export function TopScorerPickCard({
         )}
 
         {error && (
-          <p className="text-sm text-destructive font-bold mt-3">{error}</p>
+          <p role="alert" className="text-sm text-destructive font-bold mt-3">{error}</p>
         )}
       </CardContent>
     </Card>

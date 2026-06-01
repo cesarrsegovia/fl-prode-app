@@ -1,5 +1,6 @@
 import { useFormatter, useTranslations } from 'next-intl';
 import type { FixtureScheduleDto, MatchDto } from '@/lib/server-endpoints';
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
 import { MatchRow } from './MatchRow';
 
 function groupMatchesByDate(matches: MatchDto[]) {
@@ -26,6 +27,17 @@ export function MatchdayList({ schedule }: Props) {
       day: 'numeric',
       month: 'long',
     });
+
+  if (schedule.length === 0) {
+    return (
+      <Empty>
+        <EmptyHeader>
+          <EmptyTitle>{t('emptyTitle')}</EmptyTitle>
+          <EmptyDescription>{t('emptyDescription')}</EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    );
+  }
 
   return (
     <div className="space-y-12">

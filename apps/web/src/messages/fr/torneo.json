@@ -26,7 +26,9 @@
   },
   "matchday": {
     "fallbackName": "Journée {round}",
-    "matchesCount": "{count, plural, one {# match} other {# matchs}}"
+    "matchesCount": "{count, plural, one {# match} other {# matchs}}",
+    "emptyTitle": "Aucun match programmé",
+    "emptyDescription": "Le calendrier n'est pas encore disponible."
   },
   "matchRow": {
     "live": "EN DIRECT",
@@ -39,7 +41,10 @@
     "played": "J",
     "record": "V-N-D",
     "goalDiff": "Diff",
-    "points": "Pts"
+    "points": "Pts",
+    "position": "Position",
+    "legendQualifies": "Qualifié",
+    "legendPlayoff": "Barrage"
   },
   "venue": {
     "matchesCount": "{count, plural, one {# match} other {# matchs}}",

@@ -2,6 +2,12 @@ import { useFormatter, useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import type { MatchDto } from '@/lib/server-endpoints';
 import { TeamFlag } from './TeamFlag';
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+} from '@/components/ui/empty';
 
 type Stage = MatchDto['stage'];
 
@@ -92,6 +98,7 @@ interface Props {
 
 export function BracketTree({ matches }: Props) {
   const t = useTranslations('torneo.stages');
+  const tTabs = useTranslations('torneo.tabs');
   const byStage = new Map<Stage, MatchDto[]>();
   for (const m of matches) {
     const arr = byStage.get(m.stage) ?? [];
@@ -107,20 +114,39 @@ export function BracketTree({ matches }: Props) {
 
   const presentStages = STAGE_ORDER.filter((s) => byStage.has(s));
 
+  if (presentStages.length === 0) {
+    return (
+      <Empty>
+        <EmptyHeader>
+          <EmptyTitle>{tTabs('eliminatorias')}</EmptyTitle>
+          <EmptyDescription>{t('FINAL')}</EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    );
+  }
+
   return (
-    <div className="overflow-x-auto pb-4 -mx-6 px-6">
-      <div className="flex gap-6 items-start min-w-fit">
-        {presentStages.map((stage) => (
-          <div key={stage} className="flex flex-col gap-3 min-w-[240px]">
-            <h4 className="font-display text-xs uppercase tracking-[0.2em] text-neon">
-              {t(stage)}
-            </h4>
-            {byStage.get(stage)!.map((m) => (
-              <BracketMatch key={m.id} match={m} />
-            ))}
-          </div>
-        ))}
+    <div className="relative">
+      <div
+        role="region"
+        aria-label={tTabs('eliminatorias')}
+        tabIndex={0}
+        className="overflow-x-auto pb-4 -mx-6 px-6 focus:outline-none focus-visible:ring-2 focus-visible:ring-neon/60"
+      >
+        <div className="flex gap-6 items-start min-w-fit">
+          {presentStages.map((stage) => (
+            <div key={stage} className="flex flex-col gap-3 min-w-50 sm:min-w-60">
+              <h4 className="font-display text-xs uppercase tracking-[0.2em] text-neon">
+                {t(stage)}
+              </h4>
+              {byStage.get(stage)!.map((m) => (
+                <BracketMatch key={m.id} match={m} />
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-linear-to-l from-background to-transparent" />
     </div>
   );
 }

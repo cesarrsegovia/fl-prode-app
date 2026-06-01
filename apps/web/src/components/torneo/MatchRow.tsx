@@ -47,9 +47,11 @@ interface Props {
   match: MatchDto;
   /** Si está presente, todo el row es clickeable. Default: `/partido/{id}`. Pasar `false` para no linkear. */
   href?: string | false;
+  /** Muestra la columna de fecha también en mobile. Default: false. */
+  showDate?: boolean;
 }
 
-export function MatchRow({ match, href }: Props) {
+export function MatchRow({ match, href, showDate = false }: Props) {
   const t = useTranslations('torneo');
   const format = useFormatter();
   const kickoff = new Date(match.startTime);
@@ -76,7 +78,7 @@ export function MatchRow({ match, href }: Props) {
   const content = (
     <>
       <div className="flex items-center gap-4 px-4 py-3">
-        <div className="hidden sm:flex flex-col items-center w-14 shrink-0 border-r border-line/40 pr-3">
+        <div className={cn('flex-col items-center w-14 shrink-0 border-r border-line/40 pr-3', showDate ? 'flex' : 'hidden sm:flex')}>
           <span className="text-[10px] uppercase tracking-[0.18em] text-ink-dim font-display">
             {ts.weekday}
           </span>
@@ -132,7 +134,7 @@ export function MatchRow({ match, href }: Props) {
             <span className="text-neon">{t('common.group', { name: match.group.name })}</span>
           )}
           {match.group && <span>·</span>}
-          <span className="truncate">
+          <span className="truncate" title={`${match.venue.name} · ${match.venue.city}`}>
             {match.venue.name} · {match.venue.city}
           </span>
         </div>

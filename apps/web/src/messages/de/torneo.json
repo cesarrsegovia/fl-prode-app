@@ -26,7 +26,9 @@
   },
   "matchday": {
     "fallbackName": "Spieltag {round}",
-    "matchesCount": "{count, plural, one {# Spiel} other {# Spiele}}"
+    "matchesCount": "{count, plural, one {# Spiel} other {# Spiele}}",
+    "emptyTitle": "Keine Spiele geplant",
+    "emptyDescription": "Der Spielplan ist noch nicht verfügbar."
   },
   "matchRow": {
     "live": "LIVE",
@@ -39,7 +41,10 @@
     "played": "Sp",
     "record": "S-U-N",
     "goalDiff": "TD",
-    "points": "Pkt"
+    "points": "Pkt",
+    "position": "Position",
+    "legendQualifies": "Qualifiziert",
+    "legendPlayoff": "Playoff"
   },
   "venue": {
     "matchesCount": "{count, plural, one {# Spiel} other {# Spiele}}",

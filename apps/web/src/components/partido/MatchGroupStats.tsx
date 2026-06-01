@@ -12,7 +12,7 @@ import {
 } from '@/lib/endpoints';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
+import { PercentBar } from '@/components/ui/percent-bar';
 
 interface Props {
   matchId: string;
@@ -79,7 +79,7 @@ export function MatchGroupStats({ matchId }: Props) {
               <p className="text-[10px] uppercase tracking-[0.18em] font-display font-bold text-ink-dim">
                 {t('submitted', { total: agg.total, members: agg.members })}
                 {agg.pending > 0 && (
-                  <span className="text-citrus">{t('pending', { count: agg.pending })}</span>
+                  <>{' '}<span className="text-citrus">{t('pending', { count: agg.pending })}</span></>
                 )}
               </p>
             </CardHeader>
@@ -89,11 +89,31 @@ export function MatchGroupStats({ matchId }: Props) {
                   {t('empty')}
                 </p>
               ) : (
-                <>
-                  <Bar label="1" value={agg.homePct} count={agg.home} tone="home" />
-                  <Bar label="X" value={agg.drawPct} count={agg.draw} tone="draw" />
-                  <Bar label="2" value={agg.awayPct} count={agg.away} tone="away" />
-                </>
+                <div className="space-y-2">
+                  {(
+                    [
+                      { label: '1', value: agg.homePct, count: agg.home, tone: 'neon' },
+                      { label: 'X', value: agg.drawPct, count: agg.draw, tone: 'citrus' },
+                      { label: '2', value: agg.awayPct, count: agg.away, tone: 'grass' },
+                    ] as const
+                  ).map(({ label, value, count, tone }) => (
+                    <div key={label} className="flex items-center gap-3">
+                      <span className="font-display font-extrabold text-sm text-ink-muted w-4 text-center">
+                        {label}
+                      </span>
+                      <PercentBar
+                        value={value}
+                        tone={tone}
+                        label={`${label}: ${value}%`}
+                        className="flex-1"
+                      />
+                      <span className="font-display font-bold text-sm text-foreground tabular-nums w-12 text-right">
+                        {value}%
+                        <span className="text-ink-dim text-[10px] font-normal ml-1">({count})</span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
               )}
             </CardContent>
           </Card>
@@ -103,40 +123,3 @@ export function MatchGroupStats({ matchId }: Props) {
   );
 }
 
-function Bar({
-  label,
-  value,
-  count,
-  tone,
-}: {
-  label: string;
-  value: number;
-  count: number;
-  tone: 'home' | 'draw' | 'away';
-}) {
-  const color =
-    tone === 'home'
-      ? 'bg-neon'
-      : tone === 'draw'
-        ? 'bg-citrus'
-        : 'bg-grass';
-  return (
-    <div className="flex items-center gap-3">
-      <span className="font-display font-extrabold text-sm text-ink-muted w-4 text-center">
-        {label}
-      </span>
-      <div className="flex-1 h-2 bg-surface-2 rounded-full overflow-hidden">
-        <div
-          className={cn('h-full transition-all', color)}
-          style={{ width: `${value}%` }}
-        />
-      </div>
-      <span className="font-display font-bold text-sm text-foreground tabular-nums w-12 text-right">
-        {value}%
-        <span className="text-ink-dim text-[10px] font-normal ml-1">
-          ({count})
-        </span>
-      </span>
-    </div>
-  );
-}

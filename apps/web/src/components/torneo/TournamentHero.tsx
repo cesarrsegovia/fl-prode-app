@@ -41,7 +41,7 @@ export function TournamentHero({ tournament }: Props) {
                   : t('type.league')}
               {tournament.country && ` · ${tournament.country}`}
             </p>
-            <h1 className="font-display font-extrabold tracking-[-0.04em] leading-[0.92] text-foreground text-[clamp(3rem,9vw,7rem)]">
+            <h1 className="font-display font-extrabold tracking-[-0.04em] leading-[0.92] text-foreground text-[clamp(2.25rem,9vw,7rem)] wrap-break-word hyphens-auto">
               {tournament.name.replace(/\s*\d{4}\s*$/, '')}
               {year && (
                 <span className="block text-neon-glow text-[0.85em]">

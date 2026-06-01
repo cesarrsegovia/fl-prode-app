@@ -16,13 +16,15 @@ export function VenueCard({ venue }: Props) {
   return (
     <Card className="bg-surface-1 border-line overflow-hidden">
       <div className="relative aspect-[16/9] bg-gradient-to-br from-grass/30 to-surface-3 flex items-end p-4">
-        <div className="absolute inset-0 opacity-30 pointer-events-none"
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 opacity-30 pointer-events-none"
           style={{
             backgroundImage:
               'repeating-linear-gradient(0deg, transparent 0, transparent 8px, oklch(45% 0.13 150 / 0.4) 8px, oklch(45% 0.13 150 / 0.4) 9px)',
           }}
         />
-        <h3 className="relative font-display font-extrabold text-2xl text-foreground tracking-tight leading-tight">
+        <h3 className="relative font-display font-extrabold text-2xl text-foreground tracking-tight leading-tight drop-shadow-[0_1px_3px_oklch(0%_0_0/0.6)]">
           {venue.name}
         </h3>
       </div>
