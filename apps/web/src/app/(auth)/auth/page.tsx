@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { Trophy, Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react';
 
 function safeNext(raw: string | null): string {
   if (!raw) return '/home';
@@ -90,30 +91,34 @@ export default function AuthPage() {
 
   return (
     <div className="flex w-full min-h-[calc(100vh-160px)] items-center justify-center relative p-4">
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-secondary-container/10 rounded-full blur-[120px] pointer-events-none"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary-container/5 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-neon/10 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-neon/5 rounded-full blur-[120px] pointer-events-none"></div>
 
-      <main className="w-full max-w-[420px] relative z-10">
+      <main className="w-full max-w-105 relative z-10">
         <div className="flex flex-col items-center mb-8">
           <div className="flex items-center gap-2 mb-2">
-            <span className="material-symbols-outlined text-primary-container text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>sports_score</span>
-            <h1 className="font-headline font-black text-3xl italic tracking-tighter text-primary-container">PRODE ARENA</h1>
+            <Trophy className="size-8 text-neon" />
+            <h1 className="font-headline font-black text-3xl italic tracking-tighter text-neon">PRODE ARENA</h1>
           </div>
-          <p className="text-on-surface-variant text-sm font-medium tracking-wide uppercase">{t('tagline')}</p>
+          <p className="text-ink-muted text-sm font-medium tracking-wide uppercase">{t('tagline')}</p>
         </div>
 
-        <div className="glass-panel border border-outline-variant/10 rounded-2xl shadow-[0_32px_64px_rgba(0,0,0,0.4)] overflow-hidden">
+        <div className="bg-surface-1 border border-line rounded-2xl shadow-[0_32px_64px_rgba(0,0,0,0.4)] overflow-hidden">
           {/* Tabs */}
-          <div className="flex bg-surface-container-low/50 border-b border-outline-variant/10">
+          <div role="tablist" className="flex bg-surface-1 border-b border-line">
             <button
-              className={`flex-1 py-4 text-sm font-bold transition-colors ${isLogin ? 'border-b-2 border-primary-container text-primary-container' : 'text-on-surface-variant hover:text-on-surface'}`}
+              role="tab"
+              aria-selected={isLogin}
+              className={`flex-1 py-4 text-sm font-bold transition-colors ${isLogin ? 'border-b-2 border-neon text-neon' : 'text-ink-muted hover:text-foreground'}`}
               onClick={() => { setIsLogin(true); setError(''); }}
               type="button"
             >
               {t('tabs.login')}
             </button>
             <button
-              className={`flex-1 py-4 text-sm font-bold transition-colors ${!isLogin ? 'border-b-2 border-primary-container text-primary-container' : 'text-on-surface-variant hover:text-on-surface'}`}
+              role="tab"
+              aria-selected={!isLogin}
+              className={`flex-1 py-4 text-sm font-bold transition-colors ${!isLogin ? 'border-b-2 border-neon text-neon' : 'text-ink-muted hover:text-foreground'}`}
               onClick={() => { setIsLogin(false); setError(''); }}
               type="button"
             >
@@ -126,9 +131,10 @@ export default function AuthPage() {
               {/* Username field (register only) */}
               {!isLogin && (
                 <div className="space-y-2">
-                  <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1">{t('labels.username')}</label>
+                  <label htmlFor="auth-username" className="block text-xs font-bold uppercase tracking-widest text-ink-muted ml-1">{t('labels.username')}</label>
                   <input
-                    className="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-xl px-4 py-3 text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container/30 transition-all relative z-20"
+                    id="auth-username"
+                    className="w-full bg-surface-2 border border-line rounded-xl px-4 py-3 text-foreground placeholder:text-ink-dim focus:outline-none focus:border-neon focus:ring-1 focus:ring-neon/30 transition-all relative z-20"
                     placeholder={t('placeholders.username')}
                     type="text"
                     value={username}
@@ -140,9 +146,10 @@ export default function AuthPage() {
 
               {/* Email */}
               <div className="space-y-2">
-                <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1">{t('labels.email')}</label>
+                <label htmlFor="auth-email" className="block text-xs font-bold uppercase tracking-widest text-ink-muted ml-1">{t('labels.email')}</label>
                 <input
-                  className="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-xl px-4 py-3 text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container/30 transition-all relative z-20"
+                  id="auth-email"
+                  className="w-full bg-surface-2 border border-line rounded-xl px-4 py-3 text-foreground placeholder:text-ink-dim focus:outline-none focus:border-neon focus:ring-1 focus:ring-neon/30 transition-all relative z-20"
                   placeholder={t('placeholders.email')}
                   type="email"
                   value={email}
@@ -153,10 +160,11 @@ export default function AuthPage() {
 
               {/* Password */}
               <div className="space-y-2">
-                <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1">{t('labels.password')}</label>
+                <label htmlFor="auth-password" className="block text-xs font-bold uppercase tracking-widest text-ink-muted ml-1">{t('labels.password')}</label>
                 <div className="relative">
                   <input
-                    className="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-xl px-4 py-3 text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container/30 transition-all relative z-20"
+                    id="auth-password"
+                    className="w-full bg-surface-2 border border-line rounded-xl px-4 py-3 text-foreground placeholder:text-ink-dim focus:outline-none focus:border-neon focus:ring-1 focus:ring-neon/30 transition-all relative z-20"
                     placeholder="••••••••"
                     type={showPassword ? 'text' : 'password'}
                     value={password}
@@ -165,34 +173,33 @@ export default function AuthPage() {
                     minLength={6}
                   />
                   <button
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface transition-colors z-30"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-foreground transition-colors z-30"
                     type="button"
+                    aria-label={showPassword ? t('hidePassword') : t('showPassword')}
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    <span className="material-symbols-outlined text-[20px]">
-                      {showPassword ? 'visibility_off' : 'visibility'}
-                    </span>
+                    {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
                   </button>
                 </div>
               </div>
 
               {/* Error display */}
               {error && (
-                <div className="flex items-center gap-2 text-error text-xs font-medium bg-error-container/10 p-3 rounded-lg border border-error/20">
-                  <span className="material-symbols-outlined text-[16px]">error</span>
+                <div role="alert" className="flex items-center gap-2 text-destructive text-xs font-medium bg-destructive/10 p-3 rounded-lg border border-destructive/20">
+                  <AlertCircle className="size-4 shrink-0" />
                   <span>{error}</span>
                 </div>
               )}
 
               {/* Submit */}
               <button
-                className="w-full neon-gradient text-on-primary font-black py-4 rounded-xl shadow-[0_8px_20px_rgba(181,242,61,0.2)] hover:shadow-[0_12px_24px_rgba(181,242,61,0.3)] hover:-translate-y-0.5 active:scale-95 transition-all duration-200 uppercase tracking-tight disabled:opacity-50 disabled:cursor-not-allowed relative z-20"
+                className="w-full bg-neon text-primary-foreground font-black py-4 rounded-xl shadow-(--shadow-neon-sm) hover:shadow-(--shadow-neon) hover:-translate-y-0.5 active:scale-95 transition-all duration-200 uppercase tracking-tight disabled:opacity-50 disabled:cursor-not-allowed relative z-20"
                 type="submit"
                 disabled={loading}
               >
                 {loading ? (
                   <span className="inline-flex items-center gap-2">
-                    <span className="animate-spin material-symbols-outlined text-[18px]">progress_activity</span>
+                    <Loader2 className="size-4 animate-spin" />
                     {isLogin ? t('submit.loggingIn') : t('submit.registering')}
                   </span>
                 ) : (
@@ -202,10 +209,10 @@ export default function AuthPage() {
             </form>
 
             <div className="mt-8 text-center space-y-4">
-              <p className="text-xs text-on-surface-variant font-medium relative z-20">
+              <p className="text-xs text-ink-muted font-medium relative z-20">
                 {isLogin ? t('switch.toRegisterPrompt') : t('switch.toLoginPrompt')}
                 <button
-                  className="text-primary-container font-bold hover:underline"
+                  className="text-neon font-bold hover:underline"
                   onClick={() => { setIsLogin(!isLogin); setError(''); }}
                   type="button"
                 >
