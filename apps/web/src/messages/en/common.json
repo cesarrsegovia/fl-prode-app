@@ -1,5 +1,13 @@
 {
   "appName": "Prode",
   "metaTitle": "Prode · 2026 World Cup",
-  "tagline": "Predict the 2026 World Cup matches and compete with your friends."
+  "tagline": "Predict the 2026 World Cup matches and compete with your friends.",
+  "error": {
+    "eyebrow": "Something went wrong",
+    "title": "Penalty missed.",
+    "description": "We had a problem processing this page. Try again or go back home.",
+    "retry": "Retry",
+    "home": "Go home",
+    "ref": "Ref"
+  }
 }

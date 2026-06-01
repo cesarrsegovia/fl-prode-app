@@ -1,5 +1,13 @@
 {
   "appName": "Prode",
   "metaTitle": "Prode · Coupe du monde 2026",
-  "tagline": "Pronostiquez les matchs de la Coupe du monde 2026 et défiez vos amis."
+  "tagline": "Pronostiquez les matchs de la Coupe du monde 2026 et défiez vos amis.",
+  "error": {
+    "eyebrow": "Une erreur est survenue",
+    "title": "Penalty manqué.",
+    "description": "Un problème est survenu lors du traitement de cette page. Réessayez ou retournez à l'accueil.",
+    "retry": "Réessayer",
+    "home": "Accueil",
+    "ref": "Réf"
+  }
 }

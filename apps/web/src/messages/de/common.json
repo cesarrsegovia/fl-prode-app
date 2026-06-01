@@ -1,5 +1,13 @@
 {
   "appName": "Prode",
   "metaTitle": "Prode · WM 2026",
-  "tagline": "Tippe die Spiele der WM 2026 und tritt gegen deine Freunde an."
+  "tagline": "Tippe die Spiele der WM 2026 und tritt gegen deine Freunde an.",
+  "error": {
+    "eyebrow": "Etwas ist schiefgelaufen",
+    "title": "Elfmeter verschossen.",
+    "description": "Beim Verarbeiten dieser Seite ist ein Problem aufgetreten. Versuch es erneut oder geh zur Startseite.",
+    "retry": "Erneut versuchen",
+    "home": "Zur Startseite",
+    "ref": "Ref"
+  }
 }

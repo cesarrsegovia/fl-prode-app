@@ -1,5 +1,13 @@
 {
   "appName": "Prode",
   "metaTitle": "Prode · Mundial 2026",
-  "tagline": "Pronosticá los partidos del Mundial 2026 y competí con tus amigos."
+  "tagline": "Pronosticá los partidos del Mundial 2026 y competí con tus amigos.",
+  "error": {
+    "eyebrow": "Algo salió mal",
+    "title": "Penal fallado.",
+    "description": "Tuvimos un problema procesando esta página. Intentá de nuevo o volvé al inicio.",
+    "retry": "Reintentar",
+    "home": "Ir al inicio",
+    "ref": "Ref"
+  }
 }
