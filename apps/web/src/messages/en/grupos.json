@@ -56,7 +56,8 @@
       "copy": "Copy",
       "copied": "Copied!",
       "copyFailed": "Couldn't copy",
-      "regenerate": "Regenerate"
+      "regenerate": "Regenerate",
+      "regenerateError": "Could not regenerate the code"
     }
   },
   "invitePage": {

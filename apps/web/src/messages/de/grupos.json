@@ -56,7 +56,8 @@
       "copy": "Kopieren",
       "copied": "Kopiert!",
       "copyFailed": "Kopieren fehlgeschlagen",
-      "regenerate": "Neu generieren"
+      "regenerate": "Neu generieren",
+      "regenerateError": "Code konnte nicht neu generiert werden"
     }
   },
   "invitePage": {

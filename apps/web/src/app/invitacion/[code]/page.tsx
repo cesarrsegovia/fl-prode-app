@@ -87,10 +87,7 @@ export default function InvitacionPage({
   if (loading) {
     return (
       <main className="pt-24 pb-12 px-4 max-w-md mx-auto">
-        <div
-          className="h-64 rounded-2xl animate-pulse"
-          style={{ background: 'var(--surface-container-low)' }}
-        />
+        <div className="h-64 rounded-2xl animate-pulse bg-surface-1" />
       </main>
     );
   }
@@ -101,12 +98,12 @@ export default function InvitacionPage({
         <p className="font-display font-extrabold text-xl text-foreground mb-2">
           {t('invalidTitle')}
         </p>
-        <p className="text-sm text-on-surface-variant mb-6">
+        <p className="text-sm text-ink-muted mb-6">
           {error ?? t('invalidDesc')}
         </p>
         <Link
           href="/home"
-          className="inline-block bg-primary text-black font-bold text-sm px-5 py-3 rounded-xl active:scale-95 transition-transform"
+          className="inline-block bg-neon text-primary-foreground font-bold text-sm px-5 py-3 rounded-xl active:scale-95 transition-transform"
         >
           {t('goHome')}
         </Link>
@@ -116,23 +113,20 @@ export default function InvitacionPage({
 
   return (
     <main className="pt-24 pb-24 px-4 max-w-md mx-auto">
-      <section
-        className="rounded-2xl p-8 text-center"
-        style={{ background: 'var(--surface-container-low)' }}
-      >
-        <p className="text-xs uppercase tracking-[0.2em] font-bold text-on-surface-variant mb-3">
+      <section className="rounded-2xl p-8 text-center bg-surface-1">
+        <p className="text-xs uppercase tracking-[0.2em] font-bold text-ink-muted mb-3">
           {t('eyebrow')}
         </p>
-        <h1 className="font-display font-extrabold text-3xl text-white tracking-tight mb-2">
+        <h1 className="font-display font-extrabold text-3xl text-foreground tracking-tight mb-2">
           {preview.name}
         </h1>
         {preview.description && (
-          <p className="text-sm text-on-surface-variant mb-4">
+          <p className="text-sm text-ink-muted mb-4">
             {preview.description}
           </p>
         )}
 
-        <div className="flex items-center justify-center gap-4 text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-8">
+        <div className="flex items-center justify-center gap-4 text-xs uppercase tracking-widest font-bold text-ink-muted mb-8">
           <span className="flex items-center gap-1">
             <Users className="size-3" />
             {t('members', { count: preview._count.members })}
@@ -144,14 +138,14 @@ export default function InvitacionPage({
         </div>
 
         {status === 'loading' ? (
-          <div className="h-12 rounded-xl animate-pulse" style={{ background: 'var(--surface-container-highest)' }} />
+          <div className="h-12 rounded-xl animate-pulse bg-surface-2" />
         ) : status === 'authenticated' ? (
           alreadyMember ? (
             <div className="space-y-3">
-              <p className="text-xs text-on-surface-variant">{t('alreadyMember')}</p>
+              <p className="text-xs text-ink-muted">{t('alreadyMember')}</p>
               <Link
                 href={`/grupos/${preview.id}`}
-                className="block w-full bg-primary text-black font-bold text-sm py-3 rounded-xl active:scale-95 transition-transform"
+                className="block w-full bg-neon text-primary-foreground font-bold text-sm py-3 rounded-xl active:scale-95 transition-transform"
               >
                 {t('goToGroup')}
               </Link>
@@ -160,7 +154,7 @@ export default function InvitacionPage({
             <button
               onClick={handleJoin}
               disabled={joining}
-              className="w-full bg-primary text-black font-bold text-sm py-3 rounded-xl active:scale-95 transition-transform disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full bg-neon text-primary-foreground font-bold text-sm py-3 rounded-xl active:scale-95 transition-transform disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {joining ? (
                 <>
@@ -173,12 +167,12 @@ export default function InvitacionPage({
           )
         ) : (
           <div className="space-y-3">
-            <p className="text-xs text-on-surface-variant">
+            <p className="text-xs text-ink-muted">
               {t('needAccount')}
             </p>
             <button
               onClick={goToAuth}
-              className="w-full bg-primary text-black font-bold text-sm py-3 rounded-xl active:scale-95 transition-transform"
+              className="w-full bg-neon text-primary-foreground font-bold text-sm py-3 rounded-xl active:scale-95 transition-transform"
             >
               {t('signIn')}
             </button>
@@ -186,11 +180,11 @@ export default function InvitacionPage({
         )}
 
         {error && (
-          <p className="mt-4 text-xs text-red-400 font-bold">{error}</p>
+          <p className="mt-4 text-xs text-destructive font-bold" role="alert">{error}</p>
         )}
       </section>
 
-      <p className="mt-6 text-center text-xs text-on-surface-variant">
+      <p className="mt-6 text-center text-xs text-ink-muted">
         {t('codeLabel')} <span className="font-mono">{code}</span>
       </p>
     </main>

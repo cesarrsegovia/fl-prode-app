@@ -30,23 +30,23 @@ export default function GruposPage() {
     <main className="pt-24 pb-24 px-4 max-w-5xl mx-auto">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
         <div>
-          <h1 className="text-4xl font-extrabold text-white tracking-tight">
+          <h1 className="text-4xl font-extrabold text-foreground tracking-tight">
             {t('title')}
           </h1>
-          <p className="text-sm text-on-surface-variant mt-1">
+          <p className="text-sm text-ink-muted mt-1">
             {t('subtitle')}
           </p>
         </div>
         <div className="flex gap-3">
           <button
             onClick={() => setMode(mode === 'join' ? 'none' : 'join')}
-            className="border border-primary/40 text-primary px-4 py-2 rounded-xl font-bold text-sm hover:bg-primary/10 transition-colors"
+            className="border border-neon/40 text-neon px-4 py-2 rounded-xl font-bold text-sm hover:bg-neon/10 transition-colors"
           >
             {t('joinWithCode')}
           </button>
           <button
             onClick={() => setMode(mode === 'create' ? 'none' : 'create')}
-            className="bg-primary text-black px-4 py-2 rounded-xl font-bold text-sm active:scale-95"
+            className="bg-neon text-primary-foreground px-4 py-2 rounded-xl font-bold text-sm active:scale-95"
           >
             {t('createGroup')}
           </button>
@@ -70,24 +70,20 @@ export default function GruposPage() {
         />
       )}
 
-      {error && <p className="text-sm text-red-400 font-bold">{error}</p>}
+      {error && <p className="text-sm text-destructive font-bold" role="alert">{error}</p>}
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
-              className="h-36 rounded-2xl animate-pulse"
-              style={{ background: 'var(--surface-container-low)' }}
+              className="h-36 rounded-2xl animate-pulse bg-surface-1"
             />
           ))}
         </div>
       ) : items.length === 0 ? (
-        <div
-          className="rounded-2xl p-8 text-center"
-          style={{ background: 'var(--surface-container-low)' }}
-        >
-          <p className="text-sm text-on-surface-variant">
+        <div className="rounded-2xl p-8 text-center bg-surface-1">
+          <p className="text-sm text-ink-muted">
             {t('empty')}
           </p>
         </div>
@@ -131,27 +127,34 @@ function CreateGroupForm({ onCreated }: { onCreated: () => void }) {
   return (
     <form
       onSubmit={submit}
-      className="rounded-2xl p-6 mb-6 space-y-3"
-      style={{ background: 'var(--surface-container-low)' }}
+      className="rounded-2xl p-6 mb-6 space-y-3 bg-surface-1"
     >
+      <label htmlFor="create-group-name" className="sr-only">
+        {t('namePlaceholder')}
+      </label>
       <input
+        id="create-group-name"
         required
         minLength={3}
         placeholder={t('namePlaceholder')}
         value={name}
         onChange={(e) => setName(e.target.value)}
-        className="w-full bg-surface-container-highest rounded-lg px-4 py-3 text-white placeholder:text-on-surface-variant"
+        className="w-full bg-surface-2 rounded-lg px-4 py-3 text-foreground placeholder:text-ink-muted"
       />
+      <label htmlFor="create-group-desc" className="sr-only">
+        {t('descPlaceholder')}
+      </label>
       <textarea
+        id="create-group-desc"
         placeholder={t('descPlaceholder')}
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        className="w-full bg-surface-container-highest rounded-lg px-4 py-3 text-white placeholder:text-on-surface-variant"
+        className="w-full bg-surface-2 rounded-lg px-4 py-3 text-foreground placeholder:text-ink-muted"
         rows={2}
       />
 
       <fieldset className="space-y-2">
-        <legend className="text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">
+        <legend className="text-xs uppercase tracking-widest font-bold text-ink-muted mb-1">
           {t('privacyLabel')}
         </legend>
         <div className="flex gap-2">
@@ -166,14 +169,14 @@ function CreateGroupForm({ onCreated }: { onCreated: () => void }) {
             onClick={() => setIsPrivate(false)}
           />
         </div>
-        <p className="text-[11px] text-on-surface-variant">{t('privacyHint')}</p>
+        <p className="text-[11px] text-ink-muted">{t('privacyHint')}</p>
       </fieldset>
 
-      {error && <p className="text-xs text-red-400 font-bold">{error}</p>}
+      {error && <p className="text-xs text-destructive font-bold" role="alert">{error}</p>}
       <button
         type="submit"
         disabled={submitting}
-        className="bg-primary text-black px-4 py-2 rounded-xl font-bold text-sm disabled:opacity-50"
+        className="bg-neon text-primary-foreground px-4 py-2 rounded-xl font-bold text-sm disabled:opacity-50"
       >
         {submitting ? t('submitting') : t('submit')}
       </button>
@@ -197,8 +200,8 @@ function PrivacyOption({
       aria-pressed={active}
       className={`flex-1 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
         active
-          ? 'bg-primary text-black'
-          : 'bg-surface-container-highest text-on-surface-variant hover:text-white'
+          ? 'bg-neon text-primary-foreground'
+          : 'bg-surface-2 text-ink-muted hover:text-foreground'
       }`}
     >
       {label}
@@ -229,28 +232,31 @@ function JoinGroupForm({ onJoined }: { onJoined: () => void }) {
   return (
     <form
       onSubmit={submit}
-      className="rounded-2xl p-6 mb-6 flex items-end gap-3"
-      style={{ background: 'var(--surface-container-low)' }}
+      className="rounded-2xl p-6 mb-6 bg-surface-1 flex flex-col sm:flex-row sm:items-end gap-3"
     >
       <div className="flex-1">
-        <label className="text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1 block">
+        <label
+          htmlFor="join-group-code"
+          className="text-xs uppercase tracking-widest font-bold text-ink-muted mb-1 block"
+        >
           {t('label')}
         </label>
         <input
+          id="join-group-code"
           required
           value={inviteCode}
           onChange={(e) => setInviteCode(e.target.value)}
-          className="w-full bg-surface-container-highest rounded-lg px-4 py-3 text-white"
+          className="w-full bg-surface-2 rounded-lg px-4 py-3 text-foreground"
           placeholder={t('placeholder')}
         />
         {error && (
-          <p className="text-xs text-red-400 font-bold mt-2">{error}</p>
+          <p className="text-xs text-destructive font-bold mt-2" role="alert">{error}</p>
         )}
       </div>
       <button
         type="submit"
         disabled={submitting}
-        className="bg-primary text-black px-4 py-2 rounded-xl font-bold text-sm disabled:opacity-50"
+        className="bg-neon text-primary-foreground px-4 py-2 rounded-xl font-bold text-sm disabled:opacity-50"
       >
         {submitting ? t('submitting') : t('submit')}
       </button>
