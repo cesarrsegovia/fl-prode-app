@@ -24,6 +24,32 @@
   "achievementsTitle": "Logros",
   "noAchievementsTitle": "Sin logros configurados",
   "unlockedOn": "Desbloqueado {date}",
+  "achievements": {
+    "FIRST_PREDICTION": {
+      "name": "Debut",
+      "description": "Cargá tu primer pronóstico."
+    },
+    "EXACT_SCORE": {
+      "name": "Ojo de Halcón",
+      "description": "Acertá un marcador exacto."
+    },
+    "STREAK_5": {
+      "name": "En Racha",
+      "description": "Alcanzá una racha de 5 aciertos seguidos."
+    },
+    "STREAK_10": {
+      "name": "Imparable",
+      "description": "Alcanzá una racha de 10 aciertos seguidos."
+    },
+    "PERFECT_ROUND": {
+      "name": "Fecha Perfecta",
+      "description": "Acertá todos los partidos de una fecha."
+    },
+    "BRACKET_CHAMPION": {
+      "name": "Visionario",
+      "description": "Acertaste el campeón del torneo."
+    }
+  },
   "links": {
     "ranking": "Ver ranking →",
     "myPredictions": "Mis pronósticos →",

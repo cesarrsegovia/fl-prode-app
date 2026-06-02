@@ -24,6 +24,32 @@
   "achievementsTitle": "Achievements",
   "noAchievementsTitle": "No achievements configured",
   "unlockedOn": "Unlocked {date}",
+  "achievements": {
+    "FIRST_PREDICTION": {
+      "name": "Debut",
+      "description": "Submit your first prediction."
+    },
+    "EXACT_SCORE": {
+      "name": "Hawk Eye",
+      "description": "Nail an exact score."
+    },
+    "STREAK_5": {
+      "name": "On Fire",
+      "description": "Reach a streak of 5 correct picks in a row."
+    },
+    "STREAK_10": {
+      "name": "Unstoppable",
+      "description": "Reach a streak of 10 correct picks in a row."
+    },
+    "PERFECT_ROUND": {
+      "name": "Perfect Matchday",
+      "description": "Get every match of a matchday right."
+    },
+    "BRACKET_CHAMPION": {
+      "name": "Visionary",
+      "description": "Predict the tournament champion."
+    }
+  },
   "links": {
     "ranking": "View ranking →",
     "myPredictions": "My predictions →",

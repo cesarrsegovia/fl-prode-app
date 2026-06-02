@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { ProdeForm } from '@/components/prode/ProdeForm';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useFixtureWithPredictions } from '@/hooks/useFixtureWithPredictions';
+import { useRoundName } from '@/lib/round-name';
 
 export default function ProdeFechaPage({
   params,
@@ -13,6 +14,7 @@ export default function ProdeFechaPage({
   params: Promise<{ fechaId: string }>;
 }) {
   const t = useTranslations('prode');
+  const roundName = useRoundName();
   const { fechaId } = use(params);
   const { fixture, predictions, isLoading, error } =
     useFixtureWithPredictions(fechaId);
@@ -51,7 +53,7 @@ export default function ProdeFechaPage({
           {t('list.eyebrow')}
         </p>
         <h1 className="font-display font-extrabold text-4xl text-foreground tracking-tight">
-          {fixture.name ?? t('fixture.fallbackName', { round: fixture.round })}
+          {roundName(fixture.round)}
         </h1>
         <Link
           href={`/prode/${fixture.id}/resultados`}

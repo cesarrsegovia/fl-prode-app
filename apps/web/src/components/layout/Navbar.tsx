@@ -49,10 +49,14 @@ export function Navbar() {
         <div className="hidden md:flex gap-6">
           {navItems.map((link) => {
             const active = isNavItemActive(link, pathname);
+            // Para invitados, "Home" apunta a la landing pública "/" (las rutas
+            // bajo (main) están protegidas y redirigen a /auth). Igual que el logo.
+            const href =
+              !isAuthed && link.labelKey === 'home' ? '/' : link.href;
             return (
               <Link
                 key={link.href}
-                href={link.href}
+                href={href}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
                   'font-display font-semibold text-sm tracking-tight transition-colors',

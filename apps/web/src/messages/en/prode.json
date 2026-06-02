@@ -43,6 +43,17 @@
   "goToTournament": "Go to tournament →",
   "fixture": {
     "fallbackName": "Matchday {round}",
+    "roundNames": {
+      "1": "Group Stage · Matchday 1",
+      "2": "Group Stage · Matchday 2",
+      "3": "Group Stage · Matchday 3",
+      "4": "Round of 64",
+      "5": "Round of 16",
+      "6": "Quarterfinals",
+      "7": "Semifinals",
+      "8": "Third Place",
+      "9": "Final"
+    },
     "matches": "{count, plural, one {# match} other {# matches}}",
     "closesIn": "Closes in",
     "backToList": "← Matchdays",

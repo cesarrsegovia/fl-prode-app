@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
 import { TeamFlag } from '@/components/torneo/TeamFlag';
+import { useRoundName } from '@/lib/round-name';
 import { cn } from '@/lib/utils';
 
 type Filter = 'all' | 'hit' | 'miss';
@@ -32,6 +33,7 @@ function actualResult(
 
 function HistoryRow({ p }: { p: PredictionHistoryItem }) {
   const t = useTranslations('mis-pronosticos');
+  const roundName = useRoundName();
   const finished = p.match.status === 'FINISHED';
   const real = actualResult(p.match);
   const hit = finished && real && p.result === real;
@@ -69,7 +71,7 @@ function HistoryRow({ p }: { p: PredictionHistoryItem }) {
           <div className="flex items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-[10px] uppercase tracking-[0.18em] font-display font-bold text-ink-dim">
-                {p.fixture.name ?? t('fixtureFallback', { round: p.fixture.round })}
+                {roundName(p.fixture.round)}
               </span>
               <span className="text-ink-dim">·</span>
               <span className="text-ink-muted">

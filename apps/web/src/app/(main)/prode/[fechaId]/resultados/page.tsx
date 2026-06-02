@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import type { Match } from '@prode/shared';
 import { MatchStatus, Result } from '@prode/shared';
 import { useFixtureWithPredictions } from '@/hooks/useFixtureWithPredictions';
+import { useRoundName } from '@/lib/round-name';
 import { TeamFlag } from '@/components/torneo/TeamFlag';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -39,6 +40,7 @@ export default function ResultadosPage({
   params: Promise<{ fechaId: string }>;
 }) {
   const t = useTranslations('prode');
+  const roundName = useRoundName();
   const { fechaId } = use(params);
   const { fixture, predictions: preds, isLoading, error } =
     useFixtureWithPredictions(fechaId);
@@ -83,7 +85,7 @@ export default function ResultadosPage({
             {t('results.title')}
           </p>
           <h1 className="font-display font-extrabold text-4xl text-foreground tracking-tight">
-            {fixture.name ?? t('fixture.fallbackName', { round: fixture.round })}
+            {roundName(fixture.round)}
           </h1>
         </div>
         <div className="text-right">

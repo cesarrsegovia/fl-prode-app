@@ -24,6 +24,32 @@
   "achievementsTitle": "Erfolge",
   "noAchievementsTitle": "Keine Erfolge konfiguriert",
   "unlockedOn": "Freigeschaltet am {date}",
+  "achievements": {
+    "FIRST_PREDICTION": {
+      "name": "Debüt",
+      "description": "Gib deinen ersten Tipp ab."
+    },
+    "EXACT_SCORE": {
+      "name": "Adlerauge",
+      "description": "Triff ein exaktes Ergebnis."
+    },
+    "STREAK_5": {
+      "name": "In Form",
+      "description": "Erreiche eine Serie von 5 richtigen Tipps in Folge."
+    },
+    "STREAK_10": {
+      "name": "Unaufhaltsam",
+      "description": "Erreiche eine Serie von 10 richtigen Tipps in Folge."
+    },
+    "PERFECT_ROUND": {
+      "name": "Perfekter Spieltag",
+      "description": "Tippe alle Spiele eines Spieltags richtig."
+    },
+    "BRACKET_CHAMPION": {
+      "name": "Visionär",
+      "description": "Tippe den Turniersieger richtig."
+    }
+  },
   "links": {
     "ranking": "Rangliste ansehen →",
     "myPredictions": "Meine Tipps →",

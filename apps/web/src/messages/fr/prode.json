@@ -43,6 +43,17 @@
   "goToTournament": "Aller au tournoi →",
   "fixture": {
     "fallbackName": "Journée {round}",
+    "roundNames": {
+      "1": "Phase de groupes · Journée 1",
+      "2": "Phase de groupes · Journée 2",
+      "3": "Phase de groupes · Journée 3",
+      "4": "Trente-deuxièmes de finale",
+      "5": "Huitièmes de finale",
+      "6": "Quarts de finale",
+      "7": "Demi-finales",
+      "8": "Match pour la 3e place",
+      "9": "Finale"
+    },
     "matches": "{count, plural, one {# match} other {# matchs}}",
     "closesIn": "Clôture dans",
     "backToList": "← Journées",
