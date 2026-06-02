@@ -43,6 +43,17 @@
   "goToTournament": "Zum Turnier →",
   "fixture": {
     "fallbackName": "Spieltag {round}",
+    "roundNames": {
+      "1": "Gruppenphase · Spieltag 1",
+      "2": "Gruppenphase · Spieltag 2",
+      "3": "Gruppenphase · Spieltag 3",
+      "4": "Runde der 64",
+      "5": "Achtelfinale",
+      "6": "Viertelfinale",
+      "7": "Halbfinale",
+      "8": "Spiel um Platz 3",
+      "9": "Finale"
+    },
     "matches": "{count, plural, one {# Spiel} other {# Spiele}}",
     "closesIn": "Schließt in",
     "backToList": "← Spieltage",

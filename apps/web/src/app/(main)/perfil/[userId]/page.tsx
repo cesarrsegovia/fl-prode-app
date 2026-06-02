@@ -98,6 +98,12 @@ function AchievementCard({ achievement }: { achievement: AchievementDto }) {
   const format = useFormatter();
   const Icon = ACHIEVEMENT_ICONS[achievement.key] ?? Trophy;
   const unlocked = achievement.unlocked;
+  // El name/description vienen sembrados en español desde la BD; traducimos por
+  // `key` (estable) y caemos al dato si no hay clave para ese logro.
+  const nameKey = `achievements.${achievement.key}.name`;
+  const descKey = `achievements.${achievement.key}.description`;
+  const name = t.has(nameKey) ? t(nameKey) : achievement.name;
+  const description = t.has(descKey) ? t(descKey) : achievement.description;
   return (
     <Card
       className={cn(
@@ -119,11 +125,11 @@ function AchievementCard({ achievement }: { achievement: AchievementDto }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <p className="font-display font-extrabold text-sm text-foreground">
-              {achievement.name}
+              {name}
             </p>
             {unlocked && <CheckCircle2 className="size-3.5 text-neon" />}
           </div>
-          <p className="text-xs text-ink-muted">{achievement.description}</p>
+          <p className="text-xs text-ink-muted">{description}</p>
           {unlocked && achievement.unlockedAt && (
             <p className="text-[10px] uppercase tracking-[0.18em] font-display font-bold text-neon mt-2">
               {t('unlockedOn', {

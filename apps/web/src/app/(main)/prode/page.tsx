@@ -27,6 +27,7 @@ import {
 } from '@/components/prode/PredictionsFilterTabs';
 import { FeaturedPickCard } from '@/components/prode/FeaturedPickCard';
 import { formatDeadline } from '@/lib/date';
+import { useRoundName } from '@/lib/round-name';
 
 interface TournamentSummary {
   id: string;
@@ -37,6 +38,7 @@ interface TournamentSummary {
 export default function ProdePage() {
   const t = useTranslations('prode');
   const tFeat = useTranslations('prode.featured');
+  const roundName = useRoundName();
   const locale = useLocale();
   const [tournament, setTournament] = useState<TournamentSummary | null>(null);
   const [items, setItems] = useState<FixtureWithMatches[]>([]);
@@ -249,7 +251,7 @@ export default function ProdePage() {
                       <div className="flex justify-between items-start mb-4 gap-4">
                         <div>
                           <h2 className="font-display font-extrabold text-2xl text-foreground tracking-tight">
-                            {fx.name ?? t('fixture.fallbackName', { round: fx.round })}
+                            {roundName(fx.round)}
                           </h2>
                           <p className="text-xs uppercase tracking-[0.18em] font-display font-bold text-ink-dim mt-1">
                             {t('fixture.matches', { count: fx.matches.length })}

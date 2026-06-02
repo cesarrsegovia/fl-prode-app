@@ -24,6 +24,32 @@
   "achievementsTitle": "Succès",
   "noAchievementsTitle": "Aucun succès configuré",
   "unlockedOn": "Débloqué le {date}",
+  "achievements": {
+    "FIRST_PREDICTION": {
+      "name": "Premiers pas",
+      "description": "Enregistre ton premier pronostic."
+    },
+    "EXACT_SCORE": {
+      "name": "Œil de lynx",
+      "description": "Trouve un score exact."
+    },
+    "STREAK_5": {
+      "name": "En feu",
+      "description": "Atteins une série de 5 bons pronostics d'affilée."
+    },
+    "STREAK_10": {
+      "name": "Inarrêtable",
+      "description": "Atteins une série de 10 bons pronostics d'affilée."
+    },
+    "PERFECT_ROUND": {
+      "name": "Journée parfaite",
+      "description": "Trouve tous les matchs d'une journée."
+    },
+    "BRACKET_CHAMPION": {
+      "name": "Visionnaire",
+      "description": "Devine le champion du tournoi."
+    }
+  },
   "links": {
     "ranking": "Voir le classement →",
     "myPredictions": "Mes pronostics →",
