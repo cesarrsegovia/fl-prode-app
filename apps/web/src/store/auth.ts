@@ -48,6 +48,9 @@ export const useAuthStore = create<AuthState>()(
       name: 'prode.auth',
       storage,
       partialize: (s) => ({ session: s.session }),
+      // No hidratar en el módulo: el SessionProvider llamará rehydrate() en un
+      // useEffect tras el primer render para evitar mismatch de hidratación SSR.
+      skipHydration: true,
       onRehydrateStorage: () => (state) => state?.setHydrated(),
     },
   ),
@@ -59,4 +62,16 @@ export function getValidToken(): string | null {
   if (!session) return null;
   if (isTokenExpired(session.accessToken, Date.now())) return null;
   return session.accessToken;
+}
+
+/** Deriva el estado estilo NextAuth a partir del store. */
+export function deriveStatus(
+  session: AuthSession | null,
+  nowMs: number,
+  hydrated: boolean,
+): AuthStatus {
+  if (!hydrated) return 'loading';
+  if (!session) return 'unauthenticated';
+  if (isTokenExpired(session.accessToken, nowMs)) return 'unauthenticated';
+  return 'authenticated';
 }

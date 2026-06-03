@@ -1,12 +1,6 @@
 import { describe, expect, it, beforeEach } from 'vitest';
-import { useAuthStore, getValidToken } from './auth';
-
-// JWT de juguete con el exp dado (segundos epoch).
-function fakeJwt(exp: number): string {
-  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
-  const payload = Buffer.from(JSON.stringify({ exp })).toString('base64url');
-  return `${header}.${payload}.sig`;
-}
+import { useAuthStore, getValidToken, deriveStatus } from './auth';
+import { fakeJwt } from '@/test-utils/fake-jwt';
 
 const validToken = fakeJwt(4102444800); // ~2100, no expira en tests
 const session = {
@@ -30,6 +24,12 @@ describe('useAuthStore', () => {
     expect(useAuthStore.getState().session).toBeNull();
   });
 
+  it('setHydrated marca hydrated = true', () => {
+    expect(useAuthStore.getState().hydrated).toBe(false);
+    useAuthStore.getState().setHydrated();
+    expect(useAuthStore.getState().hydrated).toBe(true);
+  });
+
   it('getValidToken devuelve el token si no expiró', () => {
     useAuthStore.getState().setSession(session);
     expect(getValidToken()).toBe(validToken);
@@ -42,5 +42,20 @@ describe('useAuthStore', () => {
 
   it('getValidToken devuelve null sin sesión', () => {
     expect(getValidToken()).toBeNull();
+  });
+});
+
+describe('deriveStatus', () => {
+  it('loading antes de hidratar', () => {
+    expect(deriveStatus(session, 0, false)).toBe('loading');
+  });
+  it('unauthenticated si no hay sesión', () => {
+    expect(deriveStatus(null, 0, true)).toBe('unauthenticated');
+  });
+  it('unauthenticated si el token expiró', () => {
+    expect(deriveStatus({ accessToken: fakeJwt(1000), user: session.user }, 9999 * 1000, true)).toBe('unauthenticated');
+  });
+  it('authenticated si hay sesión y token vigente', () => {
+    expect(deriveStatus(session, 1000 * 1000, true)).toBe('authenticated');
   });
 });
