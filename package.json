@@ -18,5 +18,8 @@
   },
   "devDependencies": {
     "turbo": "^2"
+  },
+  "dependencies": {
+    "@rolldown/binding-win32-x64-msvc": "^1.0.3"
   }
 }
