@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@/lib/session';
 import { useTranslations } from 'next-intl';
 import type { MyGroupEntry } from '@/lib/endpoints';
 import { grupos } from '@/lib/endpoints';

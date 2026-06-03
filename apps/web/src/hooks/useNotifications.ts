@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@/lib/session';
 import { WS_EVENTS } from '@prode/shared';
 import type { Notification } from '@prode/shared';
 import { notificaciones as api } from '@/lib/endpoints';
