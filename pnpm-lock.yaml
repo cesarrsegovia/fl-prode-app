@@ -7,14 +7,14 @@ settings:
 importers:
 
   .:
-    dependencies:
-      '@rolldown/binding-win32-x64-msvc':
-        specifier: ^1.0.3
-        version: 1.0.3
     devDependencies:
       turbo:
         specifier: ^2
         version: 2.9.3
+    optionalDependencies:
+      '@rolldown/binding-win32-x64-msvc':
+        specifier: ^1.0.3
+        version: 1.0.3
 
   apps/api:
     dependencies:
@@ -6239,7 +6239,8 @@ snapshots:
   '@rolldown/binding-win32-x64-msvc@1.0.2':
     optional: true
 
-  '@rolldown/binding-win32-x64-msvc@1.0.3': {}
+  '@rolldown/binding-win32-x64-msvc@1.0.3':
+    optional: true
 
   '@rolldown/pluginutils@1.0.1': {}
 
