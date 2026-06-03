@@ -24,6 +24,12 @@ describe('isAllowedOrigin', () => {
   it('rechaza con allowlist vacía', () => {
     expect(isAllowedOrigin('https://casino.com', [])).toBe(false);
   });
+  it("rechaza origen vacío (contexto same-origin opaco)", () => {
+    expect(isAllowedOrigin('', allow)).toBe(false);
+  });
+  it("rechaza el string 'null' (iframe sandboxed)", () => {
+    expect(isAllowedOrigin('null', allow)).toBe(false);
+  });
 });
 
 describe('buildMessage', () => {

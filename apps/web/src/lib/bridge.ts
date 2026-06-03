@@ -32,7 +32,7 @@ export function isAllowedOrigin(origin: string, allow: string[]): boolean {
   return allow.includes(origin);
 }
 
-export function buildMessage(type: string, payload?: Record<string, unknown>): BridgeMessage {
+export function buildMessage(type: EventType, payload?: Record<string, unknown>): BridgeMessage {
   return payload ? { type, payload } : { type };
 }
 
@@ -42,6 +42,8 @@ function isEmbedded(): boolean {
   return typeof window !== 'undefined' && window.self !== window.top;
 }
 
+// Origen real del padre, fijado por el PRIMER mensaje válido (first-wins) para no
+// poder ser "repintado" por otro origen permitido en configuraciones multi-origen.
 let lastParentOrigin: string | null = null;
 function targetOrigin(): string {
   if (lastParentOrigin) return lastParentOrigin;
@@ -49,7 +51,7 @@ function targetOrigin(): string {
   return '*';
 }
 
-export function postToParent(type: string, payload?: Record<string, unknown>): void {
+export function postToParent(type: EventType, payload?: Record<string, unknown>): void {
   if (!isEmbedded()) return;
   window.parent.postMessage(buildMessage(type, payload), targetOrigin());
 }
@@ -58,14 +60,30 @@ export function requestReauth(): void {
   postToParent(EVENTS.REQUEST_AUTH);
 }
 
+let warnedEmptyAllowlist = false;
+
 /** Suscribe a mensajes del padre validando origen. Devuelve función de baja. */
 export function onParentMessage(handler: (msg: BridgeMessage) => void): () => void {
   if (typeof window === 'undefined') return () => {};
+
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    !warnedEmptyAllowlist &&
+    isEmbedded() &&
+    PARENT_ORIGINS.length === 0
+  ) {
+    warnedEmptyAllowlist = true;
+    console.warn(
+      '[bridge] App embebida pero NEXT_PUBLIC_PARENT_ORIGINS está vacío: ' +
+        'todos los mensajes del padre se descartarán. Configurá los orígenes del casino.',
+    );
+  }
+
   const listener = (event: MessageEvent) => {
     if (!isAllowedOrigin(event.origin, PARENT_ORIGINS)) return;
     const data = event.data as BridgeMessage | undefined;
     if (!data || typeof data.type !== 'string' || !data.type.startsWith('casino:')) return;
-    lastParentOrigin = event.origin;
+    if (!lastParentOrigin) lastParentOrigin = event.origin;
     handler({ type: data.type, payload: data.payload });
   };
   window.addEventListener('message', listener);
