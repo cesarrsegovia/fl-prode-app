@@ -5,7 +5,8 @@ import { requestReauth } from '@/lib/bridge';
 // Singleton para queries del lado cliente.
 export const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:4000/api',
-  withCredentials: true,
+  // Sin cookies: la sesión viaja como Bearer (ver interceptor). El diseño embebido
+  // es cookieless, así que no enviamos credenciales cross-origin.
   headers: {
     'Content-Type': 'application/json',
   },
