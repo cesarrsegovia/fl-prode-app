@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@/lib/session';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { Shield } from 'lucide-react';
