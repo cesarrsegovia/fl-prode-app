@@ -53,14 +53,10 @@ export const useAuthStore = create<AuthState>()(
   ),
 );
 
-/** Token vigente o null (no-React, seguro para importar en el cliente axios).
- *  Para tokens opacos (no-JWT) no se puede verificar expiración → se devuelven tal cual. */
+/** Token vigente o null (no-React, seguro para importar en el cliente axios). */
 export function getValidToken(): string | null {
   const session = useAuthStore.getState().session;
   if (!session) return null;
-  const { accessToken } = session;
-  // Solo rechazar si es un JWT bien formado con exp vencido
-  const parts = accessToken.split('.');
-  if (parts.length === 3 && isTokenExpired(accessToken, Date.now())) return null;
-  return accessToken;
+  if (isTokenExpired(session.accessToken, Date.now())) return null;
+  return session.accessToken;
 }
