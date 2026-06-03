@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { signIn } from '@/lib/session';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AlertCircle, Loader2 } from 'lucide-react';
 
@@ -34,7 +34,7 @@ export default function LaunchPage() {
       redirect: false,
     })
       .then((res) => {
-        if (!res || res.error) {
+        if (!('ok' in res) || !res.ok) {
           setError('No se pudo validar la sesión con la plataforma');
           return;
         }

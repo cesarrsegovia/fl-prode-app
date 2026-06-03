@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@/lib/session';
 import { useFormatter, useTranslations } from 'next-intl';
 import {
   Trophy,

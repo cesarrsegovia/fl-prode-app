@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@/lib/session';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Loader2, Search, ShieldCheck, ShieldOff } from 'lucide-react';
 import { admin, type AdminUserItem } from '@/lib/endpoints';

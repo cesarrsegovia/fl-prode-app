@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@/lib/session';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { NAV_ITEMS, isNavItemActive } from '@/lib/navigation';
