@@ -7,7 +7,8 @@ import { cn } from '@/lib/utils';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { BottomNav } from '@/components/layout/BottomNav';
-import { AuthProvider } from '@/components/providers/AuthProvider';
+import { SessionProvider } from '@/lib/session';
+import { BridgeProvider } from '@/components/providers/BridgeProvider';
 import { RealtimeProvider } from '@/components/providers/RealtimeProvider';
 
 const display = Bricolage_Grotesque({
@@ -57,16 +58,18 @@ export default async function RootLayout({
           {tNav('skipToContent')}
         </a>
         <NextIntlClientProvider>
-          <AuthProvider>
-            <RealtimeProvider>
-              <Navbar />
-              <div id="main-content" tabIndex={-1} className="flex-1 relative z-10 pb-nav md:pb-0 outline-none">
-                {children}
-              </div>
-              <Footer />
-              <BottomNav />
-            </RealtimeProvider>
-          </AuthProvider>
+          <SessionProvider>
+            <BridgeProvider>
+              <RealtimeProvider>
+                <Navbar />
+                <div id="main-content" tabIndex={-1} className="flex-1 relative z-10 pb-nav md:pb-0 outline-none">
+                  {children}
+                </div>
+                <Footer />
+                <BottomNav />
+              </RealtimeProvider>
+            </BridgeProvider>
+          </SessionProvider>
         </NextIntlClientProvider>
       </body>
     </html>

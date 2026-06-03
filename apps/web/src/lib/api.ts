@@ -1,31 +1,42 @@
 import axios from 'axios';
-import { getSession } from 'next-auth/react';
+import { getValidToken, useAuthStore } from '@/store/auth';
+import { requestReauth } from '@/lib/bridge';
 
-// Singleton instance for client-side queries
+// Singleton para queries del lado cliente.
 export const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:4000/api',
-  withCredentials: true,
+  // Sin cookies: la sesión viaja como Bearer (ver interceptor). El diseño embebido
+  // es cookieless, así que no enviamos credenciales cross-origin.
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Inject the NestJS JWT from NextAuth session into every request
+// Inyecta el JWT (del store) en cada request.
 apiClient.interceptors.request.use(
-  async (config) => {
-    const session = await getSession();
-    if (session?.accessToken) {
-      config.headers.Authorization = `Bearer ${session.accessToken}`;
+  (config) => {
+    const token = getValidToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
+  (error) => Promise.reject(error),
+);
+
+// En 401: limpiar sesión y, si estamos embebidos, pedir code fresco al casino.
+apiClient.interceptors.response.use(
+  (res) => res,
   (error) => {
+    if (error?.response?.status === 401) {
+      useAuthStore.getState().clear();
+      requestReauth();
+    }
     return Promise.reject(error);
   },
 );
 
-// Server-side fetch helper (for RSC / Server Actions)
-// Use this inside Server Components where getSession is not available
+// Helper server-side (RSC / Server Actions) — sin auth, igual que antes.
 export async function serverFetch(path: string, options?: RequestInit) {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:4000/api';
   return fetch(`${baseUrl}${path}`, {

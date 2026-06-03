@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { signOut, useSession } from 'next-auth/react';
+import { signOut, useSession } from '@/lib/session';
 import { useTranslations } from 'next-intl';
 import { Bell, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -22,6 +22,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import { useIsEmbedded } from '@/hooks/useEmbed';
 
 export function Navbar() {
   const pathname = usePathname();
@@ -29,6 +30,7 @@ export function Navbar() {
   const { data: session, status } = useSession();
   const isAuthed = status === 'authenticated';
   const isAdmin = session?.user?.isAdmin === true;
+  const embedded = useIsEmbedded();
   const [faqOpen, setFaqOpen] = useState(false);
   const navItems = isAdmin ? [...NAV_ITEMS, ADMIN_NAV_ITEM] : NAV_ITEMS;
 
@@ -91,7 +93,7 @@ export function Navbar() {
             userId={(session?.user as { id?: string } | undefined)?.id}
             image={session?.user?.image ?? null}
           />
-        ) : (
+        ) : embedded ? null : (
           <>
             <Link href="/auth">
               <Button variant="ghost" className="font-display font-semibold">

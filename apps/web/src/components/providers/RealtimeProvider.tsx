@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@/lib/session';
 import { useRealtimeStore } from '@/store/useRealtimeStore';
 
 export function RealtimeProvider({ children }: { children: React.ReactNode }) {

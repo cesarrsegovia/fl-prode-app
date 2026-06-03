@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@/lib/session';
 import { useTranslations } from 'next-intl';
 import { Lock, Loader2, Users } from 'lucide-react';
 import { grupos, type GroupPreview } from '@/lib/endpoints';

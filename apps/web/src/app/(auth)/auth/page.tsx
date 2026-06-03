@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { signIn } from '@/lib/session';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Trophy, Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react';
@@ -40,7 +40,7 @@ export default function AuthPage() {
         redirect: false,
       });
 
-      if (result?.error) {
+      if ('error' in result) {
         setError(t('errors.invalidCredentials'));
       } else {
         router.push(next);
@@ -77,7 +77,7 @@ export default function AuthPage() {
         redirect: false,
       });
 
-      if (result?.error) {
+      if ('error' in result) {
         setError(t('errors.loginAfterRegister'));
       } else {
         router.push(next);
