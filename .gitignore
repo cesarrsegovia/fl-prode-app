@@ -30,7 +30,11 @@ Thumbs.db
 .turbo/
 
 # Prisma
-apps/api/prisma/migrations/
+# Se versiona SOLO la migración baseline squashed (refleja el schema completo y se aplica
+# con `prisma migrate deploy` en prod). Las carpetas locales de dev previas quedan ignoradas.
+apps/api/prisma/migrations/*
+!apps/api/prisma/migrations/20260603120000_init
+!apps/api/prisma/migrations/migration_lock.toml
 
 # Debug
 npm-debug.log*

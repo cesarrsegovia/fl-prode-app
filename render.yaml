@@ -1,0 +1,81 @@
+# Render Blueprint — API NestJS (@prode/api) + Postgres + Key Value (Redis)
+# Deploy: Render Dashboard → New → Blueprint → apuntar a este repo.
+# La WEB (apps/web) va en Vercel, NO acá (ver docs/deploy.md y apps/web/vercel.json).
+#
+# Notas:
+#  - `plan: free` para arrancar/probar. Para producción real (casino) subir a planes pagos:
+#    el web free se duerme por inactividad (corta WebSockets) y el Postgres free expira a los
+#    ~30 días. Ver docs/deploy.md.
+#  - Las migraciones se aplican en el startCommand (`prisma migrate deploy`), idempotente y
+#    compatible con cualquier plan. En planes pagos podés moverlo a `preDeployCommand`.
+
+databases:
+  - name: prode-postgres
+    databaseName: prode
+    user: prode
+    plan: free
+
+services:
+  # ─────────── Redis (Render Key Value) ───────────
+  - type: redis
+    name: prode-redis
+    plan: free
+    ipAllowList: [] # solo acceso interno desde otros servicios de Render
+    maxmemoryPolicy: noeviction
+
+  # ─────────── API NestJS ───────────
+  - type: web
+    name: prode-api
+    runtime: node
+    plan: free
+    rootDir: . # monorepo: instalamos/compilamos desde la raíz con pnpm workspaces
+    healthCheckPath: /api/health
+    buildCommand: >-
+      corepack enable &&
+      pnpm install --frozen-lockfile --prod=false &&
+      pnpm --filter @prode/shared build &&
+      pnpm --filter @prode/api exec prisma generate &&
+      pnpm --filter @prode/api build
+    # migrate deploy corre antes de levantar el server (idempotente; falla ruidoso si hay drift)
+    startCommand: >-
+      pnpm --filter @prode/api exec prisma migrate deploy &&
+      pnpm --filter @prode/api run start:prod
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      # Conexiones autoenchufadas desde los servicios gestionados:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: prode-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: prode-redis
+          property: connectionString
+      # Secretos / config (completar en el dashboard; sync:false = no se versiona):
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRATION
+        value: 7d
+      # Origen de la web (Vercel) para CORS. Ej: https://prode.vercel.app
+      - key: FRONTEND_URL
+        sync: false
+      # ── Integración con el casino (backend wallet/identidad) ──
+      - key: PROVIDER_NAME
+        value: prode
+      - key: PROVIDER_OPERATOR_NAME
+        sync: false
+      - key: OFFCHAIN_API_URL
+        sync: false
+      - key: PROVIDER_OUTBOUND_API_KEY
+        sync: false
+      - key: PROVIDER_TIMEOUT_MS
+        value: "10000"
+      # ── API-Football (resultados); dejar vacío desactiva el cron ──
+      - key: SPORTS_API_KEY
+        sync: false
+      - key: SPORTS_API_URL
+        value: https://v3.football.api-sports.io
+      - key: SENTRY_DSN
+        sync: false

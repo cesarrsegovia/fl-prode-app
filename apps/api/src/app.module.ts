@@ -19,6 +19,7 @@ import { MessagesModule } from './modules/messages/messages.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { ProviderModule } from './modules/provider/provider.module';
 import { WebsocketModule } from './websocket/websocket.module';
+import { HealthController } from './common/health.controller';
 import { ResultadosCron } from './jobs/resultados.cron';
 
 @Module({
@@ -44,6 +45,7 @@ import { ResultadosCron } from './jobs/resultados.cron';
     AdminModule,
     ProviderModule,
   ],
+  controllers: [HealthController],
   providers: [ResultadosCron],
 })
 export class AppModule {}
