@@ -90,7 +90,7 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="flex w-full min-h-[calc(100vh-160px)] items-center justify-center relative p-4">
+    <div className="flex w-full min-h-[calc(100vh-160px)] items-center justify-center relative px-4 pt-24 pb-8">
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-neon/10 rounded-full blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-neon/5 rounded-full blur-[120px] pointer-events-none"></div>
 
