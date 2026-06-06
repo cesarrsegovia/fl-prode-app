@@ -44,7 +44,7 @@ export default function LaunchPage() {
   }, [searchParams, router]);
 
   return (
-    <div className="flex w-full min-h-[calc(100vh-160px)] items-center justify-center p-4">
+    <div className="flex w-full min-h-[calc(100vh-160px)] items-center justify-center px-4 pt-24 pb-8">
       <main className="w-full max-w-[420px] text-center space-y-6">
         {!error ? (
           <>
