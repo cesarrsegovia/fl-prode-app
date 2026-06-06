@@ -93,6 +93,8 @@
     "captainCheck": "Capitaine (x2)",
     "homeScoreLabel": "Buts de {team}",
     "awayScoreLabel": "Buts de {team}",
+    "incrementScore": "Ajouter un but à {team}",
+    "decrementScore": "Retirer un but à {team}",
     "pickAria": {
       "home": "Victoire à domicile",
       "draw": "Match nul",
