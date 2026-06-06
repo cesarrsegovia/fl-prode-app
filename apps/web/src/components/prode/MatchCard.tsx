@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import type { Match } from '@prode/shared';
 import { MatchStatus, Result } from '@prode/shared';
+import { Minus, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TeamFlag } from '@/components/torneo/TeamFlag';
 
@@ -96,6 +97,12 @@ export function MatchCard({
       homeScoreGuess: side === 'home' ? parsed : pick?.homeScoreGuess,
       awayScoreGuess: side === 'away' ? parsed : pick?.awayScoreGuess,
     });
+  };
+
+  const adjustScore = (side: 'home' | 'away', delta: number) => {
+    const current =
+      (side === 'home' ? pick?.homeScoreGuess : pick?.awayScoreGuess) ?? 0;
+    setScore(side, String(Math.max(0, current + delta)));
   };
 
   return (
@@ -193,27 +200,23 @@ export function MatchCard({
             <span className="text-[10px] font-display font-extrabold uppercase tracking-[0.18em] text-ink-muted">
               {t('scoreBonus')}
             </span>
-            <div className="flex items-center gap-3">
-              <input
-                className="w-10 h-8 bg-surface-2 rounded text-center text-sm font-display font-bold focus:ring-1 focus:ring-neon p-0 tabular-nums"
-                type="number"
-                inputMode="numeric"
-                aria-label={t('homeScoreLabel', { team: teamName(match, 'home') })}
-                min={0}
-                placeholder="0"
-                value={pick?.homeScoreGuess ?? ''}
-                onChange={(e) => setScore('home', e.target.value)}
+            <div className="flex items-start gap-3">
+              <ScoreStepper
+                value={pick?.homeScoreGuess}
+                inputAria={t('homeScoreLabel', { team: teamName(match, 'home') })}
+                incAria={t('incrementScore', { team: teamName(match, 'home') })}
+                decAria={t('decrementScore', { team: teamName(match, 'home') })}
+                onType={(raw) => setScore('home', raw)}
+                onStep={(delta) => adjustScore('home', delta)}
               />
-              <span className="text-ink-muted font-bold">-</span>
-              <input
-                className="w-10 h-8 bg-surface-2 rounded text-center text-sm font-display font-bold focus:ring-1 focus:ring-neon p-0 tabular-nums"
-                type="number"
-                inputMode="numeric"
-                aria-label={t('awayScoreLabel', { team: teamName(match, 'away') })}
-                min={0}
-                placeholder="0"
-                value={pick?.awayScoreGuess ?? ''}
-                onChange={(e) => setScore('away', e.target.value)}
+              <span className="text-ink-muted font-bold text-lg leading-9">-</span>
+              <ScoreStepper
+                value={pick?.awayScoreGuess}
+                inputAria={t('awayScoreLabel', { team: teamName(match, 'away') })}
+                incAria={t('incrementScore', { team: teamName(match, 'away') })}
+                decAria={t('decrementScore', { team: teamName(match, 'away') })}
+                onType={(raw) => setScore('away', raw)}
+                onStep={(delta) => adjustScore('away', delta)}
               />
             </div>
           </div>
@@ -234,6 +237,63 @@ export function MatchCard({
             </label>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Input de goles con botones [−]/[+] debajo. Se puede tipear o usar los botones.
+ * Las flechitas nativas del input number se ocultan.
+ */
+function ScoreStepper({
+  value,
+  inputAria,
+  incAria,
+  decAria,
+  onType,
+  onStep,
+}: {
+  value?: number;
+  inputAria: string;
+  incAria: string;
+  decAria: string;
+  onType: (raw: string) => void;
+  onStep: (delta: number) => void;
+}) {
+  const stepBtn =
+    'size-7 rounded bg-surface-2 text-ink-muted flex items-center justify-center transition hover:bg-neon/10 hover:text-neon active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-neon disabled:opacity-40 disabled:pointer-events-none';
+
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      <input
+        className="w-12 h-9 bg-surface-2 rounded text-center text-base font-display font-bold focus:ring-1 focus:ring-neon p-0 tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+        type="number"
+        inputMode="numeric"
+        aria-label={inputAria}
+        min={0}
+        placeholder="0"
+        value={value ?? ''}
+        onChange={(e) => onType(e.target.value)}
+      />
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          aria-label={decAria}
+          disabled={(value ?? 0) <= 0}
+          onClick={() => onStep(-1)}
+          className={stepBtn}
+        >
+          <Minus className="size-3.5" />
+        </button>
+        <button
+          type="button"
+          aria-label={incAria}
+          onClick={() => onStep(1)}
+          className={stepBtn}
+        >
+          <Plus className="size-3.5" />
+        </button>
       </div>
     </div>
   );

@@ -93,6 +93,8 @@
     "captainCheck": "Kapitän (x2)",
     "homeScoreLabel": "Tore von {team}",
     "awayScoreLabel": "Tore von {team}",
+    "incrementScore": "Tor für {team} hinzufügen",
+    "decrementScore": "Tor von {team} entfernen",
     "pickAria": {
       "home": "Heimsieg",
       "draw": "Unentschieden",
