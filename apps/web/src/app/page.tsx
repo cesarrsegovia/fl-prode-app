@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Users, Globe, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { diceBearAvatar } from "@/lib/avatar";
+import bannerWc26 from "../../public/images/banner-wc26gem.webp";
 
 export default function Page() {
   const t = useTranslations("landing");
@@ -13,6 +14,12 @@ export default function Page() {
         <section className="relative min-h-svh flex flex-col items-center justify-center text-center px-6 py-20">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-150 bg-neon/10 rounded-full blur-[120px] -z-10"></div>
           <div className="max-w-4xl mx-auto space-y-8">
+            <Image
+              src={bannerWc26}
+              alt=""
+              priority
+              className="hidden md:block w-full h-auto rounded-2xl"
+            />
             <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-foreground leading-[0.95]">
               {t("hero.predict")} <br />
               {t("hero.compete")}{" "}
