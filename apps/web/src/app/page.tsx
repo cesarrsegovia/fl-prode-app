@@ -1,9 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Users, Globe, Trophy } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { diceBearAvatar } from "@/lib/avatar";
+import { HowItWorksButton } from "@/components/landing/HowItWorksButton";
 import bannerWc26 from "../../public/images/banner-wc26gem.webp";
 
 export default function Page() {
@@ -31,62 +29,7 @@ export default function Page() {
               {t("hero.subtitle")}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-              <Button render={<Link href="/auth" />} className="w-full sm:w-auto px-8 py-6 font-extrabold text-lg rounded-xl">
-                {t("hero.ctaPrimary")}
-              </Button>
-              <Button variant="secondary" render={<Link href="/auth" />} className="w-full sm:w-auto px-8 py-6 font-bold text-lg rounded-xl">
-                {t("hero.ctaSecondary")}
-              </Button>
-            </div>
-
-            <div className="pt-12 flex flex-col items-center gap-4">
-              <div className="flex -space-x-3">
-                <Image
-                  className="w-12 h-12 rounded-full border-4 border-background object-cover"
-                  src={diceBearAvatar('fan-1')}
-                  alt=""
-                  width={48}
-                  height={48}
-                  unoptimized
-                />
-                <Image
-                  className="w-12 h-12 rounded-full border-4 border-background object-cover"
-                  src={diceBearAvatar('fan-2')}
-                  alt=""
-                  width={48}
-                  height={48}
-                  unoptimized
-                />
-                <Image
-                  className="w-12 h-12 rounded-full border-4 border-background object-cover"
-                  src={diceBearAvatar('fan-3')}
-                  alt=""
-                  width={48}
-                  height={48}
-                  unoptimized
-                />
-                <Image
-                  className="w-12 h-12 rounded-full border-4 border-background object-cover"
-                  src={diceBearAvatar('fan-4')}
-                  alt=""
-                  width={48}
-                  height={48}
-                  unoptimized
-                />
-                <div className="w-12 h-12 rounded-full border-4 border-background bg-surface-2 flex items-center justify-center text-xs font-bold text-foreground">
-                  +2k
-                </div>
-              </div>
-              <p className="text-sm font-medium text-ink-muted tracking-wide">
-                {t.rich("hero.social", {
-                  count: 12450,
-                  hl: (chunks) => (
-                    <span className="text-neon font-bold">
-                      {chunks}
-                    </span>
-                  ),
-                })}
-              </p>
+              <HowItWorksButton />
             </div>
           </div>
 

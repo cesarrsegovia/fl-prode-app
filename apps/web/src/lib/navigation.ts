@@ -4,6 +4,7 @@ import {
   Trophy,
   Users,
   ListChecks,
+  Shield,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -29,6 +30,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
 export const ADMIN_NAV_ITEM = {
   href: '/admin',
   labelKey: 'admin',
+  icon: Shield,
   matchPrefixes: ['/admin'],
 } as const;
 
