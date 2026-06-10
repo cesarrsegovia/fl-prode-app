@@ -25,11 +25,17 @@ function applyFrameAncestors(req: NextRequest, res: NextResponse): NextResponse 
  */
 export function middleware(req: NextRequest) {
   const url = req.nextUrl;
-  const code = url.searchParams.get('authorizationCode');
+  // El padre puede mandar el code como `authorizationCode` (contrato) o `token`
+  // (game_url del agregador, p. ej. `/?consumer=gamblor&embed=1&token=...`).
+  const code =
+    url.searchParams.get('authorizationCode') || url.searchParams.get('token');
 
   if (code && !url.pathname.startsWith('/launch') && !url.pathname.startsWith('/api')) {
     const dest = url.clone();
     dest.pathname = '/launch';
+    // Normalizamos a `authorizationCode` para que /launch lo lea de una sola forma.
+    dest.searchParams.set('authorizationCode', code);
+    dest.searchParams.delete('token');
     return applyFrameAncestors(req, NextResponse.redirect(dest));
   }
 
