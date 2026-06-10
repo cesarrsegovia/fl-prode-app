@@ -9,5 +9,19 @@
     "retry": "Erneut versuchen",
     "home": "Zur Startseite",
     "ref": "Ref"
+  },
+  "player": {
+    "positions": {
+      "Goalkeeper": "Torwart",
+      "Defender": "Verteidiger",
+      "Midfielder": "Mittelfeldspieler",
+      "Attacker": "Stürmer"
+    },
+    "roles": {
+      "entrenador": "Trainer",
+      "asistentetecnico": "Co-Trainer",
+      "directortecnico": "Trainer"
+    },
+    "staff": "Trainerstab"
   }
 }

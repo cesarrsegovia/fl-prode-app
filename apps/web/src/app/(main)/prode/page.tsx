@@ -15,6 +15,7 @@ import {
   type TopScorerPickResponse,
 } from '@/lib/endpoints';
 import { apiClient } from '@/lib/api';
+import { positionKey } from '@/lib/player-labels';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
@@ -38,6 +39,7 @@ interface TournamentSummary {
 export default function ProdePage() {
   const t = useTranslations('prode');
   const tFeat = useTranslations('prode.featured');
+  const tPlayer = useTranslations('common.player');
   const roundName = useRoundName();
   const locale = useLocale();
   const [tournament, setTournament] = useState<TournamentSummary | null>(null);
@@ -164,7 +166,11 @@ export default function ProdePage() {
                 label={tFeat('topScorer.label')}
                 pointsLabel={tFeat('topScorer.points')}
                 pickName={topPick?.player?.name ?? null}
-                pickSubtitle={topPick?.player?.position ?? null}
+                pickSubtitle={
+                  positionKey(topPick?.player?.position)
+                    ? tPlayer(`positions.${positionKey(topPick?.player?.position)}`)
+                    : (topPick?.player?.position ?? null)
+                }
                 deadlineLabel={tFeat('deadlineUntil', { date: deadlineLabel })}
                 emptyLabel={tFeat('empty')}
                 href={`/torneo/${tournament.id}`}

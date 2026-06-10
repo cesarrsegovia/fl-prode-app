@@ -97,7 +97,11 @@
     "currentPick": "Tu pick actual",
     "locked": "Predicciones cerradas",
     "saveError": "No se pudo guardar tu predicción",
-    "emptyPlayers": "Lista de jugadores próximamente"
+    "emptyPlayers": "Lista de jugadores próximamente",
+    "forwardsLabel": "Delanteros",
+    "otherPlayerLabel": "¿Otro jugador?",
+    "selectTeamPlaceholder": "Elegir selección…",
+    "searchPlaceholder": "Buscar jugador…"
   },
   "alerts": {
     "missingChampion": "Falta tu campeón",

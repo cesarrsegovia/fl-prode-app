@@ -97,7 +97,11 @@
     "currentPick": "Votre choix actuel",
     "locked": "Pronostics fermés",
     "saveError": "Échec de l'enregistrement",
-    "emptyPlayers": "Liste des joueurs bientôt disponible"
+    "emptyPlayers": "Liste des joueurs bientôt disponible",
+    "forwardsLabel": "Attaquants",
+    "otherPlayerLabel": "Un autre joueur ?",
+    "selectTeamPlaceholder": "Choisir une équipe…",
+    "searchPlaceholder": "Rechercher un joueur…"
   },
   "alerts": {
     "missingChampion": "Votre champion manque",

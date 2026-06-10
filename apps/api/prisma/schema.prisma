@@ -180,6 +180,8 @@ model Player {
   photoUrl    String?
   age         Int?
   nationality String?
+  isStaff     Boolean @default(false) // cuerpo técnico (DT, asistente): no es candidato a goleador
+  role        String? // rol original en español cuando isStaff: "Entrenador", "Asistente técnico", ...
 
   squad           SquadEntry[]
   topScorerOf     Tournament[]    @relation("TournamentTopScorer")

@@ -97,7 +97,11 @@
     "currentPick": "Dein aktueller Tipp",
     "locked": "Tipps geschlossen",
     "saveError": "Tipp konnte nicht gespeichert werden",
-    "emptyPlayers": "Spielerliste folgt in Kürze"
+    "emptyPlayers": "Spielerliste folgt in Kürze",
+    "forwardsLabel": "Stürmer",
+    "otherPlayerLabel": "Anderer Spieler?",
+    "selectTeamPlaceholder": "Mannschaft wählen…",
+    "searchPlaceholder": "Spieler suchen…"
   },
   "alerts": {
     "missingChampion": "Dein Meister fehlt",

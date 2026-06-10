@@ -2,8 +2,10 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { Users } from 'lucide-react';
-import { teamApi, tournamentApi } from '@/lib/server-endpoints';
+import { teamApi, tournamentApi, type PlayerDto } from '@/lib/server-endpoints';
+import { positionKey, staffRoleKey } from '@/lib/player-labels';
 import { TeamFlag } from '@/components/torneo/TeamFlag';
+import { PlayerPhoto } from '@/components/torneo/PlayerPhoto';
 import { MatchRow } from '@/components/torneo/MatchRow';
 import { Card, CardContent } from '@/components/ui/card';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
@@ -26,6 +28,7 @@ export async function generateMetadata({ params }: Props) {
 export default async function SeleccionPage({ params }: Props) {
   const { id } = await params;
   const t = await getTranslations('seleccion');
+  const tPlayer = await getTranslations('common.player');
 
   let team;
   try {
@@ -45,6 +48,22 @@ export default async function SeleccionPage({ params }: Props) {
         teamApi.squad(id, activeTournament.id).catch(() => []),
       ])
     : [[], []];
+
+  // Subtítulo del jugador: rol traducido para el cuerpo técnico, posición
+  // traducida + dorsal para jugadores. La BD guarda los datos crudos.
+  const playerSubtitle = (p: PlayerDto): string => {
+    if (p.isStaff) {
+      const rk = staffRoleKey(p.role);
+      return rk ? tPlayer(`roles.${rk}`) : (p.role ?? tPlayer('staff'));
+    }
+    const pk = positionKey(p.position);
+    return [
+      pk ? tPlayer(`positions.${pk}`) : p.position,
+      p.number !== null ? `#${p.number}` : null,
+    ]
+      .filter(Boolean)
+      .join(' · ');
+  };
 
   return (
     <main className="pt-24 pb-24 px-4 max-w-5xl mx-auto">
@@ -129,20 +148,14 @@ export default async function SeleccionPage({ params }: Props) {
                     key={p.id}
                     className="flex items-center gap-3 px-3 py-2 rounded-lg bg-surface-2"
                   >
-                    {p.number !== null && (
-                      <span className="size-8 rounded-full bg-neon/15 text-neon font-display font-extrabold text-sm flex items-center justify-center tabular-nums shrink-0">
-                        {p.number}
-                      </span>
-                    )}
+                    <PlayerPhoto src={p.photoUrl} alt={p.name} size="sm" />
                     <div className="flex-1 min-w-0">
                       <p className="font-display font-semibold text-sm text-foreground truncate">
                         {p.name}
                       </p>
-                      {p.position && (
-                        <p className="text-[10px] uppercase tracking-[0.18em] font-display text-ink-dim">
-                          {p.position}
-                        </p>
-                      )}
+                      <p className="text-[10px] uppercase tracking-[0.18em] font-display text-ink-dim truncate">
+                        {playerSubtitle(p)}
+                      </p>
                     </div>
                   </li>
                 ))}
