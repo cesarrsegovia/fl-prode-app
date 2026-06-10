@@ -21,6 +21,7 @@ import { ProviderModule } from './modules/provider/provider.module';
 import { WebsocketModule } from './websocket/websocket.module';
 import { HealthController } from './common/health.controller';
 import { ResultadosCron } from './jobs/resultados.cron';
+import { DbKeepaliveCron } from './jobs/db-keepalive.cron';
 
 @Module({
   imports: [
@@ -46,6 +47,6 @@ import { ResultadosCron } from './jobs/resultados.cron';
     ProviderModule,
   ],
   controllers: [HealthController],
-  providers: [ResultadosCron],
+  providers: [ResultadosCron, DbKeepaliveCron],
 })
 export class AppModule {}

@@ -38,7 +38,10 @@ export class TeamsService {
     });
   }
 
-  /** Plantilla del equipo en un torneo (si fue importada). */
+  /**
+   * Plantilla del equipo en un torneo (si fue importada). Incluye cuerpo
+   * técnico (isStaff), que va primero; luego los jugadores por número.
+   */
   async getSquad(teamId: string, tournamentId: string) {
     const entries = await this.prisma.squadEntry.findMany({
       where: { teamId, tournamentId },
@@ -47,6 +50,8 @@ export class TeamsService {
     return entries
       .map((e) => e.player)
       .sort((a, b) => {
+        // Staff primero (entrenador, asistentes), luego jugadores por número.
+        if (a.isStaff !== b.isStaff) return a.isStaff ? -1 : 1;
         const an = a.number ?? 999;
         const bn = b.number ?? 999;
         return an - bn;

@@ -14,6 +14,7 @@ build/
 .env.*.local
 .env.example
 !apps/web/.env.example
+!apps/api/.env.example
 .env.local.example
 
 # IDE
@@ -30,11 +31,15 @@ Thumbs.db
 .turbo/
 
 # Prisma
-# Se versiona SOLO la migración baseline squashed (refleja el schema completo y se aplica
-# con `prisma migrate deploy` en prod). Las carpetas locales de dev previas quedan ignoradas.
-apps/api/prisma/migrations/*
-!apps/api/prisma/migrations/20260603120000_init
-!apps/api/prisma/migrations/migration_lock.toml
+# Las migraciones SE VERSIONAN (el deploy corre `prisma migrate deploy`).
+# Se ignoran SOLO las carpetas locales de dev previas a la baseline squashed
+# 20260603120000_init, que ya refleja ese schema completo. Toda migración
+# nueva (posterior a la baseline) entra al repo automáticamente.
+apps/api/prisma/migrations/20260409151701_init/
+apps/api/prisma/migrations/20260423170925_phase_2_admin_and_external_ids/
+apps/api/prisma/migrations/20260520120000_add_r32_qualifier_picks/
+apps/api/prisma/migrations/20260528120000_group_score_tiebreak_counters/
+apps/api/prisma/migrations/20260528121500_top_scorer_pick/
 
 # Debug
 npm-debug.log*

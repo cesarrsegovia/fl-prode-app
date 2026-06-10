@@ -625,8 +625,9 @@ export class TournamentsService {
 
   /** Jugadores del torneo (agrupables por equipo / posición). */
   async getTournamentPlayers(tournamentId: string) {
+    // Candidatos a goleador: solo jugadores, nunca cuerpo técnico.
     const entries = await this.prisma.squadEntry.findMany({
-      where: { tournamentId },
+      where: { tournamentId, player: { isStaff: false } },
       include: {
         player: true,
         team: {

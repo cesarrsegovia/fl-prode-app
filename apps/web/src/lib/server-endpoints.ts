@@ -153,6 +153,8 @@ export interface PlayerDto {
   number: number | null;
   photoUrl: string | null;
   age: number | null;
+  isStaff: boolean;
+  role: string | null;
 }
 
 // ---------- Tournament endpoints ----------

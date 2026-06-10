@@ -97,7 +97,11 @@
     "currentPick": "Your current pick",
     "locked": "Picks closed",
     "saveError": "Couldn't save your pick",
-    "emptyPlayers": "Player list coming soon"
+    "emptyPlayers": "Player list coming soon",
+    "forwardsLabel": "Forwards",
+    "otherPlayerLabel": "Another player?",
+    "selectTeamPlaceholder": "Choose a team…",
+    "searchPlaceholder": "Search player…"
   },
   "alerts": {
     "missingChampion": "Missing your champion",

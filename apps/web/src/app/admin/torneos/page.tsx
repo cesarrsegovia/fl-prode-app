@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { apiClient } from '@/lib/api';
+import { positionKey } from '@/lib/player-labels';
 import {
   topScorerPick,
   tournamentPlayers,
@@ -18,6 +19,7 @@ interface TournamentRow {
 
 export default function AdminTorneosPage() {
   const t = useTranslations('admin.torneos');
+  const tPlayer = useTranslations('common.player');
   const [tournaments, setTournaments] = useState<TournamentRow[]>([]);
   const [selected, setSelected] = useState<string>('');
   const [players, setPlayers] = useState<TournamentPlayerDto[]>([]);
@@ -108,7 +110,11 @@ export default function AdminTorneosPage() {
               {players.map((p) => (
                 <option key={p.playerId} value={p.playerId}>
                   {p.team.name} — {p.name}
-                  {p.position ? ` (${p.position})` : ''}
+                  {positionKey(p.position)
+                    ? ` (${tPlayer(`positions.${positionKey(p.position)}`)})`
+                    : p.position
+                      ? ` (${p.position})`
+                      : ''}
                 </option>
               ))}
             </select>
