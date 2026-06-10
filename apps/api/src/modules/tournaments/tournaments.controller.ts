@@ -124,6 +124,12 @@ export class TournamentsController {
     return this.service.getTournamentPlayers(id);
   }
 
+  @Get(':id/top-scorer-pick/deadline')
+  async topScorerDeadline(@Param('id') id: string) {
+    const deadline = await this.service.getTopScorerDeadline(id);
+    return { deadline };
+  }
+
   @UseGuards(AuthGuard('jwt'))
   @Get(':id/top-scorer-pick/me')
   myTopScorerPick(

@@ -44,10 +44,11 @@ export function championPickDeadline(tournamentStart: Date): Date {
   return endOfPreviousDayUtc(tournamentStart);
 }
 
-// Goleador: mismo criterio que el campeón (cierre antes del inicio del torneo).
+// Goleador: se puede elegir hasta el final de la 2da fecha de grupos
+// (cierra el día previo al primer partido de la 3ra fecha, igual que R32).
 // Si Tournament.topScorerDeadline está seteado, ese valor manda en el service.
-export function topScorerPickDeadline(tournamentStart: Date): Date {
-  return endOfPreviousDayUtc(tournamentStart);
+export function topScorerPickDeadline(round3FirstMatchStart: Date): Date {
+  return endOfPreviousDayUtc(round3FirstMatchStart);
 }
 
 export function r32QualifierDeadline(round3FirstMatchStart: Date): Date {

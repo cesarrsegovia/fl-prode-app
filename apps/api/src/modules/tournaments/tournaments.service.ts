@@ -204,6 +204,15 @@ export class TournamentsService {
    * de grupos (round=3). Si todavía no hay fixture cargado para round 3, retorna null.
    */
   async getR32Deadline(tournamentId: string): Promise<Date | null> {
+    const firstStart = await this.getRound3FirstMatchStart(tournamentId);
+    if (!firstStart) return null;
+    return r32QualifierDeadline(firstStart);
+  }
+
+  /** Primer partido de la 3ra fecha de grupos (round=3), o null si no hay fixture. */
+  private async getRound3FirstMatchStart(
+    tournamentId: string,
+  ): Promise<Date | null> {
     const round3 = await this.prisma.fixture.findUnique({
       where: {
         tournamentId_round: {
@@ -219,9 +228,7 @@ export class TournamentsService {
         },
       },
     });
-    const firstStart = round3?.matches[0]?.startTime;
-    if (!firstStart) return null;
-    return r32QualifierDeadline(firstStart);
+    return round3?.matches[0]?.startTime ?? null;
   }
 
   async getMyR32Picks(tournamentId: string, userId: string) {
@@ -656,21 +663,29 @@ export class TournamentsService {
     });
   }
 
+  /**
+   * Deadline efectivo del pick de goleador: si Tournament.topScorerDeadline
+   * está seteado manda ese valor; si no, se puede elegir hasta el final de la
+   * 2da fecha de grupos (día previo al primer partido de la 3ra fecha).
+   */
+  async getTopScorerDeadline(tournamentId: string): Promise<Date | null> {
+    const tournament = await this.prisma.tournament.findUnique({
+      where: { id: tournamentId },
+      select: { topScorerDeadline: true },
+    });
+    if (!tournament) throw new NotFoundException('Torneo no encontrado');
+    if (tournament.topScorerDeadline) return tournament.topScorerDeadline;
+    const firstStart = await this.getRound3FirstMatchStart(tournamentId);
+    if (!firstStart) return null;
+    return topScorerPickDeadline(firstStart);
+  }
+
   async setTopScorerPick(
     tournamentId: string,
     userId: string,
     playerId: string,
   ) {
-    const tournament = await this.prisma.tournament.findUnique({
-      where: { id: tournamentId },
-      select: { id: true, startDate: true, topScorerDeadline: true },
-    });
-    if (!tournament) throw new NotFoundException('Torneo no encontrado');
-
-    const fallback = tournament.startDate
-      ? topScorerPickDeadline(tournament.startDate)
-      : null;
-    const deadline = tournament.topScorerDeadline ?? fallback;
+    const deadline = await this.getTopScorerDeadline(tournamentId);
     if (deadline && deadline.getTime() <= Date.now()) {
       throw new BadRequestException(
         'El plazo para elegir goleador ya está cerrado.',
