@@ -21,7 +21,9 @@ export default function LaunchPage() {
     if (ran.current) return;
     ran.current = true;
 
-    const code = searchParams.get('authorizationCode');
+    // Aceptamos `authorizationCode` (contrato) o `token` (game_url del agregador).
+    const code =
+      searchParams.get('authorizationCode') || searchParams.get('token');
     const next = safeNext(searchParams.get('next'));
 
     if (!code) {
