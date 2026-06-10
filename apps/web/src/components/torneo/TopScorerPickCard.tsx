@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Target, Check, Search } from 'lucide-react';
-import { topScorerPickDeadline } from '@prode/shared';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PlayerPhoto } from '@/components/torneo/PlayerPhoto';
@@ -18,8 +17,6 @@ import { cn } from '@/lib/utils';
 
 interface Props {
   tournamentId: string;
-  tournamentStartDate: string | null;
-  topScorerDeadline?: string | null;
 }
 
 const FORWARD = 'Attacker';
@@ -31,11 +28,7 @@ function normalize(s: string): string {
     .toLowerCase();
 }
 
-export function TopScorerPickCard({
-  tournamentId,
-  tournamentStartDate,
-  topScorerDeadline: deadlineOverride,
-}: Props) {
+export function TopScorerPickCard({ tournamentId }: Props) {
   const t = useTranslations('torneo.topScorer');
   const tCommon = useTranslations('torneo.common');
   const tPlayer = useTranslations('common.player');
@@ -46,17 +39,20 @@ export function TopScorerPickCard({
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [otherTeamId, setOtherTeamId] = useState('');
+  const [deadline, setDeadline] = useState<Date | null>(null);
 
   useEffect(() => {
     let alive = true;
     Promise.all([
       tournamentPlayers.list(tournamentId),
       topScorerPick.mine(tournamentId),
+      topScorerPick.deadline(tournamentId),
     ])
-      .then(([list, mine]) => {
+      .then(([list, mine, dl]) => {
         if (!alive) return;
         setPlayers(list);
         setCurrent(mine);
+        setDeadline(dl.deadline ? new Date(dl.deadline) : null);
       })
       .catch((e) => alive && setError(e?.message ?? null))
       .finally(() => alive && setLoaded(true));
@@ -64,13 +60,6 @@ export function TopScorerPickCard({
       alive = false;
     };
   }, [tournamentId]);
-
-  const deadline = useMemo(() => {
-    if (deadlineOverride) return new Date(deadlineOverride);
-    if (tournamentStartDate)
-      return topScorerPickDeadline(new Date(tournamentStartDate));
-    return null;
-  }, [tournamentStartDate, deadlineOverride]);
 
   const locked = deadline ? deadline <= new Date() : false;
 

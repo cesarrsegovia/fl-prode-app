@@ -71,11 +71,7 @@ export default async function TorneoPage({ params }: Props) {
           teams={teamOptions}
         />
 
-        <TopScorerPickCard
-          tournamentId={tournament.id}
-          tournamentStartDate={tournament.startDate}
-          topScorerDeadline={tournament.topScorerDeadline ?? null}
-        />
+        <TopScorerPickCard tournamentId={tournament.id} />
 
         <R32PicksCard tournamentId={tournament.id} teams={teamOptions} />
 

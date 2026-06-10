@@ -196,6 +196,12 @@ export const tournamentPlayers = {
 };
 
 export const topScorerPick = {
+  deadline: (tournamentId: string) =>
+    apiClient
+      .get<{ deadline: string | null }>(
+        `/tournaments/${tournamentId}/top-scorer-pick/deadline`,
+      )
+      .then((r) => r.data),
   mine: (tournamentId: string) =>
     apiClient
       .get<TopScorerPickResponse | null>(
