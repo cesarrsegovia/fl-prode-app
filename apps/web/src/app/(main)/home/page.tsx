@@ -15,6 +15,7 @@ import {
   type NotificationDto,
 } from '@/lib/endpoints';
 import { apiClient } from '@/lib/api';
+import { useRoundName } from '@/lib/round-name';
 import { Countdown } from '@/components/prode/Countdown';
 import { GroupCard } from '@/components/grupos/GroupCard';
 import { PositionBadge } from '@/components/ranking/PositionBadge';
@@ -41,6 +42,7 @@ function daysUntil(date: string | null) {
 export default function HomePage() {
   const t = useTranslations('home');
   const format = useFormatter();
+  const roundName = useRoundName();
   const { data: session } = useSession();
   const userId = (session?.user as { id?: string } | undefined)?.id;
   const username =
@@ -153,8 +155,7 @@ export default function HomePage() {
             ) : nextFixture ? (
               <>
                 <h3 className="font-display font-extrabold text-3xl text-foreground tracking-tight mb-1">
-                  {nextFixture.name ??
-                    t('nextFixture.fallbackName', { round: nextFixture.round })}
+                  {roundName(nextFixture.round)}
                 </h3>
                 <p className="text-sm text-ink-muted mb-4">
                   {t('nextFixture.matches', { count: nextFixture.matches.length })}
