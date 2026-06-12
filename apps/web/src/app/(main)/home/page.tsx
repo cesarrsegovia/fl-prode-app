@@ -179,8 +179,24 @@ export default function HomePage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-ink-muted">{t('nextFixture.closesIn')}</span>
-                    <Countdown targetDate={new Date(nextFixture.closeAt)} />
+                    {(() => {
+                      const MATCH_LEAD_MS = 60 * 60 * 1000;
+                      const nextOpenDeadline = nextFixture.matches
+                        .map((m) => new Date(m.startTime).getTime() - MATCH_LEAD_MS)
+                        .filter((time) => time > Date.now())
+                        .sort((a, b) => a - b)[0];
+                      const targetDate = nextOpenDeadline
+                        ? new Date(nextOpenDeadline)
+                        : new Date(nextFixture.closeAt);
+                      return (
+                        <>
+                          {nextOpenDeadline && (
+                            <span className="text-ink-muted">{t('nextFixture.closesIn')}</span>
+                          )}
+                          <Countdown targetDate={targetDate} />
+                        </>
+                      );
+                    })()}
                   </div>
                   <Link
                     href={`/prode/${nextFixture.id}`}
