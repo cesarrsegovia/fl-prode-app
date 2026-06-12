@@ -98,6 +98,7 @@
     "incrementScore": "Tor für {team} hinzufügen",
     "decrementScore": "Tor von {team} entfernen",
     "yourPickValue": "Dein Tipp: {home} - {away}",
+    "yourPickResult": "Dein Tipp: {result}",
     "pickAria": {
       "home": "Heimsieg",
       "draw": "Unentschieden",

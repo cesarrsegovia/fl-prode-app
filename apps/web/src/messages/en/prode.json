@@ -98,6 +98,7 @@
     "incrementScore": "Add a goal to {team}",
     "decrementScore": "Remove a goal from {team}",
     "yourPickValue": "Your prediction: {home} - {away}",
+    "yourPickResult": "Your prediction: {result}",
     "pickAria": {
       "home": "Home win",
       "draw": "Draw",

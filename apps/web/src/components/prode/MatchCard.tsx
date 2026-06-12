@@ -192,9 +192,11 @@ export function MatchCard({
                 );
               })}
             </div>
-            {isLocked && pick && pick.homeScoreGuess !== undefined && pick.awayScoreGuess !== undefined && (
+            {isLocked && pick && pick.result && (
               <div className="text-[10px] font-display font-bold uppercase tracking-wider text-neon bg-neon/10 border border-neon/30 px-2 py-0.5 rounded">
-                {t('yourPickValue', { home: pick.homeScoreGuess, away: pick.awayScoreGuess })}
+                {pick.homeScoreGuess !== undefined && pick.awayScoreGuess !== undefined
+                  ? t('yourPickValue', { home: pick.homeScoreGuess, away: pick.awayScoreGuess })
+                  : t('yourPickResult', { result: t(`pickAria.${RESULT_ARIA_KEY[pick.result]}`) })}
               </div>
             )}
           </div>

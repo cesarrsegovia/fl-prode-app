@@ -98,6 +98,7 @@
     "incrementScore": "Sumar gol a {team}",
     "decrementScore": "Restar gol a {team}",
     "yourPickValue": "Tu pronóstico: {home} - {away}",
+    "yourPickResult": "Tu pronóstico: {result}",
     "pickAria": {
       "home": "Gana el local",
       "draw": "Empate",
