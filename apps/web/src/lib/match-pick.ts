@@ -24,6 +24,10 @@ export function scoreForResult(
   home?: number,
   away?: number,
 ): { home?: number; away?: number } {
+  // El marcador (bonus exacto) es una apuesta OPCIONAL e independiente del
+  // ganador. Si está incompleto, no inventamos goles: forzar un marcador haría
+  // que el usuario pudiera sumar el bonus por acertar un resultado que nunca
+  // jugó. Solo se ajusta cuando ya hay un marcador completo y contradice al pick.
   if (home === undefined || away === undefined) return { home, away };
 
   switch (result) {
