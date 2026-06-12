@@ -1,6 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject } from '@nestjs/common';
 import { ActivityType, MatchStatus, NotificationType, Result } from '@prisma/client';
-import axios from 'axios';
 import { WS_EVENTS } from '@prode/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EventsGateway } from '../../websocket/events.gateway';
@@ -8,20 +7,13 @@ import { GamificacionService } from '../gamificacion/gamificacion.service';
 import { NotificacionesService } from '../notificaciones/notificaciones.service';
 import { ActivityService } from '../activity/activity.service';
 import { TournamentsService } from '../tournaments/tournaments.service';
-import { statusFromApiFootball } from '../../common/utils/api-football.util';
+import {
+  ActiveMatch,
+  RemoteResult,
+  RESULTS_PROVIDER,
+  ResultsProvider,
+} from './providers/results-provider';
 import { computePredictionOutcome } from './scoring';
-
-interface ApiFixtureResponse {
-  fixture: { id: number; status: { short: string } };
-  goals: { home: number | null; away: number | null };
-  score: {
-    extratime: { home: number | null; away: number | null };
-    penalty: { home: number | null; away: number | null };
-  };
-}
-
-// Chunk para que la URL no se desborde si hay muchísimos partidos activos.
-const BATCH_SIZE = 20;
 
 @Injectable()
 export class ResultadosService {
@@ -34,48 +26,42 @@ export class ResultadosService {
     private readonly activity: ActivityService,
     private readonly events: EventsGateway,
     private readonly tournaments: TournamentsService,
+    @Inject(RESULTS_PROVIDER) private readonly provider: ResultsProvider,
   ) {}
 
   async fetchAndUpdateResults() {
-    const apiKey = process.env.SPORTS_API_KEY;
-    const rawUrl = process.env.SPORTS_API_URL;
-    if (!apiKey || !rawUrl) {
-      this.logger.warn('SPORTS_API_KEY/SPORTS_API_URL no configurados. Skipping.');
-      return;
-    }
-    const apiUrl = (/^https?:\/\//i.test(rawUrl) ? rawUrl : `https://${rawUrl}`).replace(/\/+$/, '');
-
     const activeMatches = await this.prisma.match.findMany({
       where: {
         status: { in: [MatchStatus.LIVE, MatchStatus.PENDING] },
         externalId: { not: null },
       },
+      select: {
+        id: true,
+        externalId: true,
+        startTime: true,
+        status: true,
+        homeScore: true,
+        awayScore: true,
+        fixtureId: true,
+      },
     });
     if (!activeMatches.length) return;
 
-    const matchByExternalId = new Map(activeMatches.map((m) => [m.externalId!, m]));
-    const externalIds = activeMatches.map((m) => m.externalId!);
+    const byExternalId = new Map(activeMatches.map((m) => [m.externalId!, m]));
+    const active: ActiveMatch[] = activeMatches.map((m) => ({
+      id: m.id,
+      externalId: m.externalId!,
+      startTime: m.startTime,
+    }));
+
+    const remote = await this.provider.fetchResults(active);
 
     const affectedFixtureIds = new Set<string>();
-
-    for (let i = 0; i < externalIds.length; i += BATCH_SIZE) {
-      const chunk = externalIds.slice(i, i + BATCH_SIZE);
-      try {
-        const res = await axios.get(`${apiUrl}/fixtures`, {
-          headers: { 'x-apisports-key': apiKey },
-          params: { ids: chunk.join('-') },
-          timeout: 10_000,
-        });
-        const responses: ApiFixtureResponse[] = res.data?.response ?? [];
-        for (const fx of responses) {
-          const local = matchByExternalId.get(String(fx.fixture.id));
-          if (!local) continue;
-          const fixtureChanged = await this.applyRemoteResult(local, fx);
-          if (fixtureChanged) affectedFixtureIds.add(local.fixtureId);
-        }
-      } catch (err: any) {
-        this.logger.error(`Batch fetch failed: ${err.message}`);
-      }
+    for (const r of remote) {
+      const local = byExternalId.get(r.externalId);
+      if (!local) continue;
+      const becameFinished = await this.applyRemoteResult(local, r);
+      if (becameFinished) affectedFixtureIds.add(local.fixtureId);
     }
 
     for (const fixtureId of affectedFixtureIds) {
@@ -86,21 +72,21 @@ export class ResultadosService {
   /** Aplica el resultado remoto al match local. Devuelve true si quedó FINISHED por primera vez. */
   private async applyRemoteResult(
     local: { id: string; status: MatchStatus; homeScore: number | null; awayScore: number | null },
-    remote: ApiFixtureResponse,
+    remote: RemoteResult,
   ): Promise<boolean> {
-    const newStatus = statusFromApiFootball(remote.fixture.status.short);
-    const homeScore = remote.goals.home ?? null;
-    const awayScore = remote.goals.away ?? null;
+    const newStatus = remote.status;
+    const homeScore = remote.homeScore;
+    const awayScore = remote.awayScore;
 
     const updated = await this.prisma.match.update({
       where: { id: local.id },
       data: {
         homeScore: homeScore ?? undefined,
         awayScore: awayScore ?? undefined,
-        homeScoreET: remote.score.extratime.home ?? undefined,
-        awayScoreET: remote.score.extratime.away ?? undefined,
-        homePens: remote.score.penalty.home ?? undefined,
-        awayPens: remote.score.penalty.away ?? undefined,
+        homeScoreET: remote.homeScoreET ?? undefined,
+        awayScoreET: remote.awayScoreET ?? undefined,
+        homePens: remote.homePens ?? undefined,
+        awayPens: remote.awayPens ?? undefined,
         status: newStatus,
       },
     });
