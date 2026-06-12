@@ -97,6 +97,7 @@
     "awayScoreLabel": "Goles de {team}",
     "incrementScore": "Sumar gol a {team}",
     "decrementScore": "Restar gol a {team}",
+    "yourPickValue": "Tu pronóstico: {home} - {away}",
     "pickAria": {
       "home": "Gana el local",
       "draw": "Empate",

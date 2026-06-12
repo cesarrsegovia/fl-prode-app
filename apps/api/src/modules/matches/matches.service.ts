@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Result } from '@prisma/client';
+import { matchLeadDeadline } from '@prode/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
@@ -76,7 +77,7 @@ export class MatchesService {
     });
     if (!match) throw new NotFoundException('Partido no encontrado');
 
-    const closed = match.fixture.closeAt <= new Date();
+    const closed = matchLeadDeadline(match.startTime) <= new Date();
 
     const members = await this.prisma.groupMember.findMany({
       where: { groupId },

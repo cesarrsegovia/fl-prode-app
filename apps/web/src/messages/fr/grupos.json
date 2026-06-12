@@ -81,7 +81,8 @@
   "members": {
     "since": "Depuis {date}",
     "you": "(vous)",
-    "admin": "Admin"
+    "admin": "Admin",
+    "viewProde": "Voir le prode"
   },
   "activity": {
     "emptyTitle": "Aucune activité dans ce groupe pour l'instant.",
@@ -96,5 +97,16 @@
     "send": "Envoyer",
     "sendFailed": "Échec de l'envoi",
     "retry": "Réessayer"
+  },
+  "memberProde": {
+    "eyebrow": "Son prode",
+    "champion": "Champion",
+    "topScorer": "Meilleur buteur",
+    "qualifiers": "Qualifiés pour les 16es",
+    "results": "Résultats par journée",
+    "none": "Non choisi",
+    "noResults": "Aucun match terminé à afficher pour l'instant",
+    "back": "← Retour au groupe",
+    "loadError": "Impossible de charger le prode"
   }
 }

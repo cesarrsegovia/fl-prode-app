@@ -19,5 +19,11 @@
     "home": "Local",
     "draw": "Empate",
     "away": "Visitante"
+  },
+  "breakdown": {
+    "total": "+{points} pts",
+    "winner": "Ganador +{points}",
+    "exact": "Exacto +{points}",
+    "captain": "Capitán ×2"
   }
 }

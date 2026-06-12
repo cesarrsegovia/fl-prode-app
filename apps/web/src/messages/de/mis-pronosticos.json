@@ -19,5 +19,11 @@
     "home": "Heim",
     "draw": "Unentschieden",
     "away": "Auswärts"
+  },
+  "breakdown": {
+    "total": "+{points} Pkt",
+    "winner": "Sieger +{points}",
+    "exact": "Exakt +{points}",
+    "captain": "Kapitän ×2"
   }
 }

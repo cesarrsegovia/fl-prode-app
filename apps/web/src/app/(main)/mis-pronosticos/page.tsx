@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { CheckCircle2, Crown, Loader2, XCircle } from 'lucide-react';
+import { Crown, Loader2 } from 'lucide-react';
+import { PointsBreakdown } from '@/components/prode/PointsBreakdown';
 import { Result } from '@prode/shared';
 import { stats, type PredictionHistoryItem } from '@/lib/endpoints';
 import { Card, CardContent } from '@/components/ui/card';
@@ -35,12 +36,6 @@ function HistoryRow({ p }: { p: PredictionHistoryItem }) {
   const t = useTranslations('mis-pronosticos');
   const roundName = useRoundName();
   const finished = p.match.status === 'FINISHED';
-  const real = actualResult(p.match);
-  const hit = finished && real && p.result === real;
-  const exact =
-    hit &&
-    p.homeScoreGuess === p.match.homeScore &&
-    p.awayScoreGuess === p.match.awayScore;
 
   return (
     <Link
@@ -97,26 +92,19 @@ function HistoryRow({ p }: { p: PredictionHistoryItem }) {
             </div>
 
             {finished && (
-              <div className="flex items-center gap-2 shrink-0">
-                {hit ? (
-                  <CheckCircle2 className="size-4 text-neon" />
-                ) : (
-                  <XCircle className="size-4 text-destructive/70" />
-                )}
-                <span
-                  className={cn(
-                    'font-display font-extrabold tabular-nums',
-                    (p.pointsEarned ?? 0) > 0 ? 'text-neon' : 'text-ink-dim',
-                  )}
-                >
-                  {t('points', { points: p.pointsEarned ?? 0 })}
-                </span>
-                {exact && (
-                  <Badge className="bg-neon/15 text-neon text-[10px]">
-                    {t('exact')}
-                  </Badge>
-                )}
-              </div>
+              <PointsBreakdown
+                pred={{
+                  result: p.result as Result,
+                  homeScoreGuess: p.homeScoreGuess,
+                  awayScoreGuess: p.awayScoreGuess,
+                  isCaptain: p.isCaptain,
+                }}
+                match={{
+                  homeScore: p.match.homeScore,
+                  awayScore: p.match.awayScore,
+                  status: p.match.status,
+                }}
+              />
             )}
           </div>
         </CardContent>

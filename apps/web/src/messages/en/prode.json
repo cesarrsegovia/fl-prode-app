@@ -97,6 +97,7 @@
     "awayScoreLabel": "{team} goals",
     "incrementScore": "Add a goal to {team}",
     "decrementScore": "Remove a goal from {team}",
+    "yourPickValue": "Your prediction: {home} - {away}",
     "pickAria": {
       "home": "Home win",
       "draw": "Draw",

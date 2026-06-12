@@ -19,5 +19,11 @@
     "home": "Domicile",
     "draw": "Nul",
     "away": "Extérieur"
+  },
+  "breakdown": {
+    "total": "+{points} pts",
+    "winner": "Vainqueur +{points}",
+    "exact": "Exact +{points}",
+    "captain": "Capitaine ×2"
   }
 }

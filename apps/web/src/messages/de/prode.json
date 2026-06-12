@@ -97,6 +97,7 @@
     "awayScoreLabel": "Tore von {team}",
     "incrementScore": "Tor für {team} hinzufügen",
     "decrementScore": "Tor von {team} entfernen",
+    "yourPickValue": "Dein Tipp: {home} - {away}",
     "pickAria": {
       "home": "Heimsieg",
       "draw": "Unentschieden",

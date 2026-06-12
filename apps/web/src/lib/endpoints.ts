@@ -166,6 +166,13 @@ export const bracketPick = {
         `/tournaments/${tournamentId}/bracket-pick/deadline`,
       )
       .then((r) => r.data),
+  ofUser: (tournamentId: string, userId: string, groupId: string) =>
+    apiClient
+      .get<BracketPickResponse | null>(
+        `/tournaments/${tournamentId}/bracket-pick/user/${userId}`,
+        { params: { groupId } },
+      )
+      .then((r) => r.data),
 };
 
 // ---------- Top Scorer (Goleador) ----------
@@ -228,6 +235,13 @@ export const topScorerPick = {
         { playerId },
       )
       .then((r) => r.data),
+  ofUser: (tournamentId: string, userId: string, groupId: string) =>
+    apiClient
+      .get<TopScorerPickResponse | null>(
+        `/tournaments/${tournamentId}/top-scorer-pick/user/${userId}`,
+        { params: { groupId } },
+      )
+      .then((r) => r.data),
 };
 
 // ---------- R32 picks (clasificados a 16vos) ----------
@@ -268,6 +282,13 @@ export const r32Picks = {
       .post<R32PickResponse[]>(`/tournaments/${tournamentId}/r32-picks`, {
         picks,
       })
+      .then((r) => r.data),
+  ofUser: (tournamentId: string, userId: string, groupId: string) =>
+    apiClient
+      .get<R32PickResponse[]>(
+        `/tournaments/${tournamentId}/r32-picks/user/${userId}`,
+        { params: { groupId } },
+      )
       .then((r) => r.data),
 };
 
@@ -418,6 +439,13 @@ export const stats = {
       .get<{ items: PredictionHistoryItem[]; nextCursor: string | null }>(
         '/users/me/predictions',
         { params: { cursor, take } },
+      )
+      .then((r) => r.data),
+  userHistory: (userId: string, groupId: string, cursor?: string, take = 30) =>
+    apiClient
+      .get<{ items: PredictionHistoryItem[]; nextCursor: string | null }>(
+        `/users/${userId}/predictions`,
+        { params: { groupId, cursor, take } },
       )
       .then((r) => r.data),
 };

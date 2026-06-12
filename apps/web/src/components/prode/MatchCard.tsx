@@ -167,29 +167,36 @@ export function MatchCard({
               )}
           </div>
 
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            {(Object.keys(RESULT_LABELS) as Result[]).map((r) => {
-              const active = pick?.result === r;
-              return (
-                <button
-                  key={r}
-                  type="button"
-                  disabled={isLocked}
-                  aria-pressed={active}
-                  aria-label={t(`pickAria.${RESULT_ARIA_KEY[r]}`)}
-                  onClick={() => setResult(r)}
-                  className={cn(
-                    'size-10 sm:size-12 rounded-lg font-display font-extrabold text-lg transition-all',
-                    active
-                      ? 'bg-neon text-primary-foreground glow-neon'
-                      : 'bg-surface-2 text-foreground hover:bg-surface-3',
-                    isLocked ? 'cursor-not-allowed' : 'active:scale-90',
-                  )}
-                >
-                  {RESULT_LABELS[r]}
-                </button>
-              );
-            })}
+          <div className="flex flex-col items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              {(Object.keys(RESULT_LABELS) as Result[]).map((r) => {
+                const active = pick?.result === r;
+                return (
+                  <button
+                    key={r}
+                    type="button"
+                    disabled={isLocked}
+                    aria-pressed={active}
+                    aria-label={t(`pickAria.${RESULT_ARIA_KEY[r]}`)}
+                    onClick={() => setResult(r)}
+                    className={cn(
+                      'size-10 sm:size-12 rounded-lg font-display font-extrabold text-lg transition-all',
+                      active
+                        ? 'bg-neon text-primary-foreground glow-neon'
+                        : 'bg-surface-2 text-foreground hover:bg-surface-3',
+                      isLocked ? 'cursor-not-allowed' : 'active:scale-90',
+                    )}
+                  >
+                    {RESULT_LABELS[r]}
+                  </button>
+                );
+              })}
+            </div>
+            {isLocked && pick && pick.homeScoreGuess !== undefined && pick.awayScoreGuess !== undefined && (
+              <div className="text-[10px] font-display font-bold uppercase tracking-wider text-neon bg-neon/10 border border-neon/30 px-2 py-0.5 rounded">
+                {t('yourPickValue', { home: pick.homeScoreGuess, away: pick.awayScoreGuess })}
+              </div>
+            )}
           </div>
 
           <div className="flex-1 min-w-0 flex flex-col items-center gap-2">

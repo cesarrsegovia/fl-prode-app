@@ -253,7 +253,7 @@ export default function GrupoDetailPage({
               <Chat groupId={id} myUserId={myUserId} />
             )}
             {tab === 'members' && (
-              <MembersList members={group.members} myUserId={myUserId} />
+              <MembersList members={group.members} myUserId={myUserId} groupId={id} />
             )}
           </div>
         </div>
@@ -337,9 +337,11 @@ function TabButton({
 function MembersList({
   members,
   myUserId,
+  groupId,
 }: {
   members: GroupMemberDto[];
   myUserId?: string;
+  groupId: string;
 }) {
   const t = useTranslations('grupos.members');
   const format = useFormatter();
@@ -385,6 +387,14 @@ function MembersList({
               <span className="text-[10px] font-black uppercase tracking-widest bg-neon/10 text-neon px-2 py-1 rounded-full">
                 {t('admin')}
               </span>
+            )}
+            {!isMe && (
+              <Link
+                href={`/grupos/${groupId}/miembro/${m.userId}`}
+                className="text-[10px] font-display font-bold uppercase tracking-widest text-neon hover:underline shrink-0"
+              >
+                {t('viewProde')}
+              </Link>
             )}
           </li>
         );
