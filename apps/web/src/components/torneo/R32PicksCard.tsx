@@ -135,6 +135,7 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
 
   const onThirdClick = (team: TeamOption) => {
     if (locked) return;
+    const groupName = team.group ?? '?';
     const current = state[team.id];
     if (current === R32PickKind.BEST_THIRD) {
       setKind(team.id, undefined);
@@ -144,11 +145,28 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
       setError(t('errThirdIsTop2'));
       return;
     }
-    if (counts.thirds >= R32_BEST_THIRDS_TOTAL) {
-      setError(t('errTooManyThirds', { max: R32_BEST_THIRDS_TOTAL }));
-      return;
+    const otherInGroup = teams.find(
+      (t) =>
+        t.group === groupName &&
+        t.id !== team.id &&
+        state[t.id] === R32PickKind.BEST_THIRD,
+    );
+    if (otherInGroup) {
+      setError(null);
+      setSuccess(null);
+      setState((prev) => {
+        const next = { ...prev };
+        delete next[otherInGroup.id];
+        next[team.id] = R32PickKind.BEST_THIRD;
+        return next;
+      });
+    } else {
+      if (counts.thirds >= R32_BEST_THIRDS_TOTAL) {
+        setError(t('errTooManyThirds', { max: R32_BEST_THIRDS_TOTAL }));
+        return;
+      }
+      setKind(team.id, R32PickKind.BEST_THIRD);
     }
-    setKind(team.id, R32PickKind.BEST_THIRD);
   };
 
   const isDirty = useMemo(() => {
@@ -347,32 +365,53 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
                 <p className="text-xs text-ink-muted mb-3">
                   {t('thirdsHelp')}
                 </p>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                  {nonTop2Teams.map((t) => {
-                    const isThird = state[t.id] === R32PickKind.BEST_THIRD;
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {teamsByGroup.map(([groupName, gTeams]) => {
+                    const candidates = gTeams.filter(
+                      (t) => state[t.id] !== R32PickKind.TOP2,
+                    );
+                    if (candidates.length === 0) return null;
                     return (
-                      <button
-                        key={t.id}
-                        type="button"
-                        onClick={() => onThirdClick(t)}
-                        disabled={locked}
-                        aria-pressed={isThird}
-                        className={cn(
-                          'flex items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors',
-                          isThird
-                            ? 'bg-citrus/20 border border-citrus/60'
-                            : 'bg-surface-2 hover:bg-surface-3 border border-transparent',
-                          locked && 'opacity-60 cursor-not-allowed',
-                        )}
+                      <div
+                        key={groupName}
+                        className="rounded-xl p-3 bg-surface-2"
                       >
-                        <TeamFlag size="sm" src={t.flagUrl} alt={t.name} />
-                        <span className="flex-1 text-xs text-foreground truncate">
-                          {t.shortName ?? t.name}
-                        </span>
-                        {isThird && (
-                          <Check className="size-3.5 text-citrus" />
-                        )}
-                      </button>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-display font-bold text-foreground text-sm">
+                            {tCommon('group', { name: groupName })}
+                          </span>
+                        </div>
+                        <div className="space-y-1">
+                          {candidates.map((t) => {
+                            const isThird =
+                              state[t.id] === R32PickKind.BEST_THIRD;
+                            return (
+                              <button
+                                key={t.id}
+                                type="button"
+                                onClick={() => onThirdClick(t)}
+                                disabled={locked}
+                                aria-pressed={isThird}
+                                className={cn(
+                                  'w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors',
+                                  isThird
+                                    ? 'bg-citrus/20 border border-citrus/60'
+                                    : 'hover:bg-surface-3 border border-transparent',
+                                  locked && 'opacity-60 cursor-not-allowed',
+                                )}
+                              >
+                                <TeamFlag size="sm" src={t.flagUrl} alt={t.name} />
+                                <span className="flex-1 text-xs text-foreground truncate">
+                                  {t.shortName ?? t.name}
+                                </span>
+                                {isThird && (
+                                  <Check className="size-3.5 text-citrus" />
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
