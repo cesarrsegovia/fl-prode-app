@@ -77,5 +77,10 @@ services:
         sync: false
       - key: SPORTS_API_URL
         value: https://v3.football.api-sports.io
+      # ── Proveedor de resultados: espn (default, gratis) | apifootball (legacy) ──
+      - key: RESULTS_PROVIDER
+        value: espn
+      - key: ESPN_SCOREBOARD_URL
+        value: https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world
       - key: SENTRY_DSN
         sync: false
