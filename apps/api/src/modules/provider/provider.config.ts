@@ -16,10 +16,12 @@ export function loadProviderConfig(): ProviderConfig {
   const apiKey = (process.env.PROVIDER_OUTBOUND_API_KEY || '').trim();
   const timeoutMs = parseInt(process.env.PROVIDER_TIMEOUT_MS || '10000', 10);
 
-  const enabled = Boolean(baseUrl && apiKey && operatorName);
+  // La API key es opcional: el casino puede no exigirla en sus endpoints.
+  // Si está presente, se envía igual (header X-API-Key); si no, no bloquea.
+  const enabled = Boolean(baseUrl && operatorName);
   if (!enabled) {
     console.warn(
-      '[provider] integración deshabilitada — faltan OFFCHAIN_API_URL, PROVIDER_OUTBOUND_API_KEY u PROVIDER_OPERATOR_NAME',
+      '[provider] integración deshabilitada — faltan OFFCHAIN_API_URL u PROVIDER_OPERATOR_NAME',
     );
   }
 
