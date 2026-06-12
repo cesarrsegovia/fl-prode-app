@@ -47,10 +47,6 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  const fixtureCloseAt = useMemo(
-    () => new Date(fixture.closeAt),
-    [fixture.closeAt],
-  );
   const isKnockoutFixture = useMemo(
     () =>
       fixture.matches.length > 0 && isKnockoutStage(fixture.matches[0].stage),
@@ -74,14 +70,15 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
   }, []);
   const isMatchClosed = (matchId: string) =>
     (deadlinesByMatch[matchId]?.getTime() ?? 0) <= now;
+  // Cada partido cierra 1h antes de su inicio (grupos y eliminatorias). El
+  // contador del encabezado apunta al próximo partido que todavía esté abierto.
   const nextOpenDeadline = useMemo(() => {
-    if (!isKnockoutFixture) return fixtureCloseAt;
     const futures = fixture.matches
       .map((m) => deadlinesByMatch[m.id])
       .filter((d): d is Date => !!d && d.getTime() > now)
       .sort((a, b) => a.getTime() - b.getTime());
     return futures[0] ?? null;
-  }, [isKnockoutFixture, fixture.matches, deadlinesByMatch, fixtureCloseAt, now]);
+  }, [fixture.matches, deadlinesByMatch, now]);
   const allClosed = fixture.matches.every((m) => isMatchClosed(m.id));
 
   const totalMatches = fixture.matches.length;
@@ -172,7 +169,7 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
       <div className="rounded-xl p-4 flex items-center justify-between gap-4 bg-surface-1">
         <div>
           <p className="text-xs uppercase tracking-widest text-ink-muted font-bold">
-            {isKnockoutFixture ? t('nextClose') : t('closesIn')}
+            {t('nextClose')}
           </p>
           {nextOpenDeadline ? (
             <Countdown targetDate={nextOpenDeadline} />
