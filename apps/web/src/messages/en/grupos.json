@@ -81,7 +81,8 @@
   "members": {
     "since": "Since {date}",
     "you": "(you)",
-    "admin": "Admin"
+    "admin": "Admin",
+    "viewProde": "View prode"
   },
   "activity": {
     "emptyTitle": "No activity in this group yet.",
@@ -96,5 +97,16 @@
     "send": "Send",
     "sendFailed": "Could not send",
     "retry": "Retry"
+  },
+  "memberProde": {
+    "eyebrow": "Their prode",
+    "champion": "Champion",
+    "topScorer": "Top scorer",
+    "qualifiers": "Round of 32 qualifiers",
+    "results": "Results by matchday",
+    "none": "Not chosen",
+    "noResults": "No closed matches to show yet",
+    "back": "← Back to group",
+    "loadError": "Could not load the prode"
   }
 }

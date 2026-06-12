@@ -81,7 +81,8 @@
   "members": {
     "since": "Seit {date}",
     "you": "(du)",
-    "admin": "Admin"
+    "admin": "Admin",
+    "viewProde": "Prode ansehen"
   },
   "activity": {
     "emptyTitle": "Noch keine Aktivität in dieser Gruppe.",
@@ -96,5 +97,16 @@
     "send": "Senden",
     "sendFailed": "Senden fehlgeschlagen",
     "retry": "Erneut versuchen"
+  },
+  "memberProde": {
+    "eyebrow": "Sein Prode",
+    "champion": "Champion",
+    "topScorer": "Torschützenkönig",
+    "qualifiers": "Qualifizierte für das Sechzehntelfinale",
+    "results": "Ergebnisse nach Spieltag",
+    "none": "Nicht gewählt",
+    "noResults": "Noch keine abgeschlossenen Spiele zum Anzeigen",
+    "back": "← Zurück zur Gruppe",
+    "loadError": "Prode konnte nicht geladen werden"
   }
 }

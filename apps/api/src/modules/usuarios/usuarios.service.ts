@@ -139,6 +139,39 @@ export class UsuariosService {
     }));
   }
 
+  /**
+   * Historial de picks de partido de otro usuario, ocultando los partidos que
+   * aún no cerraron (cierre por partido = startTime − 1h). Misma forma que
+   * getPredictionsHistory para reusar el render en el front.
+   */
+  async getVisiblePredictionsHistory(
+    userId: string,
+    opts: { take?: number; cursor?: string } = {},
+  ) {
+    const take = Math.min(opts.take ?? 30, 100);
+    const now = new Date();
+    const cursor = opts.cursor ? { id: opts.cursor } : undefined;
+    const items = await this.prisma.prediction.findMany({
+      where: {
+        userId,
+        match: { startTime: { lte: new Date(now.getTime() + 60 * 60 * 1000) } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: take + 1,
+      ...(cursor && { cursor, skip: 1 }),
+      include: {
+        match: { include: { homeTeam: true, awayTeam: true } },
+        fixture: { select: { id: true, round: true, name: true } },
+      },
+    });
+    const hasMore = items.length > take;
+    const rows = hasMore ? items.slice(0, take) : items;
+    return {
+      items: rows,
+      nextCursor: hasMore ? rows[rows.length - 1].id : null,
+    };
+  }
+
   async getPredictionsHistory(
     userId: string,
     opts: { take?: number; cursor?: string } = {},

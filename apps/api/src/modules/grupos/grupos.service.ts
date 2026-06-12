@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -167,6 +168,30 @@ export class GruposService {
 
   async leave(groupId: string, userId: string) {
     return this.removeMember(groupId, userId, userId);
+  }
+
+  /**
+   * Valida que tanto el solicitante como el usuario objetivo pertenezcan al
+   * mismo grupo. Usado para autorizar la lectura del prode de un compañero.
+   */
+  async assertSharesGroup(
+    requesterId: string,
+    targetUserId: string,
+    groupId: string,
+  ): Promise<void> {
+    const [requester, target] = await Promise.all([
+      this.prisma.groupMember.findUnique({
+        where: { userId_groupId: { userId: requesterId, groupId } },
+        select: { id: true },
+      }),
+      this.prisma.groupMember.findUnique({
+        where: { userId_groupId: { userId: targetUserId, groupId } },
+        select: { id: true },
+      }),
+    ]);
+    if (!requester || !target) {
+      throw new ForbiddenException('No comparten este grupo');
+    }
   }
 
   private async ensureExists(id: string) {

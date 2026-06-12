@@ -5,10 +5,12 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { TournamentsService } from './tournaments.service';
+import { GruposService } from '../grupos/grupos.service';
 import { WorldCupImporterService } from '../importer/worldcup-importer.service';
 import { AdminGuard } from '../../common/guards/admin.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -22,6 +24,7 @@ export class TournamentsController {
   constructor(
     private readonly service: TournamentsService,
     private readonly importer: WorldCupImporterService,
+    private readonly grupos: GruposService,
   ) {}
 
   @Get()
@@ -76,6 +79,18 @@ export class TournamentsController {
   }
 
   @UseGuards(AuthGuard('jwt'))
+  @Get(':id/bracket-pick/user/:userId')
+  async userBracketPick(
+    @Param('id') id: string,
+    @Param('userId') userId: string,
+    @Query('groupId') groupId: string,
+    @CurrentUser() user: { userId: string },
+  ) {
+    await this.grupos.assertSharesGroup(user.userId, userId, groupId);
+    return this.service.getMyBracketPick(id, userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
   @Post(':id/bracket-pick')
   setBracketPick(
     @Param('id') id: string,
@@ -114,6 +129,18 @@ export class TournamentsController {
   }
 
   @UseGuards(AuthGuard('jwt'))
+  @Get(':id/r32-picks/user/:userId')
+  async userR32Picks(
+    @Param('id') id: string,
+    @Param('userId') userId: string,
+    @Query('groupId') groupId: string,
+    @CurrentUser() user: { userId: string },
+  ) {
+    await this.grupos.assertSharesGroup(user.userId, userId, groupId);
+    return this.service.getMyR32Picks(id, userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
   @Post(':id/r32-picks')
   setR32Picks(
     @Param('id') id: string,
@@ -143,6 +170,18 @@ export class TournamentsController {
     @CurrentUser() user: { userId: string },
   ) {
     return this.service.getMyTopScorerPick(id, user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get(':id/top-scorer-pick/user/:userId')
+  async userTopScorerPick(
+    @Param('id') id: string,
+    @Param('userId') userId: string,
+    @Query('groupId') groupId: string,
+    @CurrentUser() user: { userId: string },
+  ) {
+    await this.grupos.assertSharesGroup(user.userId, userId, groupId);
+    return this.service.getMyTopScorerPick(id, userId);
   }
 
   @UseGuards(AuthGuard('jwt'))

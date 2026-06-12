@@ -81,7 +81,8 @@
   "members": {
     "since": "Desde {date}",
     "you": "(vos)",
-    "admin": "Admin"
+    "admin": "Admin",
+    "viewProde": "Ver prode"
   },
   "activity": {
     "emptyTitle": "Todavía no hay actividad en este grupo.",
@@ -96,5 +97,16 @@
     "send": "Enviar",
     "sendFailed": "No se pudo enviar",
     "retry": "Reintentar"
+  },
+  "memberProde": {
+    "eyebrow": "Su prode",
+    "champion": "Campeón",
+    "topScorer": "Goleador",
+    "qualifiers": "Clasificados a 16vos",
+    "results": "Resultados por fecha",
+    "none": "Sin elegir",
+    "noResults": "Todavía no hay partidos cerrados para mostrar",
+    "back": "← Volver al grupo",
+    "loadError": "No se pudo cargar el prode"
   }
 }

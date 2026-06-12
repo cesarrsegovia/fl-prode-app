@@ -19,5 +19,11 @@
     "home": "Home",
     "draw": "Draw",
     "away": "Away"
+  },
+  "breakdown": {
+    "total": "+{points} pts",
+    "winner": "Winner +{points}",
+    "exact": "Exact +{points}",
+    "captain": "Captain ×2"
   }
 }
