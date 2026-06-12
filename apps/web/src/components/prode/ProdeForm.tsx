@@ -12,7 +12,7 @@ import { normalizeSavedScore } from '@/lib/match-pick';
 import { MatchCard, type MatchPick } from './MatchCard';
 import { Countdown } from './Countdown';
 import { PercentBar } from '@/components/ui/percent-bar';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { Loader2, ArrowLeft, Check } from 'lucide-react';
 import Link from 'next/link';
 
 interface Props {
@@ -60,6 +60,23 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
   );
   const [savingMatchId, setSavingMatchId] = useState<string | null>(null);
   const [isSavingAll, setIsSavingAll] = useState(false);
+  // matchIds que se acaban de guardar; muestran "Guardado" en verde por un rato.
+  const [justSavedIds, setJustSavedIds] = useState<Set<string>>(new Set());
+
+  const flashSaved = (matchIds: string[]) => {
+    setJustSavedIds((prev) => {
+      const next = new Set(prev);
+      matchIds.forEach((id) => next.add(id));
+      return next;
+    });
+    setTimeout(() => {
+      setJustSavedIds((prev) => {
+        const next = new Set(prev);
+        matchIds.forEach((id) => next.delete(id));
+        return next;
+      });
+    }, 2000);
+  };
   const [captainId, setCaptainId] = useState<string | null>(
     () =>
       initialPredictions?.find((p) => p.isCaptain)?.matchId ?? null,
@@ -156,8 +173,7 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
         isCaptain: pick.isCaptain,
       });
       setSavedPicks((prev) => ({ ...prev, [matchId]: { ...pick } }));
-      setSuccessMsg(t('saved'));
-      setTimeout(() => setSuccessMsg(null), 1500);
+      flashSaved([matchId]);
     } catch (err: any) {
       setSubmitError(
         err?.response?.data?.message ?? t('saveError'),
@@ -193,6 +209,7 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
         for (const [matchId, pick] of entries) next[matchId] = { ...pick };
         return next;
       });
+      flashSaved(entries.map(([matchId]) => matchId));
       setSuccessMsg(t('savedMany', { count: entries.length }));
       setTimeout(() => setSuccessMsg(null), 2000);
     } catch (err: any) {
@@ -275,16 +292,24 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
               />
               {!closed && picks[match.id]?.result && (
                 <div className="mt-1 flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => savePick(match.id)}
-                    disabled={savingMatchId === match.id}
-                    className="text-xs font-bold text-neon hover:underline disabled:opacity-50"
-                  >
-                    {savingMatchId === match.id
-                      ? t('saving')
-                      : t('saveThis')}
-                  </button>
+                  {justSavedIds.has(match.id) ? (
+                    <span
+                      aria-live="polite"
+                      className="flex items-center gap-1 text-xs font-bold text-success"
+                    >
+                      <Check className="size-3.5" />
+                      {t('savedThis')}
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => savePick(match.id)}
+                      disabled={savingMatchId === match.id}
+                      className="text-xs font-bold text-neon hover:underline disabled:opacity-50"
+                    >
+                      {savingMatchId === match.id ? t('saving') : t('saveThis')}
+                    </button>
+                  )}
                 </div>
               )}
             </div>
