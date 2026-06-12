@@ -92,7 +92,8 @@
     "errIncomplete": "Il vous manque des choix : {count} sur {total}.",
     "saved": "Choix enregistrés",
     "saveError": "Échec de l'enregistrement",
-    "submit": "Enregistrer {count}/{total} choix"
+    "submit": "Enregistrer {count}/{total} choix",
+    "back": "Retour"
   },
   "topScorer": {
     "eyebrow": "Pronostic du meilleur buteur",

@@ -92,7 +92,8 @@
     "errIncomplete": "Dir fehlen Tipps: {count} von {total}.",
     "saved": "Tipps gespeichert",
     "saveError": "Speichern fehlgeschlagen",
-    "submit": "{count}/{total} Tipps speichern"
+    "submit": "{count}/{total} Tipps speichern",
+    "back": "Zurück"
   },
   "topScorer": {
     "eyebrow": "Torschützenkönig-Tipp",

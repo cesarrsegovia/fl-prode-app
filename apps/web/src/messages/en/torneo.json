@@ -92,7 +92,8 @@
     "errIncomplete": "You're missing picks: {count} of {total}.",
     "saved": "Picks saved",
     "saveError": "Couldn't save",
-    "submit": "Save {count}/{total} picks"
+    "submit": "Save {count}/{total} picks",
+    "back": "Go back"
   },
   "topScorer": {
     "eyebrow": "Top scorer prediction",

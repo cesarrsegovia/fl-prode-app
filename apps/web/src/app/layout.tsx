@@ -10,6 +10,7 @@ import { BottomNav } from '@/components/layout/BottomNav';
 import { SessionProvider } from '@/lib/session';
 import { BridgeProvider } from '@/components/providers/BridgeProvider';
 import { RealtimeProvider } from '@/components/providers/RealtimeProvider';
+import { LocaleBootstrap } from '@/components/providers/LocaleBootstrap';
 
 const display = Bricolage_Grotesque({
   subsets: ['latin'],
@@ -58,6 +59,7 @@ export default async function RootLayout({
           {tNav('skipToContent')}
         </a>
         <NextIntlClientProvider>
+          <LocaleBootstrap />
           <SessionProvider>
             <BridgeProvider>
               <RealtimeProvider>
