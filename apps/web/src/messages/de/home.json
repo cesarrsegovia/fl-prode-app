@@ -14,6 +14,9 @@
     "fallbackName": "Spieltag {round}",
     "matches": "{count, plural, one {# Spiel} other {# Spiele}}",
     "closesIn": "Schließt in",
+    "nextClosesIn": "Nächstes Spiel schließt in",
+    "open": "Offen",
+    "closed": "Geschlossen",
     "loadPredictions": "Tipps eingeben",
     "none": "Derzeit keine offenen Spieltage."
   },

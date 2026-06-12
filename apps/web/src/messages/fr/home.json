@@ -14,6 +14,9 @@
     "fallbackName": "Journée {round}",
     "matches": "{count, plural, one {# match} other {# matchs}}",
     "closesIn": "Clôture dans",
+    "nextClosesIn": "Le prochain match se clôture dans",
+    "open": "Ouvert",
+    "closed": "Fermé",
     "loadPredictions": "Saisir les pronostics",
     "none": "Aucune journée ouverte pour le moment."
   },
