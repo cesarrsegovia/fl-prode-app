@@ -98,6 +98,7 @@
     "incrementScore": "Ajouter un but à {team}",
     "decrementScore": "Retirer un but à {team}",
     "yourPickValue": "Votre choix: {home} - {away}",
+    "yourPickResult": "Votre choix: {result}",
     "pickAria": {
       "home": "Victoire à domicile",
       "draw": "Match nul",
