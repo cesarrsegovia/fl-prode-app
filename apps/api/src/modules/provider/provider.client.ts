@@ -50,8 +50,9 @@ export class ProviderClient {
           baseURL: config.baseUrl,
           timeout: config.timeoutMs,
           headers: {
-            'X-API-Key': config.apiKey,
             'Content-Type': 'application/json',
+            // La API key es opcional; solo la mandamos si el casino la configuró.
+            ...(config.apiKey ? { 'X-API-Key': config.apiKey } : {}),
           },
         })
       : null;
@@ -73,7 +74,7 @@ export class ProviderClient {
       },
     };
     return this.postEnvelope<AuthenticateResponseData>(
-      `/providers/${this.config.name}/authenticate`,
+      '/authenticate',
       body,
     );
   }
@@ -81,7 +82,7 @@ export class ProviderClient {
   async moveFunds(payload: MoveFundsRequest['data']): Promise<MoveFundsResponseData> {
     const body: MoveFundsRequest = { data: payload };
     return this.postEnvelope<MoveFundsResponseData>(
-      `/providers/${this.config.name}/moveFunds`,
+      '/moveFunds',
       body,
     );
   }
