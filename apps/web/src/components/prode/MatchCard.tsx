@@ -296,7 +296,7 @@ function ScoreStepper({
         inputMode="numeric"
         aria-label={inputAria}
         min={0}
-        placeholder="0"
+        placeholder="–"
         value={value ?? ''}
         onChange={(e) => onType(e.target.value)}
       />

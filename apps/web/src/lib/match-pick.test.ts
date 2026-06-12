@@ -30,6 +30,10 @@ describe('resultFromScore', () => {
 
 describe('scoreForResult', () => {
   describe('cuando el marcador está incompleto', () => {
+    // El marcador (bonus exacto) es una apuesta OPCIONAL e independiente del
+    // ganador. Elegir L/E/V NO debe inventar un marcador: si el usuario no lo
+    // jugó, no puede sumar el bonus por acertar el resultado exacto. Por eso un
+    // marcador incompleto se deja intacto.
     it('no inventa goles si ambos están vacíos', () => {
       expect(scoreForResult(Result.HOME, undefined, undefined)).toEqual({
         home: undefined,
