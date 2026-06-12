@@ -19,6 +19,7 @@ import {
 import type { RankingEntry } from '@prode/shared';
 import { apiClient } from '@/lib/api';
 import { ranking, stats, users, type AchievementDto, type UserStats } from '@/lib/endpoints';
+import { useAuthStore } from '@/store/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -212,6 +213,14 @@ export default function PerfilPage({
         bio: editBio.trim() || undefined,
       });
       setUser((prev) => prev ? { ...prev, username: updated.username, bio: updated.bio } : prev);
+      // Sincronizar el store de sesión para que el navbar refleje el nuevo username
+      const currentSession = useAuthStore.getState().session;
+      if (currentSession && updated.username) {
+        useAuthStore.getState().setSession({
+          ...currentSession,
+          user: { ...currentSession.user, username: updated.username, name: updated.username },
+        });
+      }
       setEditing(false);
     } catch (e: unknown) {
       const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;

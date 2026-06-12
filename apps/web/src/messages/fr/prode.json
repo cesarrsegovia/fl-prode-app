@@ -40,6 +40,7 @@
     "subtitle": "Vous avez pronostiqué tous les prochains matchs. Bien joué !"
   },
   "topScorerTabHint": "Choisissez votre meilleur buteur depuis la page du tournoi.",
+  "topScorerChange": "Modifier →",
   "goToTournament": "Aller au tournoi →",
   "fixture": {
     "fallbackName": "Journée {round}",
@@ -80,7 +81,8 @@
     "saveAllError": "Un problème est survenu lors de l'enregistrement",
     "saving": "Enregistrement…",
     "saveThis": "Enregistrer celui-ci",
-    "saveAll": "Enregistrer tous les pronostics"
+    "saveAll": "Enregistrer tous les pronostics",
+    "back": "Retour"
   },
   "match": {
     "status": {

@@ -11,7 +11,8 @@ import { pronosticos } from '@/lib/endpoints';
 import { MatchCard, type MatchPick } from './MatchCard';
 import { Countdown } from './Countdown';
 import { PercentBar } from '@/components/ui/percent-bar';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 interface Props {
   fixture: FixtureWithMatches;
@@ -33,9 +34,20 @@ function buildInitialPicks(preds?: Prediction[]): PickMap {
   }, {});
 }
 
+/** Firma estable de un pick para comparar lo cargado contra lo guardado. */
+function pickSignature(p?: MatchPick): string {
+  if (!p?.result) return '';
+  return `${p.result}|${p.homeScoreGuess ?? ''}|${p.awayScoreGuess ?? ''}|${p.isCaptain ? '1' : '0'}`;
+}
+
 export function ProdeForm({ fixture, initialPredictions }: Props) {
   const t = useTranslations('prode.form');
   const [picks, setPicks] = useState<PickMap>(() =>
+    buildInitialPicks(initialPredictions),
+  );
+  // Snapshot de lo que ya está persistido en el servidor, para detectar
+  // si quedan cambios sin guardar.
+  const [savedPicks, setSavedPicks] = useState<PickMap>(() =>
     buildInitialPicks(initialPredictions),
   );
   const [savingMatchId, setSavingMatchId] = useState<string | null>(null);
@@ -88,6 +100,20 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
     [picks],
   );
 
+  // Hay cambios sin guardar si algún partido ABIERTO tiene un pick con
+  // resultado que difiere de lo ya persistido.
+  const hasPendingChanges = useMemo(
+    () =>
+      fixture.matches.some((m) => {
+        if (isMatchClosed(m.id)) return false;
+        const p = picks[m.id];
+        if (!p?.result) return false;
+        return pickSignature(p) !== pickSignature(savedPicks[m.id]);
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [fixture.matches, picks, savedPicks, now],
+  );
+
   useEffect(() => {
     if (captainId) {
       setPicks((prev) => {
@@ -121,6 +147,7 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
         awayScoreGuess: pick.awayScoreGuess,
         isCaptain: pick.isCaptain,
       });
+      setSavedPicks((prev) => ({ ...prev, [matchId]: { ...pick } }));
       setSuccessMsg(t('saved'));
       setTimeout(() => setSuccessMsg(null), 1500);
     } catch (err: any) {
@@ -153,6 +180,11 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
           isCaptain: pick.isCaptain,
         });
       }
+      setSavedPicks((prev) => {
+        const next = { ...prev };
+        for (const [matchId, pick] of entries) next[matchId] = { ...pick };
+        return next;
+      });
       setSuccessMsg(t('savedMany', { count: entries.length }));
       setTimeout(() => setSuccessMsg(null), 2000);
     } catch (err: any) {
@@ -263,7 +295,7 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
         </p>
       )}
 
-      {!allClosed && (
+      {!allClosed && hasPendingChanges ? (
         <button
           type="button"
           onClick={saveAll}
@@ -279,6 +311,14 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
             t('saveAll')
           )}
         </button>
+      ) : (
+        <Link
+          href="/prode"
+          className="w-full h-14 bg-surface-2 text-foreground font-extrabold text-lg rounded-xl active:scale-[0.98] transition-transform flex items-center justify-center gap-2 hover:bg-surface-1"
+        >
+          <ArrowLeft className="size-5" />
+          {t('back')}
+        </Link>
       )}
     </div>
   );

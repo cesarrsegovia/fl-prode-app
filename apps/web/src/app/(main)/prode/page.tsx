@@ -49,6 +49,7 @@ export default function ProdePage() {
   );
   const [champPick, setChampPick] = useState<BracketPickResponse | null>(null);
   const [topPick, setTopPick] = useState<TopScorerPickResponse | null>(null);
+  const [pickDeadline, setPickDeadline] = useState<string | null>(null);
   const [filter, setFilter] = useState<PredictionsFilter>('pending');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -75,6 +76,11 @@ export default function ProdePage() {
     if (!tournament?.id) return;
     bracketPick.mine(tournament.id).then(setChampPick).catch(() => {});
     topScorerPick.mine(tournament.id).then(setTopPick).catch(() => {});
+    // Campeón y goleador comparten deadline (fin de la fase de grupos).
+    bracketPick
+      .deadline(tournament.id)
+      .then((d) => setPickDeadline(d.deadline ?? null))
+      .catch(() => {});
   }, [tournament?.id]);
 
   const allMatches = useMemo(() => items.flatMap((f) => f.matches), [items]);
@@ -94,7 +100,10 @@ export default function ProdePage() {
     topScorer: topPick ? 1 : 0,
   };
 
-  const deadlineLabel = formatDeadline(tournament?.startDate ?? null, locale);
+  const deadlineLabel = formatDeadline(
+    pickDeadline ?? tournament?.startDate ?? null,
+    locale,
+  );
 
   // Filtra las fechas según el estado de sus partidos. Una fecha se incluye
   // si tiene al menos un partido que coincide con el filtro activo.
@@ -202,16 +211,51 @@ export default function ProdePage() {
 
       {!isLoading && !error && filter === 'topScorer' && (
         <Card className="bg-surface-1 border-line">
-          <CardContent className="p-6 text-center text-sm text-ink-muted">
-            {t('topScorerTabHint')}
-            {tournament && (
-              <div className="mt-3">
-                <Link
-                  href={`/torneo/${tournament.id}`}
-                  className="font-display font-bold text-neon hover:underline"
-                >
-                  {t('goToTournament')}
-                </Link>
+          <CardContent className="p-6">
+            {topPick?.player ? (
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-neon/10 text-neon">
+                  <Trophy size={18} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] uppercase tracking-[0.2em] font-display font-bold text-neon">
+                    {tFeat('topScorer.label')}
+                  </p>
+                  <p className="font-display font-extrabold text-foreground truncate">
+                    {topPick.player.name}
+                  </p>
+                  {(positionKey(topPick.player.position)
+                    ? tPlayer(`positions.${positionKey(topPick.player.position)}`)
+                    : topPick.player.position) && (
+                    <p className="text-xs text-ink-muted">
+                      {positionKey(topPick.player.position)
+                        ? tPlayer(`positions.${positionKey(topPick.player.position)}`)
+                        : topPick.player.position}
+                    </p>
+                  )}
+                </div>
+                {tournament && (
+                  <Link
+                    href={`/torneo/${tournament.id}`}
+                    className="shrink-0 text-xs font-display font-bold text-neon hover:underline"
+                  >
+                    {t('topScorerChange')}
+                  </Link>
+                )}
+              </div>
+            ) : (
+              <div className="text-center text-sm text-ink-muted">
+                {t('topScorerTabHint')}
+                {tournament && (
+                  <div className="mt-3">
+                    <Link
+                      href={`/torneo/${tournament.id}`}
+                      className="font-display font-bold text-neon hover:underline"
+                    >
+                      {t('goToTournament')}
+                    </Link>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
