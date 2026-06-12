@@ -92,7 +92,8 @@
     "errIncomplete": "Te faltan picks: {count} de {total}.",
     "saved": "Picks guardados",
     "saveError": "No se pudo guardar",
-    "submit": "Guardar {count}/{total} picks"
+    "submit": "Guardar {count}/{total} picks",
+    "back": "Volver atrás"
   },
   "topScorer": {
     "eyebrow": "Predicción de goleador",

@@ -4,12 +4,25 @@ import { cookies, headers } from 'next/headers';
 import { LOCALE_COOKIE, type Locale } from './config';
 import { matchLocale } from './locale-match';
 
-/** Idioma efectivo de la request (cookie > Accept-Language > default). */
+// Header que el middleware setea desde `?lang=` (idioma cookieless del iframe).
+const LOCALE_HEADER = 'x-prode-locale';
+
+/**
+ * Idioma efectivo de la request. Prioridad:
+ *   1. Header `x-prode-locale` (viene de `?lang=` vía middleware) — funciona
+ *      dentro del iframe cross-site, donde las cookies de tercero se bloquean.
+ *   2. Cookie `NEXT_LOCALE` (uso first-party / standalone).
+ *   3. Accept-Language del navegador.
+ *   4. Default.
+ */
 export async function getUserLocale(): Promise<Locale> {
+  const hdrs = await headers();
+  const headerLocale = hdrs.get(LOCALE_HEADER) ?? null;
   const cookieStore = await cookies();
   const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value ?? null;
-  const acceptLanguage = (await headers()).get('accept-language');
-  return matchLocale(acceptLanguage, cookieLocale);
+  const acceptLanguage = hdrs.get('accept-language');
+  // El header del iframe tiene prioridad: si está, manda sobre la cookie.
+  return matchLocale(acceptLanguage, headerLocale ?? cookieLocale);
 }
 
 /** Persiste la elección de idioma del usuario en la cookie. */

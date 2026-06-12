@@ -4,11 +4,27 @@ import { useEffect, useRef, useState } from 'react';
 import { signIn } from '@/lib/session';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AlertCircle, Loader2 } from 'lucide-react';
+import { locales } from '@/i18n/config';
+import { LOCALE_STORAGE_KEY } from '@/i18n/client-locale';
 
 function safeNext(raw: string | null): string {
   if (!raw) return '/home';
   if (!raw.startsWith('/') || raw.startsWith('//')) return '/home';
   return raw;
+}
+
+/** Idioma válido pedido en la URL del launch (`?lang=`), o null. */
+function safeLang(raw: string | null): string | null {
+  const v = (raw ?? '').trim().toLowerCase();
+  return (locales as readonly string[]).includes(v) ? v : null;
+}
+
+/** Agrega `?lang=` a una ruta interna preservando otros params. */
+function withLang(path: string, lang: string | null): string {
+  if (!lang) return path;
+  const [base, hash] = path.split('#');
+  const sep = base.includes('?') ? '&' : '?';
+  return `${base}${sep}lang=${lang}${hash ? `#${hash}` : ''}`;
 }
 
 export default function LaunchPage() {
@@ -25,6 +41,17 @@ export default function LaunchPage() {
     const code =
       searchParams.get('authorizationCode') || searchParams.get('token');
     const next = safeNext(searchParams.get('next'));
+    // Idioma cookieless: gamblor (o el switcher) puede pasar `?lang=`. Lo
+    // persistimos en localStorage y lo arrastramos al `next` para que el
+    // server renderice en ese idioma dentro del iframe.
+    const lang = safeLang(searchParams.get('lang'));
+    if (lang) {
+      try {
+        window.localStorage.setItem(LOCALE_STORAGE_KEY, lang);
+      } catch {
+        // localStorage bloqueado: el `?lang=` en la URL resuelve igual.
+      }
+    }
 
     if (!code) {
       setError('Falta el parámetro authorizationCode');
@@ -40,7 +67,7 @@ export default function LaunchPage() {
           setError('No se pudo validar la sesión con la plataforma');
           return;
         }
-        router.replace(next);
+        router.replace(withLang(next, lang));
       })
       .catch(() => setError('Error de conexión'));
   }, [searchParams, router]);

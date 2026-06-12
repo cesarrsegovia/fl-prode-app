@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Trophy, Check, AlertCircle } from 'lucide-react';
 import {
@@ -48,7 +49,9 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
   const t = useTranslations('torneo.r32');
   const tCommon = useTranslations('torneo.common');
   const format = useFormatter();
+  const router = useRouter();
   const [state, setState] = useState<PicksState>({});
+  const [savedState, setSavedState] = useState<PicksState>({});
   const [loaded, setLoaded] = useState(false);
   const [deadline, setDeadline] = useState<Date | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -60,7 +63,9 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
       r32Picks.mine(tournamentId).catch(() => [] as R32PickResponse[]),
       r32Picks.deadline(tournamentId).catch(() => ({ deadline: null })),
     ]).then(([mine, d]) => {
-      setState(initialState(mine));
+      const initial = initialState(mine);
+      setState(initial);
+      setSavedState(initial);
       setDeadline(d.deadline ? new Date(d.deadline) : null);
       setLoaded(true);
     });
@@ -146,6 +151,16 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
     setKind(team.id, R32PickKind.BEST_THIRD);
   };
 
+  const isDirty = useMemo(() => {
+    const keys = new Set([...Object.keys(state), ...Object.keys(savedState)]);
+    for (const key of keys) {
+      if (state[key] !== savedState[key]) {
+        return true;
+      }
+    }
+    return false;
+  }, [state, savedState]);
+
   const submit = async () => {
     if (counts.total !== R32_TOTAL_QUALIFIERS) {
       setError(
@@ -161,12 +176,21 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
         .map(([teamId, kind]) => ({ teamId, kind: kind as PickKind }));
       await r32Picks.set(tournamentId, payload);
       setSuccess(t('saved'));
+      setSavedState(state);
       setTimeout(() => setSuccess(null), 2000);
     } catch (err: any) {
       setError(err?.response?.data?.message ?? t('saveError'));
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleButtonClick = () => {
+    if (!isDirty && counts.total === R32_TOTAL_QUALIFIERS) {
+      router.back();
+      return;
+    }
+    submit();
   };
 
   const nonTop2Teams = useMemo(
@@ -368,7 +392,7 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
             {!locked && (
               <button
                 type="button"
-                onClick={submit}
+                onClick={handleButtonClick}
                 disabled={
                   submitting || counts.total !== R32_TOTAL_QUALIFIERS
                 }
@@ -376,7 +400,9 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
               >
                 {submitting
                   ? tCommon('saving')
-                  : t('submit', { count: counts.total, total: R32_TOTAL_QUALIFIERS })}
+                  : !isDirty && counts.total === R32_TOTAL_QUALIFIERS
+                    ? t('back')
+                    : t('submit', { count: counts.total, total: R32_TOTAL_QUALIFIERS })}
               </button>
             )}
           </>

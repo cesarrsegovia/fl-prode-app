@@ -1,11 +1,11 @@
 'use client';
 
 import { useTransition } from 'react';
-import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { Globe } from 'lucide-react';
 import { locales, localeLabels, type Locale } from '@/i18n/config';
 import { setUserLocale } from '@/i18n/locale';
+import { LOCALE_STORAGE_KEY } from '@/i18n/client-locale';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -14,20 +14,35 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 /**
- * Selector de idioma. Persiste la elección en la cookie vía server action y
- * refresca los server components para re-renderizar en el nuevo idioma.
+ * Selector de idioma. Dentro del iframe cross-site las cookies de tercero se
+ * bloquean, así que el mecanismo principal es cookieless: guardamos la elección
+ * en localStorage (first-party al iframe) y recargamos con `?lang=xx`, que el
+ * middleware reenvía al server. Igual seteamos la cookie best-effort para el
+ * uso standalone.
  */
 export function LanguageSwitcher() {
   const t = useTranslations('nav');
   const current = useLocale() as Locale;
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   function onSelect(locale: Locale) {
     if (locale === current) return;
     startTransition(async () => {
-      await setUserLocale(locale);
-      router.refresh();
+      try {
+        window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+      } catch {
+        // localStorage puede estar bloqueado; seguimos con la URL igual.
+      }
+      // Cookie best-effort (standalone). En el iframe se ignora, no bloquea.
+      try {
+        await setUserLocale(locale);
+      } catch {
+        // Server action puede fallar en el iframe; el `?lang=` resuelve igual.
+      }
+      const url = new URL(window.location.href);
+      url.searchParams.set('lang', locale);
+      // Reload completo para que el server re-renderice con el nuevo idioma.
+      window.location.assign(url.toString());
     });
   }
 
