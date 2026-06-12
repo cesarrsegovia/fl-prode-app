@@ -1,10 +1,39 @@
 import { describe, expect, it } from 'vitest';
 import { Result } from '@prode/shared';
 import {
+  normalizeSavedScore,
   normalizeScoreInput,
   resultFromScore,
   scoreForResult,
 } from './match-pick';
+
+describe('normalizeSavedScore', () => {
+  // Picks guardados antes del fix podían quedar con un solo lado (el otro null).
+  // Al cargarlos, un lado cargado implica que se apostó marcador, así que el
+  // null pasa a 0 (coherente con normalizeScoreInput). Ambos null = sin marcador.
+  it('completa el lado faltante en 0 cuando solo el local está cargado', () => {
+    expect(normalizeSavedScore(2, null)).toEqual({ home: 2, away: 0 });
+  });
+
+  it('completa el lado faltante en 0 cuando solo el visitante está cargado', () => {
+    expect(normalizeSavedScore(null, 1)).toEqual({ home: 0, away: 1 });
+  });
+
+  it('deja ambos vacíos si ninguno estaba cargado', () => {
+    expect(normalizeSavedScore(null, null)).toEqual({
+      home: undefined,
+      away: undefined,
+    });
+  });
+
+  it('no toca un marcador completo', () => {
+    expect(normalizeSavedScore(2, 1)).toEqual({ home: 2, away: 1 });
+  });
+
+  it('trata el 0 como valor cargado (no como vacío)', () => {
+    expect(normalizeSavedScore(0, null)).toEqual({ home: 0, away: 0 });
+  });
+});
 
 describe('normalizeScoreInput', () => {
   // El marcador es todo-o-nada: tocar un lado expresa intención de apostar, así
