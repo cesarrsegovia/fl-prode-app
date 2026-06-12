@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Trophy, Check } from 'lucide-react';
-import { championPickDeadline } from '@prode/shared';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -14,7 +13,7 @@ import {
 } from '@/components/ui/empty';
 import { bracketPick, type BracketPickResponse } from '@/lib/endpoints';
 import { TeamFlag } from './TeamFlag';
-import { cn } from '@/lib/utils';
+import { FlagCombobox } from './FlagCombobox';
 
 interface TeamOption {
   id: string;
@@ -26,40 +25,36 @@ interface TeamOption {
 
 interface Props {
   tournamentId: string;
-  tournamentStartDate: string | null;
   teams: TeamOption[];
 }
 
 export function BracketPickCard({
   tournamentId,
-  tournamentStartDate,
   teams,
 }: Props) {
   const t = useTranslations('torneo.champion');
   const tCommon = useTranslations('torneo.common');
+  const tCombo = useTranslations('torneo.combobox');
   const [current, setCurrent] = useState<BracketPickResponse | null>(null);
   const [submitting, setSubmitting] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [deadline, setDeadline] = useState<Date | null>(null);
 
   useEffect(() => {
-    bracketPick
-      .mine(tournamentId)
-      .then((pick) => {
+    Promise.all([
+      bracketPick.mine(tournamentId),
+      bracketPick.deadline(tournamentId),
+    ])
+      .then(([pick, dl]) => {
         setCurrent(pick);
+        setDeadline(dl.deadline ? new Date(dl.deadline) : null);
         setLoaded(true);
       })
       .catch(() => setLoaded(true));
   }, [tournamentId]);
 
-  const lockedAt = useMemo(
-    () =>
-      tournamentStartDate
-        ? championPickDeadline(new Date(tournamentStartDate))
-        : null,
-    [tournamentStartDate],
-  );
-  const locked = lockedAt ? lockedAt <= new Date() : false;
+  const locked = deadline ? deadline <= new Date() : false;
 
   const sortedTeams = useMemo(() => {
     return [...teams].sort((a, b) => {
@@ -137,34 +132,23 @@ export function BracketPickCard({
               <EmptyDescription>{t('subtitle')}</EmptyDescription>
             </EmptyHeader>
           </Empty>
+        ) : locked && current ? null : !locked ? (
+          <FlagCombobox
+            options={sortedTeams.map((tm) => ({
+              id: tm.id,
+              label: tm.name,
+              sublabel: tm.group ?? undefined,
+              image: <TeamFlag size="sm" src={tm.flagUrl} alt={tm.name} />,
+            }))}
+            value={current?.champTeamId}
+            disabled={submitting !== null}
+            placeholder={tCombo('select')}
+            searchPlaceholder={tCombo('search')}
+            noResultsLabel={tCombo('noResults')}
+            onSelect={(id) => pick(id)}
+          />
         ) : (
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-            {sortedTeams.map((t) => {
-              const isMine = current?.champTeamId === t.id;
-              const isSaving = submitting === t.id;
-              return (
-                <button
-                  key={t.id}
-                  onClick={() => pick(t.id)}
-                  disabled={locked || isSaving}
-                  title={t.name}
-                  aria-pressed={isMine}
-                  className={cn(
-                    'flex flex-col items-center gap-2 p-2 rounded-lg border transition-all',
-                    isMine
-                      ? 'border-neon bg-neon/10 glow-neon'
-                      : 'border-line/40 hover:border-neon/60 hover:bg-surface-2',
-                    (locked || isSaving) && 'opacity-60',
-                  )}
-                >
-                  <TeamFlag size="md" src={t.flagUrl} alt={t.name} />
-                  <span className="text-[10px] font-display font-bold text-ink-muted truncate w-full text-center">
-                    {t.shortName ?? t.name}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          <p className="text-sm text-ink-muted">{t('locked')}</p>
         )}
 
         {error && (

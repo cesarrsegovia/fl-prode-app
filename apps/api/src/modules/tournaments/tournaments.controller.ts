@@ -85,6 +85,12 @@ export class TournamentsController {
     return this.service.setBracketPick(id, user.userId, body.champTeamId);
   }
 
+  @Get(':id/bracket-pick/deadline')
+  async bracketDeadline(@Param('id') id: string) {
+    const deadline = await this.service.getChampionDeadline(id);
+    return { deadline };
+  }
+
   @Get(':id/bracket-pick/aggregate')
   bracketPickAggregate(@Param('id') id: string) {
     return this.service.getBracketPickAggregate(id);

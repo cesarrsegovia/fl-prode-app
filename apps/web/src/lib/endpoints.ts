@@ -160,6 +160,12 @@ export const bracketPick = {
         { champTeamId },
       )
       .then((r) => r.data),
+  deadline: (tournamentId: string) =>
+    apiClient
+      .get<{ deadline: string | null }>(
+        `/tournaments/${tournamentId}/bracket-pick/deadline`,
+      )
+      .then((r) => r.data),
 };
 
 // ---------- Top Scorer (Goleador) ----------

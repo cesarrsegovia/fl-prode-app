@@ -1,4 +1,9 @@
 {
+  "combobox": {
+    "search": "Search…",
+    "select": "Choose an option",
+    "noResults": "No results"
+  },
   "metaTitle": "{name} · Prode",
   "metaDescription": "Predict the matches of {name}.",
   "metaFallback": "Tournament · Prode",
@@ -63,7 +68,7 @@
     "eyebrow": "Champion prediction",
     "titleChange": "Changing your pick?",
     "titleInitial": "Who lifts the trophy?",
-    "subtitle": "Pick a team before the tournament starts. Bonus at the end if you're right.",
+    "subtitle": "Pick a team until the end of the group stage. Bonus at the end if you nail it.",
     "currentPick": "Your current pick",
     "locked": "Predictions closed",
     "saveError": "Couldn't save your prediction"

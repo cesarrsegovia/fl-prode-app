@@ -67,7 +67,6 @@ export default async function TorneoPage({ params }: Props) {
 
         <BracketPickCard
           tournamentId={tournament.id}
-          tournamentStartDate={tournament.startDate}
           teams={teamOptions}
         />
 
