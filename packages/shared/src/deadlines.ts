@@ -1,6 +1,10 @@
 import { MatchStage } from './types/fixture.types';
 
-export const KNOCKOUT_LEAD_MS = 60 * 60 * 1000;
+// Lead time aplicado a CADA partido: el pick cierra 1h antes del inicio.
+// Aplica a fase de grupos y eliminatorias por igual.
+export const MATCH_LEAD_MS = 60 * 60 * 1000;
+/** @deprecated usar MATCH_LEAD_MS — alias mantenido por compatibilidad. */
+export const KNOCKOUT_LEAD_MS = MATCH_LEAD_MS;
 
 const KNOCKOUT_STAGES: ReadonlySet<MatchStage> = new Set([
   MatchStage.R32,
@@ -32,8 +36,14 @@ export function endOfPreviousDayUtc(reference: Date): Date {
   return out;
 }
 
+/** Cierre por partido: 1h antes del inicio. Vale para grupos y eliminatorias. */
+export function matchLeadDeadline(matchStartTime: Date): Date {
+  return new Date(matchStartTime.getTime() - MATCH_LEAD_MS);
+}
+
+/** @deprecated usar matchLeadDeadline — alias por compatibilidad. */
 export function knockoutMatchDeadline(matchStartTime: Date): Date {
-  return new Date(matchStartTime.getTime() - KNOCKOUT_LEAD_MS);
+  return matchLeadDeadline(matchStartTime);
 }
 
 export function groupFixtureDeadline(earliestMatchStart: Date): Date {
@@ -64,12 +74,9 @@ export interface MatchDeadlineInput {
 }
 
 export function matchPredictionDeadline(input: MatchDeadlineInput): Date {
-  const startTime = new Date(input.startTime);
-  const fixtureCloseAt = new Date(input.fixtureCloseAt);
-  if (isKnockoutStage(input.stage)) {
-    return knockoutMatchDeadline(startTime);
-  }
-  return fixtureCloseAt;
+  // El Mundial ya comenzó: cada partido cierra 1h antes de su inicio,
+  // tanto en fase de grupos como en eliminatorias (fixtureCloseAt ya no manda).
+  return matchLeadDeadline(new Date(input.startTime));
 }
 
 export function isMatchPredictionClosed(

@@ -3,6 +3,13 @@
   "eyebrowOther": "Player",
   "memberSince": "Since {date}",
   "loadError": "Couldn't load the profile",
+  "editProfileLabel": "Edit profile",
+  "editUsernamePlaceholder": "Username",
+  "editBioPlaceholder": "One line about you (optional)",
+  "editSave": "Save",
+  "editSaving": "Saving…",
+  "editCancel": "Cancel",
+  "editError": "Couldn't save the profile",
   "statsTitle": "Stats",
   "stats": {
     "globalPosition": "Global position",

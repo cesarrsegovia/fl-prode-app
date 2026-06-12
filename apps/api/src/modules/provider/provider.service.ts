@@ -105,7 +105,7 @@ export class ProviderService {
       data = await this.client.authenticate(authorizationCode);
     }
 
-    const user = await this.prisma.user.upsert({
+    let user = await this.prisma.user.upsert({
       where: {
         providerName_providerUserId: {
           providerName: this.config.name,
@@ -119,10 +119,35 @@ export class ProviderService {
       create: {
         providerName: this.config.name,
         providerUserId: data.userName,
+        username: data.nickname || data.userName,
         currency: data.currency,
         locale: data.language,
       },
     });
+
+    // Si el usuario existía sin username (creado antes de esta lógica), lo asignamos ahora.
+    if (!user.username) {
+      const desiredUsername = data.nickname || data.userName;
+      try {
+        user = await this.prisma.user.update({
+          where: { id: user.id },
+          data: { username: desiredUsername },
+        });
+      } catch (e) {
+        if (
+          e instanceof Prisma.PrismaClientKnownRequestError &&
+          e.code === 'P2002'
+        ) {
+          // Colisión de username — usar userName (interno del provider) como sufijo único
+          user = await this.prisma.user.update({
+            where: { id: user.id },
+            data: { username: `${desiredUsername}_${data.userName.slice(-4)}` },
+          });
+        } else {
+          throw e;
+        }
+      }
+    }
 
     const session = await this.prisma.providerSession.upsert({
       where: { authorizationCode },

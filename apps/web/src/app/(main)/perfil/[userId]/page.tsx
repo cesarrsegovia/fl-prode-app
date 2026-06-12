@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useEffect, useState } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSession } from '@/lib/session';
 import { useFormatter, useTranslations } from 'next-intl';
@@ -14,10 +14,11 @@ import {
   Crown,
   CheckCircle2,
   Lock,
+  Pencil,
 } from 'lucide-react';
 import type { RankingEntry } from '@prode/shared';
 import { apiClient } from '@/lib/api';
-import { ranking, stats, type AchievementDto, type UserStats } from '@/lib/endpoints';
+import { ranking, stats, users, type AchievementDto, type UserStats } from '@/lib/endpoints';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -27,13 +28,14 @@ import { cn } from '@/lib/utils';
 
 interface UserDto {
   id: string;
-  username: string;
+  username: string | null;
   avatarUrl: string | null;
   bio: string | null;
   createdAt: string;
 }
 
-function getInitials(name: string) {
+function getInitials(name: string | null | undefined) {
+  if (!name?.trim()) return '?';
   const parts = name.trim().split(/\s+/);
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
@@ -164,6 +166,12 @@ export default function PerfilPage({
   const [rankingEntry, setRankingEntry] = useState<RankingEntry | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [editUsername, setEditUsername] = useState('');
+  const [editBio, setEditBio] = useState('');
+  const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     Promise.all([
@@ -184,6 +192,34 @@ export default function PerfilPage({
       )
       .finally(() => setIsLoading(false));
   }, [userId, isMe]);
+
+  function openEdit() {
+    if (!user) return;
+    setEditUsername(user.username ?? '');
+    setEditBio(user.bio ?? '');
+    setEditError(null);
+    setEditing(true);
+    setTimeout(() => inputRef.current?.focus(), 50);
+  }
+
+  async function saveEdit() {
+    if (!user) return;
+    setEditSaving(true);
+    setEditError(null);
+    try {
+      const updated = await users.updateMe({
+        username: editUsername.trim() || undefined,
+        bio: editBio.trim() || undefined,
+      });
+      setUser((prev) => prev ? { ...prev, username: updated.username, bio: updated.bio } : prev);
+      setEditing(false);
+    } catch (e: unknown) {
+      const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setEditError(msg ?? t('editError'));
+    } finally {
+      setEditSaving(false);
+    }
+  }
 
   if (error) {
     return (
@@ -206,15 +242,16 @@ export default function PerfilPage({
     year: 'numeric',
   });
 
-  const avatar = user.avatarUrl ?? diceBearAvatar(user.username);
+  const displayName = user.username ?? userId;
+  const avatar = user.avatarUrl ?? diceBearAvatar(displayName);
 
   return (
     <main className="pt-24 pb-24 px-4 max-w-5xl mx-auto">
       <header className="mb-12 flex flex-col md:flex-row md:items-end gap-6">
         <Avatar size="lg" className="size-28 md:size-32">
-          <AvatarImage src={avatar} alt={user.username} />
+          <AvatarImage src={avatar} alt={displayName} />
           <AvatarFallback className="bg-neon text-primary-foreground text-2xl font-display font-extrabold">
-            {getInitials(user.username)}
+            {getInitials(displayName)}
           </AvatarFallback>
         </Avatar>
 
@@ -222,12 +259,66 @@ export default function PerfilPage({
           <p className="font-display text-xs uppercase tracking-[0.25em] text-neon mb-2">
             {isMe ? t('eyebrowMe') : t('eyebrowOther')}
           </p>
-          <h1 className="font-display font-extrabold text-foreground text-[clamp(2.5rem,6vw,4rem)] tracking-[-0.03em] leading-[0.95]">
-            {user.username}
-          </h1>
-          {user.bio && (
-            <p className="text-sm text-ink-muted mt-3 max-w-xl">{user.bio}</p>
+
+          {editing ? (
+            <div className="flex flex-col gap-3 max-w-md">
+              <input
+                ref={inputRef}
+                value={editUsername}
+                onChange={(e) => setEditUsername(e.target.value)}
+                maxLength={30}
+                placeholder={t('editUsernamePlaceholder')}
+                className="bg-surface-2 border border-line rounded-lg px-4 py-2 font-display font-extrabold text-2xl text-foreground focus:outline-none focus:border-neon"
+              />
+              <textarea
+                value={editBio}
+                onChange={(e) => setEditBio(e.target.value)}
+                maxLength={280}
+                rows={2}
+                placeholder={t('editBioPlaceholder')}
+                className="bg-surface-2 border border-line rounded-lg px-4 py-2 text-sm text-foreground resize-none focus:outline-none focus:border-neon"
+              />
+              {editError && (
+                <p className="text-xs text-destructive font-bold">{editError}</p>
+              )}
+              <div className="flex gap-3">
+                <button
+                  onClick={saveEdit}
+                  disabled={editSaving}
+                  className="px-5 py-2 rounded-lg bg-neon text-primary-foreground text-xs font-display font-bold uppercase tracking-[0.15em] disabled:opacity-50"
+                >
+                  {editSaving ? t('editSaving') : t('editSave')}
+                </button>
+                <button
+                  onClick={() => setEditing(false)}
+                  className="px-5 py-2 rounded-lg border border-line text-xs font-display font-bold uppercase tracking-[0.15em] text-ink-muted"
+                >
+                  {t('editCancel')}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-3">
+                <h1 className="font-display font-extrabold text-foreground text-[clamp(2.5rem,6vw,4rem)] tracking-[-0.03em] leading-[0.95]">
+                  {displayName}
+                </h1>
+                {isMe && (
+                  <button
+                    onClick={openEdit}
+                    aria-label={t('editProfileLabel')}
+                    className="mt-2 text-ink-dim hover:text-neon transition-colors"
+                  >
+                    <Pencil className="size-5" />
+                  </button>
+                )}
+              </div>
+              {user.bio && (
+                <p className="text-sm text-ink-muted mt-3 max-w-xl">{user.bio}</p>
+              )}
+            </>
           )}
+
           <p className="text-[10px] uppercase tracking-[0.2em] font-display font-bold text-ink-dim mt-4">
             {t('memberSince', { date: memberSince })}
           </p>

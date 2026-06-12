@@ -3,6 +3,13 @@
   "eyebrowOther": "Joueur",
   "memberSince": "Depuis {date}",
   "loadError": "Impossible de charger le profil",
+  "editProfileLabel": "Modifier le profil",
+  "editUsernamePlaceholder": "Nom d'utilisateur",
+  "editBioPlaceholder": "Une ligne sur vous (optionnel)",
+  "editSave": "Enregistrer",
+  "editSaving": "Enregistrement…",
+  "editCancel": "Annuler",
+  "editError": "Impossible de sauvegarder le profil",
   "statsTitle": "Stats",
   "stats": {
     "globalPosition": "Position mondiale",

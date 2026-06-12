@@ -398,6 +398,14 @@ export interface PredictionHistoryItem {
   fixture: { id: string; round: number; name: string | null };
 }
 
+export const users = {
+  updateMe: (data: { username?: string; bio?: string; avatarUrl?: string }) =>
+    apiClient.patch<{ id: string; username: string | null; bio: string | null; avatarUrl: string | null }>(
+      '/users/me',
+      data,
+    ).then((r) => r.data),
+};
+
 export const stats = {
   user: (userId: string) =>
     apiClient.get<UserStats>(`/users/${userId}/stats`).then((r) => r.data),
