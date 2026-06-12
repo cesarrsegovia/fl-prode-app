@@ -40,8 +40,10 @@ export function groupFixtureDeadline(earliestMatchStart: Date): Date {
   return endOfPreviousDayUtc(earliestMatchStart);
 }
 
-export function championPickDeadline(tournamentStart: Date): Date {
-  return endOfPreviousDayUtc(tournamentStart);
+// Campeón: se puede elegir hasta el final de la 2da fecha de grupos
+// (cierra el día previo al primer partido de la 3ra fecha, igual que el goleador).
+export function championPickDeadline(round3FirstMatchStart: Date): Date {
+  return endOfPreviousDayUtc(round3FirstMatchStart);
 }
 
 // Goleador: se puede elegir hasta el final de la 2da fecha de grupos

@@ -108,23 +108,50 @@ async function main() {
     const espn = await fetchEspnEvents(dates);
     console.log(`ESPN devolvió ${espn.length} eventos.`);
 
-    const espnByKey = new Map<string, EspnEvent>();
+    // Índice de eventos de grupos por PAR de equipos sin orden (clave canónica).
+    // Cada clave puede tener varios eventos (distintas fechas); el match elige el más cercano.
+    const pairKey = (a: string, b: string) => [norm(a), norm(b)].sort().join('|');
+    const espnByPair = new Map<string, EspnEvent[]>();
     for (const e of espn) {
       if (e.homeAbbr && e.awayAbbr) {
-        espnByKey.set(`${norm(e.homeAbbr)}|${norm(e.awayAbbr)}|${ymd(new Date(e.dateIso))}`, e);
+        const k = pairKey(e.homeAbbr, e.awayAbbr);
+        (espnByPair.get(k) ?? espnByPair.set(k, []).get(k)!).push(e);
       }
     }
 
+    const DAY_MS = 24 * 60 * 60 * 1000;
+
     let matched = 0;
     const unmatched: string[] = [];
+    const inverted: string[] = [];
 
     for (const m of matches) {
       let ev: EspnEvent | undefined;
-      if (m.stage === MatchStage.GROUP && m.homeTeam && m.awayTeam) {
-        const key = `${norm(m.homeTeam.shortName)}|${norm(m.awayTeam.shortName)}|${ymd(m.startTime)}`;
-        ev = espnByKey.get(key);
+      if (m.stage === MatchStage.GROUP && m.homeTeam?.shortName && m.awayTeam?.shortName) {
+        // Match por par sin orden + tolerancia de fecha ±1 día (huso horario).
+        const candidates = espnByPair.get(pairKey(m.homeTeam.shortName, m.awayTeam.shortName)) ?? [];
+        ev = candidates
+          .filter((c) => Math.abs(new Date(c.dateIso).getTime() - m.startTime.getTime()) <= DAY_MS)
+          .sort(
+            (a, b) =>
+              Math.abs(new Date(a.dateIso).getTime() - m.startTime.getTime()) -
+              Math.abs(new Date(b.dateIso).getTime() - m.startTime.getTime()),
+          )[0];
+        // Detectar invertido (ESPN home != nuestro home) para alertar — NO tocamos home/away.
+        if (ev && norm(ev.homeAbbr) !== norm(m.homeTeam.shortName)) {
+          inverted.push(
+            `${m.homeTeam.shortName} vs ${m.awayTeam.shortName} (ESPN: ${ev.homeAbbr} vs ${ev.awayAbbr}, id ${ev.id})`,
+          );
+        }
       } else {
-        ev = espn.find((e) => new Date(e.dateIso).getTime() === m.startTime.getTime());
+        // KO: placeholders en ambos lados → match por fecha+hora con tolerancia ±1 día.
+        ev = espn
+          .filter((e) => Math.abs(new Date(e.dateIso).getTime() - m.startTime.getTime()) <= DAY_MS)
+          .sort(
+            (a, b) =>
+              Math.abs(new Date(a.dateIso).getTime() - m.startTime.getTime()) -
+              Math.abs(new Date(b.dateIso).getTime() - m.startTime.getTime()),
+          )[0];
       }
       if (ev) {
         await prisma.match.update({ where: { id: m.id }, data: { externalId: ev.id } });
@@ -145,6 +172,12 @@ async function main() {
     if (unmatched.length) {
       console.log('\nSin match (revisar a mano):');
       unmatched.forEach((u) => console.log(`  - ${u}`));
+    }
+    if (inverted.length) {
+      console.log(
+        '\n⚠️  Invertidos (ESPN tiene home/away al revés que la BD — el score podría venir invertido, revisar):',
+      );
+      inverted.forEach((u) => console.log(`  - ${u}`));
     }
   } finally {
     await prisma.$disconnect();

@@ -6,9 +6,11 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "lint": "eslint src/"
+    "lint": "eslint src/",
+    "test": "vitest run"
   },
   "devDependencies": {
-    "typescript": "^5.7"
+    "typescript": "^5.7",
+    "vitest": "^4.1.7"
   }
 }

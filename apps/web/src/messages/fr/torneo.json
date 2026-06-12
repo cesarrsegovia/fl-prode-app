@@ -1,4 +1,9 @@
 {
+  "combobox": {
+    "search": "Rechercher…",
+    "select": "Choisissez une option",
+    "noResults": "Aucun résultat"
+  },
   "metaTitle": "{name} · Prode",
   "metaDescription": "Pronostiquez les matchs de {name}.",
   "metaFallback": "Tournoi · Prode",
@@ -63,7 +68,7 @@
     "eyebrow": "Pronostic du champion",
     "titleChange": "Vous changez de favori ?",
     "titleInitial": "Qui soulève le trophée ?",
-    "subtitle": "Choisissez une équipe avant le début du tournoi. Bonus à la fin si vous avez raison.",
+    "subtitle": "Choisissez une équipe jusqu'à la fin de la phase de groupes. Bonus à la fin si vous trouvez.",
     "currentPick": "Votre choix actuel",
     "locked": "Pronostics clôturés",
     "saveError": "Impossible d'enregistrer votre pronostic"

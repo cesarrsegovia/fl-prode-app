@@ -1,4 +1,9 @@
 {
+  "combobox": {
+    "search": "Suchen…",
+    "select": "Option wählen",
+    "noResults": "Keine Ergebnisse"
+  },
   "metaTitle": "{name} · Prode",
   "metaDescription": "Tippe die Spiele von {name}.",
   "metaFallback": "Turnier · Prode",
@@ -63,7 +68,7 @@
     "eyebrow": "Champion-Tipp",
     "titleChange": "Favoriten ändern?",
     "titleInitial": "Wer holt den Pokal?",
-    "subtitle": "Wähle ein Team vor Turnierbeginn. Bonus am Ende, wenn du richtig liegst.",
+    "subtitle": "Wähle ein Team bis zum Ende der Gruppenphase. Bonus am Ende, wenn du richtig liegst.",
     "currentPick": "Dein aktueller Tipp",
     "locked": "Tipps geschlossen",
     "saveError": "Dein Tipp konnte nicht gespeichert werden"

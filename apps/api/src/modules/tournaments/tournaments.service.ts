@@ -166,17 +166,13 @@ export class TournamentsService {
   ) {
     const tournament = await this.prisma.tournament.findUnique({
       where: { id: tournamentId },
-      select: { startDate: true },
+      select: { id: true },
     });
     if (!tournament) throw new NotFoundException('Torneo no encontrado');
 
-    if (
-      tournament.startDate &&
-      championPickDeadline(tournament.startDate).getTime() <= Date.now()
-    ) {
-      throw new BadRequestException(
-        'El plazo para elegir campeón ya está cerrado.',
-      );
+    const deadline = await this.getChampionDeadline(tournamentId);
+    if (deadline && deadline.getTime() <= Date.now()) {
+      throw new BadRequestException('El plazo para elegir campeón ya está cerrado.');
     }
 
     // Verificar que el team pertenezca al torneo.
@@ -678,6 +674,13 @@ export class TournamentsService {
     const firstStart = await this.getRound3FirstMatchStart(tournamentId);
     if (!firstStart) return null;
     return topScorerPickDeadline(firstStart);
+  }
+
+  /** Deadline del pick de campeón: fin de la 2da fecha (día previo al primer partido de la 3ra). */
+  async getChampionDeadline(tournamentId: string): Promise<Date | null> {
+    const firstStart = await this.getRound3FirstMatchStart(tournamentId);
+    if (!firstStart) return null;
+    return championPickDeadline(firstStart);
   }
 
   async setTopScorerPick(

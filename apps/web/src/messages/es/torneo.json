@@ -1,4 +1,9 @@
 {
+  "combobox": {
+    "search": "Buscar…",
+    "select": "Elegí una opción",
+    "noResults": "Sin resultados"
+  },
   "metaTitle": "{name} · Prode",
   "metaDescription": "Pronosticá los partidos de {name}.",
   "metaFallback": "Torneo · Prode",
@@ -63,7 +68,7 @@
     "eyebrow": "Predicción del campeón",
     "titleChange": "¿Cambiás de candidato?",
     "titleInitial": "¿Quién levanta la copa?",
-    "subtitle": "Elegí una selección antes del inicio del torneo. Bonus al final si acertás.",
+    "subtitle": "Elegí una selección hasta el final de la fase de grupos. Bonus al final si acertás.",
     "currentPick": "Tu pick actual",
     "locked": "Predicciones cerradas",
     "saveError": "No se pudo guardar tu predicción"
