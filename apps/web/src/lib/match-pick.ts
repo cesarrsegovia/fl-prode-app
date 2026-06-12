@@ -1,6 +1,28 @@
 import { Result } from '@prode/shared';
 
 /**
+ * Normaliza el marcador al editar UN lado. El marcador es todo-o-nada: tocar un
+ * lado expresa intención de apostar, así que si el otro está vacío pasa a 0 (el
+ * usuario percibe "2 – " como "2-0"). Borrar un lado (dejarlo vacío) no toca el
+ * otro: si ambos quedan vacíos no hay marcador (no suma bonus).
+ *
+ * @param side  lado que el usuario acaba de editar
+ * @param value nuevo valor de ESE lado (undefined si lo borró)
+ * @param other valor actual del OTRO lado
+ */
+export function normalizeScoreInput(
+  side: 'home' | 'away',
+  value: number | undefined,
+  other: number | undefined,
+): { home?: number; away?: number } {
+  // Si se completó este lado y el otro está vacío, el otro pasa a 0.
+  const filledOther = value !== undefined && other === undefined ? 0 : other;
+  return side === 'home'
+    ? { home: value, away: filledOther }
+    : { home: filledOther, away: value };
+}
+
+/**
  * Deriva el ganador (L/E/V) a partir de un marcador. Devuelve undefined si el
  * marcador está incompleto, para no forzar un resultado sin datos.
  */

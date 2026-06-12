@@ -6,7 +6,11 @@ import type { Match } from '@prode/shared';
 import { MatchStatus, Result } from '@prode/shared';
 import { Minus, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { resultFromScore, scoreForResult } from '@/lib/match-pick';
+import {
+  normalizeScoreInput,
+  resultFromScore,
+  scoreForResult,
+} from '@/lib/match-pick';
 import { TeamFlag } from '@/components/torneo/TeamFlag';
 
 export interface MatchPick {
@@ -103,8 +107,12 @@ export function MatchCard({
   const setScore = (side: 'home' | 'away', raw: string) => {
     const parsed = raw === '' ? undefined : Math.max(0, Number(raw));
     if (raw !== '' && Number.isNaN(parsed)) return;
-    const homeScoreGuess = side === 'home' ? parsed : pick?.homeScoreGuess;
-    const awayScoreGuess = side === 'away' ? parsed : pick?.awayScoreGuess;
+    const other = side === 'home' ? pick?.awayScoreGuess : pick?.homeScoreGuess;
+    const { home: homeScoreGuess, away: awayScoreGuess } = normalizeScoreInput(
+      side,
+      parsed,
+      other,
+    );
     const derived = resultFromScore(homeScoreGuess, awayScoreGuess);
     onChange({
       ...pick,
