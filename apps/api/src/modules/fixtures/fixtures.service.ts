@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { MATCH_LEAD_MS } from '@prode/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateFixtureDto } from './dto/create-fixture.dto';
 import { UpdateFixtureDto } from './dto/update-fixture.dto';
@@ -16,8 +17,12 @@ export class FixturesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findActive() {
+    // El pick de cada partido cierra 1h antes de su inicio. Una fecha sigue
+    // "activa" mientras tenga al menos un partido cuyo cierre todavía no pasó
+    // (startTime > ahora - 1h), sin importar el closeAt de la fecha.
+    const openThreshold = new Date(Date.now() - MATCH_LEAD_MS);
     return this.prisma.fixture.findMany({
-      where: { closeAt: { gt: new Date() } },
+      where: { matches: { some: { startTime: { gt: openThreshold } } } },
       include: { matches: { include: MATCH_INCLUDE, orderBy: { startTime: 'asc' } } },
       orderBy: { closeAt: 'asc' },
     });

@@ -3,6 +3,13 @@
   "eyebrowOther": "Spieler",
   "memberSince": "Seit {date}",
   "loadError": "Profil konnte nicht geladen werden",
+  "editProfileLabel": "Profil bearbeiten",
+  "editUsernamePlaceholder": "Benutzername",
+  "editBioPlaceholder": "Ein Satz über dich (optional)",
+  "editSave": "Speichern",
+  "editSaving": "Speichern…",
+  "editCancel": "Abbrechen",
+  "editError": "Profil konnte nicht gespeichert werden",
   "statsTitle": "Statistiken",
   "stats": {
     "globalPosition": "Globale Position",
