@@ -6,6 +6,7 @@ import type { Match } from '@prode/shared';
 import { MatchStatus, Result } from '@prode/shared';
 import { Minus, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { resultFromScore, scoreForResult } from '@/lib/match-pick';
 import { TeamFlag } from '@/components/torneo/TeamFlag';
 
 export interface MatchPick {
@@ -24,9 +25,9 @@ interface Props {
 }
 
 const RESULT_LABELS: Record<Result, string> = {
-  [Result.HOME]: '1',
-  [Result.DRAW]: 'X',
-  [Result.AWAY]: '2',
+  [Result.HOME]: 'L',
+  [Result.DRAW]: 'E',
+  [Result.AWAY]: 'V',
 };
 
 const RESULT_ARIA_KEY: Record<Result, string> = {
@@ -86,16 +87,30 @@ export function MatchCard({
   }, [match.status]);
 
   const setResult = (result: Result) => {
-    onChange({ ...pick, result });
+    const { home, away } = scoreForResult(
+      result,
+      pick?.homeScoreGuess,
+      pick?.awayScoreGuess,
+    );
+    onChange({
+      ...pick,
+      result,
+      homeScoreGuess: home,
+      awayScoreGuess: away,
+    });
   };
 
   const setScore = (side: 'home' | 'away', raw: string) => {
     const parsed = raw === '' ? undefined : Math.max(0, Number(raw));
     if (raw !== '' && Number.isNaN(parsed)) return;
+    const homeScoreGuess = side === 'home' ? parsed : pick?.homeScoreGuess;
+    const awayScoreGuess = side === 'away' ? parsed : pick?.awayScoreGuess;
+    const derived = resultFromScore(homeScoreGuess, awayScoreGuess);
     onChange({
       ...pick,
-      homeScoreGuess: side === 'home' ? parsed : pick?.homeScoreGuess,
-      awayScoreGuess: side === 'away' ? parsed : pick?.awayScoreGuess,
+      homeScoreGuess,
+      awayScoreGuess,
+      result: derived ?? pick?.result,
     });
   };
 
