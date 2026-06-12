@@ -46,7 +46,7 @@ export default function GrupoDetailPage({
 
   const [group, setGroup] = useState<GroupDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<Tab>('ranking');
+  const [tab, setTab] = useState<Tab>('members');
   const [inviteCopied, setInviteCopied] = useState(false);
   const [copyFailed, setCopyFailed] = useState(false);
   const [regenerating, setRegenerating] = useState(false);

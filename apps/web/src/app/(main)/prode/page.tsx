@@ -308,10 +308,26 @@ export default function ProdePage() {
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-[10px] uppercase tracking-[0.2em] font-display font-bold text-ink-muted mb-1">
-                            {t('fixture.closesIn')}
-                          </p>
-                          <Countdown targetDate={new Date(fx.closeAt)} />
+                          {(() => {
+                            const MATCH_LEAD_MS = 60 * 60 * 1000;
+                            const nextOpenDeadline = fx.matches
+                              .map((m) => new Date(m.startTime).getTime() - MATCH_LEAD_MS)
+                              .filter((time) => time > Date.now())
+                              .sort((a, b) => a - b)[0];
+                            const targetDate = nextOpenDeadline
+                              ? new Date(nextOpenDeadline)
+                              : new Date(fx.closeAt);
+                            return (
+                              <>
+                                {nextOpenDeadline && (
+                                  <p className="text-[10px] uppercase tracking-[0.2em] font-display font-bold text-ink-muted mb-1">
+                                    {t('fixture.closesIn')}
+                                  </p>
+                                )}
+                                <Countdown targetDate={targetDate} />
+                              </>
+                            );
+                          })()}
                         </div>
                       </div>
 
