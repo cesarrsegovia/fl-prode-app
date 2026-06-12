@@ -1,6 +1,47 @@
 import { describe, expect, it } from 'vitest';
 import { Result } from '@prode/shared';
-import { resultFromScore, scoreForResult } from './match-pick';
+import {
+  normalizeScoreInput,
+  resultFromScore,
+  scoreForResult,
+} from './match-pick';
+
+describe('normalizeScoreInput', () => {
+  // El marcador es todo-o-nada: tocar un lado expresa intención de apostar, así
+  // que el lado vacío pasa a 0 (el usuario percibe "2 – " como "2-0"). Si no se
+  // tocó ningún lado, el marcador queda sin cargar (no suma bonus).
+  it('editar el local con el visitante vacío completa el visitante en 0', () => {
+    expect(normalizeScoreInput('home', 2, undefined)).toEqual({
+      home: 2,
+      away: 0,
+    });
+  });
+
+  it('editar el visitante con el local vacío completa el local en 0', () => {
+    expect(normalizeScoreInput('away', 3, undefined)).toEqual({
+      home: 0,
+      away: 3,
+    });
+  });
+
+  it('no toca el otro lado si ya tiene valor', () => {
+    expect(normalizeScoreInput('home', 2, 1)).toEqual({ home: 2, away: 1 });
+  });
+
+  it('borrar un lado con el otro vacío deja ambos vacíos', () => {
+    expect(normalizeScoreInput('home', undefined, undefined)).toEqual({
+      home: undefined,
+      away: undefined,
+    });
+  });
+
+  it('borrar un lado con el otro cargado conserva el cargado', () => {
+    expect(normalizeScoreInput('home', undefined, 1)).toEqual({
+      home: undefined,
+      away: 1,
+    });
+  });
+});
 
 describe('resultFromScore', () => {
   it('devuelve HOME cuando el local hace más goles', () => {
