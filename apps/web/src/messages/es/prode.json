@@ -40,6 +40,7 @@
     "subtitle": "Predijiste todos los partidos próximos. ¡Bien hecho!"
   },
   "topScorerTabHint": "Definí tu goleador desde la página del torneo.",
+  "topScorerChange": "Cambiar →",
   "goToTournament": "Ir al torneo →",
   "fixture": {
     "fallbackName": "Fecha {round}",
@@ -80,7 +81,8 @@
     "saveAllError": "Hubo un problema al guardar",
     "saving": "Guardando…",
     "saveThis": "Guardar este",
-    "saveAll": "Guardar todos los pronósticos"
+    "saveAll": "Guardar todos los pronósticos",
+    "back": "Volver"
   },
   "match": {
     "status": {

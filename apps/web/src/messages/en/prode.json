@@ -40,6 +40,7 @@
     "subtitle": "You've predicted every upcoming match. Nice work!"
   },
   "topScorerTabHint": "Set your top scorer from the tournament page.",
+  "topScorerChange": "Change →",
   "goToTournament": "Go to tournament →",
   "fixture": {
     "fallbackName": "Matchday {round}",
@@ -80,7 +81,8 @@
     "saveAllError": "There was a problem saving",
     "saving": "Saving…",
     "saveThis": "Save this one",
-    "saveAll": "Save all predictions"
+    "saveAll": "Save all predictions",
+    "back": "Back"
   },
   "match": {
     "status": {

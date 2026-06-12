@@ -40,6 +40,7 @@
     "subtitle": "Du hast alle kommenden Spiele getippt. Gut gemacht!"
   },
   "topScorerTabHint": "Wähle deinen Torschützenkönig auf der Turnierseite.",
+  "topScorerChange": "Ändern →",
   "goToTournament": "Zum Turnier →",
   "fixture": {
     "fallbackName": "Spieltag {round}",
@@ -80,7 +81,8 @@
     "saveAllError": "Beim Speichern ist ein Problem aufgetreten",
     "saving": "Speichern…",
     "saveThis": "Diesen speichern",
-    "saveAll": "Alle Tipps speichern"
+    "saveAll": "Alle Tipps speichern",
+    "back": "Zurück"
   },
   "match": {
     "status": {
