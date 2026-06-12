@@ -13,6 +13,7 @@ import { RankingTable } from '@/components/ranking/RankingTable';
 import { ActivityFeed } from '@/components/grupos/ActivityFeed';
 import { Chat } from '@/components/grupos/Chat';
 import { UserAvatar } from '@/components/ui/user-avatar';
+import { buildInviteUrl } from '@/lib/invite-url';
 
 interface GroupMemberDto {
   id: string;
@@ -75,7 +76,10 @@ export default function GrupoDetailPage({
     !!group && group.members.some((m) => m.userId === myUserId && m.role === 'ADMIN');
 
   const inviteUrl = group
-    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/invitacion/${group.inviteCode}`
+    ? buildInviteUrl(group.inviteCode, {
+        appUrl: process.env.NEXT_PUBLIC_APP_URL,
+        origin: typeof window !== 'undefined' ? window.location.origin : '',
+      })
     : '';
 
   const flashCopied = () => {
