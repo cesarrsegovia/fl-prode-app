@@ -89,7 +89,7 @@ export function FlagCombobox({
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 w-full rounded-lg border border-line/40 bg-surface-1 shadow-xl">
+        <div className="mt-1 w-full rounded-lg border border-line/40 bg-surface-1 shadow-xl">
           <div className="relative p-2 border-b border-line/30">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-ink-muted" />
             <input
