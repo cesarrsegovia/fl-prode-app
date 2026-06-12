@@ -14,6 +14,9 @@
     "fallbackName": "Matchday {round}",
     "matches": "{count, plural, one {# match} other {# matches}}",
     "closesIn": "Closes in",
+    "nextClosesIn": "Next match closes in",
+    "open": "Open",
+    "closed": "Closed",
     "loadPredictions": "Enter predictions",
     "none": "No open matchdays right now."
   },

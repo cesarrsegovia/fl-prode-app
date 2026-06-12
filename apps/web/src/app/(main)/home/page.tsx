@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useSession } from '@/lib/session';
 import { useFormatter, useTranslations } from 'next-intl';
@@ -54,6 +54,23 @@ export default function HomePage() {
   const [topRanking, setTopRanking] = useState<RankingEntry[]>([]);
   const [recentNotifs, setRecentNotifs] = useState<NotificationDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const nextOpenDeadline = useMemo(() => {
+    if (!nextFixture) return null;
+    const MATCH_LEAD_MS = 60 * 60 * 1000;
+    const futures = nextFixture.matches
+      .map((m) => new Date(m.startTime).getTime() - MATCH_LEAD_MS)
+      .filter((time) => time > Date.now())
+      .sort((a, b) => a - b);
+    return futures[0] ? new Date(futures[0]) : null;
+  }, [nextFixture]);
+
+  const targetDate = useMemo(() => {
+    if (!nextFixture) return null;
+    return nextOpenDeadline ?? new Date(nextFixture.closeAt);
+  }, [nextFixture, nextOpenDeadline]);
+
+  const isOpen = !!nextOpenDeadline;
 
   useEffect(() => {
     Promise.all([
@@ -154,9 +171,21 @@ export default function HomePage() {
               <Skeleton className="h-24 w-full" />
             ) : nextFixture ? (
               <>
-                <h3 className="font-display font-extrabold text-3xl text-foreground tracking-tight mb-1">
-                  {roundName(nextFixture.round)}
-                </h3>
+                <div className="flex items-center gap-3 mb-1.5 flex-wrap">
+                  <h3 className="font-display font-extrabold text-3xl text-foreground tracking-tight">
+                    {roundName(nextFixture.round)}
+                  </h3>
+                  <Badge
+                    variant="outline"
+                    className={
+                      isOpen
+                        ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30 text-[10px] font-black uppercase tracking-widest px-2 py-0.5'
+                        : 'bg-destructive/10 text-destructive border-destructive/30 text-[10px] font-black uppercase tracking-widest px-2 py-0.5'
+                    }
+                  >
+                    {t(isOpen ? 'nextFixture.open' : 'nextFixture.closed')}
+                  </Badge>
+                </div>
                 <p className="text-sm text-ink-muted mb-4">
                   {t('nextFixture.matches', { count: nextFixture.matches.length })}
                 </p>
@@ -179,24 +208,10 @@ export default function HomePage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm">
-                    {(() => {
-                      const MATCH_LEAD_MS = 60 * 60 * 1000;
-                      const nextOpenDeadline = nextFixture.matches
-                        .map((m) => new Date(m.startTime).getTime() - MATCH_LEAD_MS)
-                        .filter((time) => time > Date.now())
-                        .sort((a, b) => a - b)[0];
-                      const targetDate = nextOpenDeadline
-                        ? new Date(nextOpenDeadline)
-                        : new Date(nextFixture.closeAt);
-                      return (
-                        <>
-                          {nextOpenDeadline && (
-                            <span className="text-ink-muted">{t('nextFixture.closesIn')}</span>
-                          )}
-                          <Countdown targetDate={targetDate} />
-                        </>
-                      );
-                    })()}
+                    {isOpen && (
+                      <span className="text-ink-muted">{t('nextFixture.nextClosesIn')}</span>
+                    )}
+                    <Countdown targetDate={targetDate!} />
                   </div>
                   <Link
                     href={`/prode/${nextFixture.id}`}
