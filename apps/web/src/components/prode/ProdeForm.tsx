@@ -8,6 +8,7 @@ import {
   matchPredictionDeadline,
 } from '@prode/shared';
 import { pronosticos } from '@/lib/endpoints';
+import { normalizeSavedScore } from '@/lib/match-pick';
 import { MatchCard, type MatchPick } from './MatchCard';
 import { Countdown } from './Countdown';
 import { PercentBar } from '@/components/ui/percent-bar';
@@ -24,10 +25,17 @@ type PickMap = Record<string, MatchPick>;
 function buildInitialPicks(preds?: Prediction[]): PickMap {
   if (!preds?.length) return {};
   return preds.reduce<PickMap>((acc, p) => {
+    // Normaliza picks viejos con medio marcador (un lado null → 0). Si el
+    // partido sigue abierto y el usuario re-guarda, el marcador completo se
+    // persiste y queda corregido para el scoring.
+    const { home, away } = normalizeSavedScore(
+      p.homeScoreGuess,
+      p.awayScoreGuess,
+    );
     acc[p.matchId] = {
       result: p.result,
-      homeScoreGuess: p.homeScoreGuess ?? undefined,
-      awayScoreGuess: p.awayScoreGuess ?? undefined,
+      homeScoreGuess: home,
+      awayScoreGuess: away,
       isCaptain: p.isCaptain,
     };
     return acc;

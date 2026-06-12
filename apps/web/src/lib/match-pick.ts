@@ -23,6 +23,20 @@ export function normalizeScoreInput(
 }
 
 /**
+ * Normaliza un marcador GUARDADO al cargarlo. Picks viejos podían quedar con un
+ * solo lado (el otro null). Como tener un lado cargado implica que se apostó
+ * marcador, el lado faltante pasa a 0. Ambos null = sin marcador (undefined).
+ * Distingue null (vacío) de 0 (valor cargado).
+ */
+export function normalizeSavedScore(
+  home: number | null,
+  away: number | null,
+): { home?: number; away?: number } {
+  if (home === null && away === null) return { home: undefined, away: undefined };
+  return { home: home ?? 0, away: away ?? 0 };
+}
+
+/**
  * Deriva el ganador (L/E/V) a partir de un marcador. Devuelve undefined si el
  * marcador está incompleto, para no forzar un resultado sin datos.
  */
