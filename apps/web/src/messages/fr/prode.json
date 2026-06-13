@@ -92,7 +92,11 @@
       "cancelled": "Annulé",
       "open": "Ouvert"
     },
-    "scoreBonus": "Bonus score (+3 pts)",
+    "scoreBonus": "Bonus score (+{points} pts)",
+    "pointsFlag": {
+      "pts": "pts",
+      "aria": "Vous avez gagné {points} points avec ce pronostic"
+    },
     "captainCheck": "Capitaine (x2)",
     "homeScoreLabel": "Buts de {team}",
     "awayScoreLabel": "Buts de {team}",

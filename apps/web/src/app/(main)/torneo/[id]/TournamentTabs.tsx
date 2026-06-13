@@ -13,16 +13,14 @@ interface Props {
   grupos: ReactNode;
   calendario: ReactNode;
   eliminatorias: ReactNode;
-  estadios: ReactNode;
 }
 
-const TAB_VALUES = ['grupos', 'calendario', 'eliminatorias', 'estadios'] as const;
+const TAB_VALUES = ['grupos', 'calendario', 'eliminatorias'] as const;
 
 export function TournamentTabs({
   grupos,
   calendario,
   eliminatorias,
-  estadios,
 }: Props) {
   const t = useTranslations('torneo.tabs');
   const [value, setValue] = useState('grupos');
@@ -30,7 +28,6 @@ export function TournamentTabs({
     grupos,
     calendario,
     eliminatorias,
-    estadios,
   };
 
   return (

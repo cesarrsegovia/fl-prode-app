@@ -93,7 +93,9 @@
     "saved": "Choix enregistrés",
     "saveError": "Échec de l'enregistrement",
     "submit": "Enregistrer {count}/{total} choix",
-    "back": "Retour"
+    "back": "Retour",
+    "show": "Voir",
+    "hide": "Masquer"
   },
   "topScorer": {
     "eyebrow": "Pronostic du meilleur buteur",

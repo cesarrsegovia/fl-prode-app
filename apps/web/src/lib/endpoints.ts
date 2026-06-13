@@ -19,6 +19,17 @@ export const fixtures = {
     apiClient.get<FixtureWithMatches>(`/fixtures/${id}`).then((r) => r.data),
 };
 
+// ---------- Matches ----------
+import type { MatchDto } from './server-endpoints';
+
+/** Partido de hoy: mismo shape que MatchDto + fixtureId para linkear a su fecha. */
+export type TodayMatchDto = MatchDto & { fixtureId: string };
+
+export const matchesApi = {
+  today: () =>
+    apiClient.get<TodayMatchDto[]>('/matches/today').then((r) => r.data),
+};
+
 // ---------- Pronósticos ----------
 export interface CreatePronosticoPayload {
   matchId: string;

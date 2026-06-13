@@ -7,6 +7,11 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 export class MatchesController {
   constructor(private readonly service: MatchesService) {}
 
+  @Get('today')
+  findToday() {
+    return this.service.findToday();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.service.findOne(id);

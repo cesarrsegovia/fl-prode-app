@@ -93,7 +93,9 @@
     "saved": "Picks guardados",
     "saveError": "No se pudo guardar",
     "submit": "Guardar {count}/{total} picks",
-    "back": "Volver atrás"
+    "back": "Volver atrás",
+    "show": "Ver",
+    "hide": "Ocultar"
   },
   "topScorer": {
     "eyebrow": "Predicción de goleador",

@@ -1,8 +1,11 @@
 {
   "greeting": "Hi, {name}",
   "playerFallback": "Player",
-  "heroLine1": "The stadium",
-  "heroLine2": "is yours.",
+  "today": {
+    "title": "Today's matches",
+    "empty": "No matches today",
+    "goToPredictions": "Go to predictions"
+  },
   "tournament": {
     "active": "Active tournament",
     "daysLabel": "{count, plural, one {day} other {days}}",

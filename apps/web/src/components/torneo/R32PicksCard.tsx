@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
-import { Trophy, Check, AlertCircle } from 'lucide-react';
+import { Trophy, Check, AlertCircle, ChevronDown } from 'lucide-react';
 import {
   R32_BEST_THIRDS_TOTAL,
   R32_TOP2_PER_GROUP,
@@ -57,6 +57,8 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  // Si ya hay picks completos guardados, la card arranca colapsada (resumen).
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -67,6 +69,7 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
       setState(initial);
       setSavedState(initial);
       setDeadline(d.deadline ? new Date(d.deadline) : null);
+      setCollapsed(mine.length >= R32_TOTAL_QUALIFIERS);
       setLoaded(true);
     });
   }, [tournamentId]);
@@ -219,11 +222,29 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
   return (
     <Card className="bg-surface-1 border-neon/30">
       <CardHeader>
-        <div className="flex items-center gap-2 mb-2">
-          <Trophy className="size-4 text-neon" />
-          <span className="font-display text-xs uppercase tracking-[0.25em] text-neon">
-            {t('eyebrow')}
-          </span>
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="flex items-center gap-2">
+            <Trophy className="size-4 text-neon" />
+            <span className="font-display text-xs uppercase tracking-[0.25em] text-neon">
+              {t('eyebrow')}
+            </span>
+          </div>
+          {loaded && counts.total === R32_TOTAL_QUALIFIERS && (
+            <button
+              type="button"
+              onClick={() => setCollapsed((c) => !c)}
+              aria-expanded={!collapsed}
+              className="flex items-center gap-1 text-xs font-display font-bold uppercase tracking-widest text-ink-muted hover:text-neon transition-colors"
+            >
+              {collapsed ? t('show') : t('hide')}
+              <ChevronDown
+                className={cn(
+                  'size-4 transition-transform',
+                  !collapsed && 'rotate-180',
+                )}
+              />
+            </button>
+          )}
         </div>
         <h3 className="font-display font-extrabold text-2xl text-foreground tracking-tight">
           {t('title')}
@@ -272,6 +293,7 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
         </div>
       </CardHeader>
 
+      {!collapsed && (
       <CardContent>
         {!loaded ? (
           <p className="text-sm text-ink-muted">{tCommon('loading')}</p>
@@ -447,6 +469,7 @@ export function R32PicksCard({ tournamentId, teams }: Props) {
           </>
         )}
       </CardContent>
+      )}
     </Card>
   );
 }

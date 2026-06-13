@@ -9,17 +9,21 @@ import type { FixtureWithMatches, RankingEntry } from '@prode/shared';
 import {
   fixtures,
   grupos,
+  matchesApi,
   notificaciones,
   ranking,
   type MyGroupEntry,
   type NotificationDto,
+  type TodayMatchDto,
 } from '@/lib/endpoints';
+import { MATCH_LEAD_MS } from '@prode/shared';
 import { apiClient } from '@/lib/api';
 import { useRoundName } from '@/lib/round-name';
 import { Countdown } from '@/components/prode/Countdown';
 import { GroupCard } from '@/components/grupos/GroupCard';
 import { PositionBadge } from '@/components/ranking/PositionBadge';
 import { TeamFlag } from '@/components/torneo/TeamFlag';
+import { MatchRow } from '@/components/torneo/MatchRow';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
@@ -50,6 +54,7 @@ export default function HomePage() {
 
   const [tournament, setTournament] = useState<TournamentSummary | null>(null);
   const [nextFixture, setNextFixture] = useState<FixtureWithMatches | null>(null);
+  const [todayMatches, setTodayMatches] = useState<TodayMatchDto[]>([]);
   const [myGroups, setMyGroups] = useState<MyGroupEntry[]>([]);
   const [topRanking, setTopRanking] = useState<RankingEntry[]>([]);
   const [recentNotifs, setRecentNotifs] = useState<NotificationDto[]>([]);
@@ -57,7 +62,6 @@ export default function HomePage() {
 
   const nextOpenDeadline = useMemo(() => {
     if (!nextFixture) return null;
-    const MATCH_LEAD_MS = 60 * 60 * 1000;
     const futures = nextFixture.matches
       .map((m) => new Date(m.startTime).getTime() - MATCH_LEAD_MS)
       .filter((time) => time > Date.now())
@@ -79,13 +83,15 @@ export default function HomePage() {
       grupos.mine().catch(() => []),
       ranking.global().catch(() => []),
       notificaciones.list().catch(() => []),
+      matchesApi.today().catch(() => []),
     ])
-      .then(([tour, fx, gs, rk, nt]) => {
+      .then(([tour, fx, gs, rk, nt, today]) => {
         setTournament(tour);
         setNextFixture(fx[0] ?? null);
         setMyGroups(gs);
         setTopRanking(rk.slice(0, 5));
         setRecentNotifs(nt.slice(0, 5));
+        setTodayMatches(today);
       })
       .finally(() => setIsLoading(false));
   }, []);
@@ -96,12 +102,9 @@ export default function HomePage() {
   return (
     <main className="pt-24 pb-24 px-4 md:px-8 max-w-7xl mx-auto">
       <header className="mb-10">
-        <p className="font-display text-xs uppercase tracking-[0.3em] text-neon mb-2">
+        <p className="font-display text-xs uppercase tracking-[0.3em] text-neon">
           {t('greeting', { name: username })}
         </p>
-        <h1 className="font-display font-extrabold text-foreground tracking-[-0.04em] text-[clamp(2.5rem,7vw,5rem)] leading-[0.95]">
-          {t('heroLine1')}<br />{t('heroLine2')}
-        </h1>
       </header>
 
       {/* Hero del Mundial */}
@@ -157,6 +160,49 @@ export default function HomePage() {
           </div>
         </Link>
       ) : null}
+
+      {/* Partidos de hoy */}
+      <section className="mb-12">
+        <h2 className="font-display font-extrabold text-2xl text-foreground tracking-tight mb-4">
+          {t('today.title')}
+        </h2>
+        {isLoading ? (
+          <div className="space-y-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-16" />
+            ))}
+          </div>
+        ) : todayMatches.length === 0 ? (
+          <Card className="bg-surface-1 border-line">
+            <CardContent className="p-6 text-center">
+              <p className="text-sm text-ink-muted">{t('today.empty')}</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-2">
+            {todayMatches.map((m) => {
+              const openForPicks =
+                m.status === 'PENDING' &&
+                new Date(m.startTime).getTime() - MATCH_LEAD_MS > Date.now();
+              return (
+                <div key={m.id} className="flex items-stretch gap-2">
+                  <div className="flex-1 min-w-0">
+                    <MatchRow match={m} href={false} />
+                  </div>
+                  {openForPicks && (
+                    <Link
+                      href={`/prode/${m.fixtureId}`}
+                      className="shrink-0 self-center bg-neon text-primary-foreground font-display font-bold text-xs px-4 py-2 rounded-xl active:scale-95 transition-transform whitespace-nowrap"
+                    >
+                      {t('today.goToPredictions')}
+                    </Link>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
 
       {/* Próxima fecha + mi ranking */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
