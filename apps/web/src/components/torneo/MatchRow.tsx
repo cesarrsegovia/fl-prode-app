@@ -44,10 +44,16 @@ function TeamCell({
     </div>
   );
 
-  // El score va siempre del lado interno (junto al bloque central), simétrico
-  // entre local y visitante: local = [equipo][score], visitante = [score][equipo].
+  // Ambos equipos se alinean hacia el centro (la hora/estado), espejados:
+  // local pegado a la derecha de su celda, visitante a la izquierda. El score
+  // va siempre del lado interno: local = [equipo][score], visitante = [score][equipo].
   return (
-    <div className="flex items-center justify-between gap-3 min-w-0">
+    <div
+      className={cn(
+        'flex items-center gap-3 min-w-0',
+        align === 'left' ? 'justify-end' : 'justify-start',
+      )}
+    >
       {align === 'left' ? (
         <>
           {team}
