@@ -59,15 +59,22 @@ export class PronosticosService {
     }
 
     if (data.isCaptain) {
-      await this.prisma.prediction.updateMany({
+      // El capitán se elige una vez por fecha: si ya hay uno confirmado en otro
+      // partido, no se puede cambiar.
+      const existingCaptain = await this.prisma.prediction.findFirst({
         where: {
           userId: data.userId,
           fixtureId: data.fixtureId,
           isCaptain: true,
           matchId: { not: data.matchId },
         },
-        data: { isCaptain: false },
+        select: { id: true },
       });
+      if (existingCaptain) {
+        throw new BadRequestException(
+          'El capitán de esta fecha ya fue confirmado y no se puede cambiar',
+        );
+      }
     }
 
     const existingPredictionCount = await this.prisma.prediction.count({

@@ -74,6 +74,8 @@
     "captainTitle": "Capitaine de la journée",
     "captainDesc": "Double les points du match choisi",
     "noCaptain": "Sans capitaine",
+    "captainConfirmed": "Capitaine confirmé",
+    "captainLocked": "Verrouillé",
     "saved": "Pronostic enregistré",
     "saveError": "Impossible d'enregistrer le pronostic",
     "needOne": "Indiquez au moins un résultat avant d'enregistrer.",
