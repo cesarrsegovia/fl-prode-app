@@ -161,7 +161,7 @@ export function MatchCard({
         <div
           aria-label={t('pointsFlag.aria', { points: flagBreakdown.total })}
           className={cn(
-            'absolute top-1/2 -translate-y-1/2 right-0 translate-x-1/2',
+            'absolute top-1/2 -translate-y-1/2 left-full ml-2',
             'flex flex-col items-center justify-center rounded-lg px-3 py-2 shadow-lg',
             'border',
             flagTone === 'win' && 'bg-success/20 border-success/60 text-success',
