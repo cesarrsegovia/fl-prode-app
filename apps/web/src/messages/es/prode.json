@@ -74,6 +74,8 @@
     "captainTitle": "Capitán de la fecha",
     "captainDesc": "Dobla los puntos del partido elegido",
     "noCaptain": "Sin capitán",
+    "captainConfirmed": "Capitán confirmado",
+    "captainLocked": "Bloqueado",
     "saved": "Pronóstico guardado",
     "saveError": "No se pudo guardar el pronóstico",
     "needOne": "Marcá al menos un resultado antes de guardar.",

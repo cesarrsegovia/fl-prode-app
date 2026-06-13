@@ -74,6 +74,8 @@
     "captainTitle": "Matchday captain",
     "captainDesc": "Doubles the points of the chosen match",
     "noCaptain": "No captain",
+    "captainConfirmed": "Captain confirmed",
+    "captainLocked": "Locked",
     "saved": "Prediction saved",
     "saveError": "Couldn't save the prediction",
     "needOne": "Mark at least one result before saving.",

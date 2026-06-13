@@ -9,6 +9,7 @@ import {
 } from '@prode/shared';
 import { pronosticos } from '@/lib/endpoints';
 import { normalizeSavedScore } from '@/lib/match-pick';
+import { eligibleCaptainMatches, isCaptainLocked } from '@/lib/captain';
 import { MatchCard, type MatchPick } from './MatchCard';
 import { Countdown } from './Countdown';
 import { PercentBar } from '@/components/ui/percent-bar';
@@ -117,6 +118,26 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
     return futures[0] ?? null;
   }, [fixture.matches, deadlinesByMatch, now]);
   const allClosed = fixture.matches.every((m) => isMatchClosed(m.id));
+
+  // El capitán queda bloqueado una vez confirmado (guardado). Solo partidos
+  // abiertos son elegibles.
+  const captainLocked = useMemo(
+    () => isCaptainLocked(Object.values(savedPicks)),
+    [savedPicks],
+  );
+  const captainMatch = useMemo(() => {
+    const lockedId = Object.entries(savedPicks).find(
+      ([, p]) => p.isCaptain,
+    )?.[0];
+    return lockedId
+      ? fixture.matches.find((m) => m.id === lockedId) ?? null
+      : null;
+  }, [savedPicks, fixture.matches]);
+  const captainOptions = useMemo(
+    () => eligibleCaptainMatches(fixture.matches, isMatchClosed),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [fixture.matches, now],
+  );
 
   const totalMatches = fixture.matches.length;
   const filledCount = useMemo(
@@ -262,19 +283,32 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
             </p>
             <p className="text-sm font-bold text-foreground">{t('captainDesc')}</p>
           </div>
-          <select
-            aria-labelledby="captain-label"
-            className="bg-surface-2 text-foreground text-sm rounded-lg py-2 px-3 font-medium focus-visible:ring-2 focus-visible:ring-neon focus-visible:outline-none"
-            value={captainId ?? ''}
-            onChange={(e) => setCaptainId(e.target.value || null)}
-          >
-            <option value="">{t('noCaptain')}</option>
-            {fixture.matches.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.homeTeamName} vs {m.awayTeamName}
-              </option>
-            ))}
-          </select>
+          {captainLocked ? (
+            <div className="flex items-center gap-2 bg-surface-2 rounded-lg py-2 px-3">
+              <span className="text-sm font-bold text-neon">
+                {captainMatch
+                  ? `${captainMatch.homeTeamName} vs ${captainMatch.awayTeamName}`
+                  : t('captainConfirmed')}
+              </span>
+              <span className="text-[10px] uppercase tracking-widest font-bold text-ink-dim">
+                {t('captainLocked')}
+              </span>
+            </div>
+          ) : (
+            <select
+              aria-labelledby="captain-label"
+              className="bg-surface-2 text-foreground text-sm rounded-lg py-2 px-3 font-medium focus-visible:ring-2 focus-visible:ring-neon focus-visible:outline-none"
+              value={captainId ?? ''}
+              onChange={(e) => setCaptainId(e.target.value || null)}
+            >
+              <option value="">{t('noCaptain')}</option>
+              {captainOptions.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.homeTeamName} vs {m.awayTeamName}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
       )}
 

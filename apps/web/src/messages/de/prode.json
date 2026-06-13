@@ -74,6 +74,8 @@
     "captainTitle": "Kapitän des Spieltags",
     "captainDesc": "Verdoppelt die Punkte des gewählten Spiels",
     "noCaptain": "Kein Kapitän",
+    "captainConfirmed": "Kapitän bestätigt",
+    "captainLocked": "Gesperrt",
     "saved": "Tipp gespeichert",
     "saveError": "Tipp konnte nicht gespeichert werden",
     "needOne": "Markiere mindestens ein Ergebnis vor dem Speichern.",
