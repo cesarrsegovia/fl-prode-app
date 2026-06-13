@@ -1,8 +1,11 @@
 {
   "greeting": "Salut, {name}",
   "playerFallback": "Joueur",
-  "heroLine1": "Le stade",
-  "heroLine2": "est à vous.",
+  "today": {
+    "title": "Matchs du jour",
+    "empty": "Aucun match aujourd'hui",
+    "goToPredictions": "Voir les pronostics"
+  },
   "tournament": {
     "active": "Tournoi actif",
     "daysLabel": "{count, plural, one {jour} other {jours}}",

@@ -93,7 +93,9 @@
     "saved": "Picks saved",
     "saveError": "Couldn't save",
     "submit": "Save {count}/{total} picks",
-    "back": "Go back"
+    "back": "Go back",
+    "show": "Show",
+    "hide": "Hide"
   },
   "topScorer": {
     "eyebrow": "Top scorer prediction",

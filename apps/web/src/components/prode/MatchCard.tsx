@@ -3,9 +3,11 @@
 import { useMemo } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import type { Match } from '@prode/shared';
-import { MatchStatus, Result } from '@prode/shared';
+import { MatchStatus, Result, POINTS_EXACT_SCORE } from '@prode/shared';
 import { Minus, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { pointsBreakdown } from '@/lib/points-breakdown';
+import { pointsFlagTone } from '@/lib/points-flag';
 import {
   normalizeScoreInput,
   resultFromScore,
@@ -69,6 +71,25 @@ export function MatchCard({
     match.status === MatchStatus.FINISHED ||
     match.status === MatchStatus.CANCELLED;
 
+  const finished = match.status === MatchStatus.FINISHED;
+  const flagBreakdown =
+    finished && pick?.result
+      ? pointsBreakdown(
+          {
+            result: pick.result,
+            homeScoreGuess: pick.homeScoreGuess ?? null,
+            awayScoreGuess: pick.awayScoreGuess ?? null,
+            isCaptain: pick.isCaptain ?? false,
+          },
+          {
+            homeScore: match.homeScore ?? null,
+            awayScore: match.awayScore ?? null,
+            status: match.status,
+          },
+        )
+      : null;
+  const flagTone = flagBreakdown ? pointsFlagTone(flagBreakdown) : null;
+
   const kickoffLabel = format.dateTime(new Date(match.startTime), {
     weekday: 'short',
     day: '2-digit',
@@ -131,11 +152,32 @@ export function MatchCard({
   return (
     <div
       className={cn(
-        'rounded-xl overflow-hidden border-l-4 transition-all bg-surface-1',
+        'rounded-xl border-l-4 transition-all bg-surface-1 relative',
         pick?.isCaptain ? 'border-neon glow-neon' : 'border-line/40',
         isLocked && 'opacity-60',
       )}
     >
+      {flagBreakdown && flagTone && (
+        <div
+          aria-label={t('pointsFlag.aria', { points: flagBreakdown.total })}
+          className={cn(
+            'absolute top-1/2 -translate-y-1/2 right-0 translate-x-1/2',
+            'flex flex-col items-center justify-center rounded-lg px-3 py-2 shadow-lg',
+            'border',
+            flagTone === 'win' && 'bg-success/20 border-success/60 text-success',
+            flagTone === 'partial' && 'bg-citrus/20 border-citrus/60 text-citrus',
+            flagTone === 'miss' &&
+              'bg-destructive/20 border-destructive/60 text-destructive',
+          )}
+        >
+          <span className="font-display font-extrabold text-2xl leading-none tabular-nums">
+            {flagBreakdown.total}
+          </span>
+          <span className="font-display font-bold text-[10px] uppercase tracking-[0.18em] leading-none mt-0.5">
+            {t('pointsFlag.pts')}
+          </span>
+        </div>
+      )}
       <div className="p-4 sm:p-5">
         <div className="flex justify-between items-center mb-4">
           <span className="text-[10px] font-display font-bold uppercase tracking-[0.18em] text-ink-muted">
@@ -230,7 +272,7 @@ export function MatchCard({
         {!isLocked && (
           <div className="mt-6 pt-4 border-t border-line/40 flex items-center justify-between">
             <span className="text-[10px] font-display font-extrabold uppercase tracking-[0.18em] text-ink-muted">
-              {t('scoreBonus')}
+              {t('scoreBonus', { points: POINTS_EXACT_SCORE })}
             </span>
             <div className="flex items-start gap-3">
               <ScoreStepper

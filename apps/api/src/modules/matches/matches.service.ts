@@ -2,10 +2,26 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { Result } from '@prisma/client';
 import { matchLeadDeadline } from '@prode/shared';
 import { PrismaService } from '../../prisma/prisma.service';
+import { todayRangeUtc } from './today-range';
 
 @Injectable()
 export class MatchesService {
   constructor(private readonly prisma: PrismaService) {}
+
+  /** Partidos cuyo inicio cae hoy (TZ de la app): jugados, en vivo y por jugar. */
+  async findToday() {
+    const { gte, lt } = todayRangeUtc(new Date());
+    return this.prisma.match.findMany({
+      where: { startTime: { gte, lt } },
+      include: {
+        homeTeam: true,
+        awayTeam: true,
+        venue: true,
+        group: true,
+      },
+      orderBy: { startTime: 'asc' },
+    });
+  }
 
   async findOne(id: string) {
     const match = await this.prisma.match.findUnique({

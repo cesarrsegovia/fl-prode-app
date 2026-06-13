@@ -92,7 +92,11 @@
       "cancelled": "Abgesagt",
       "open": "Offen"
     },
-    "scoreBonus": "Ergebnis-Bonus (+3 Pkt.)",
+    "scoreBonus": "Ergebnis-Bonus (+{points} Pkt.)",
+    "pointsFlag": {
+      "pts": "Pkt.",
+      "aria": "Du hast {points} Punkte mit dieser Vorhersage erzielt"
+    },
     "captainCheck": "Kapitän (x2)",
     "homeScoreLabel": "Tore von {team}",
     "awayScoreLabel": "Tore von {team}",

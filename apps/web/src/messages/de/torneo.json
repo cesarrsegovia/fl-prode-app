@@ -93,7 +93,9 @@
     "saved": "Tipps gespeichert",
     "saveError": "Speichern fehlgeschlagen",
     "submit": "{count}/{total} Tipps speichern",
-    "back": "Zurück"
+    "back": "Zurück",
+    "show": "Anzeigen",
+    "hide": "Ausblenden"
   },
   "topScorer": {
     "eyebrow": "Torschützenkönig-Tipp",

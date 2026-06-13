@@ -7,7 +7,6 @@ import { TournamentHero } from '@/components/torneo/TournamentHero';
 import { GroupStandings } from '@/components/torneo/GroupStandings';
 import { MatchdayList } from '@/components/torneo/MatchdayList';
 import { BracketTree } from '@/components/torneo/BracketTree';
-import { VenueCard } from '@/components/torneo/VenueCard';
 import { BracketPickCard } from '@/components/torneo/BracketPickCard';
 import { TopScorerPickCard } from '@/components/torneo/TopScorerPickCard';
 import { R32PicksCard } from '@/components/torneo/R32PicksCard';
@@ -42,10 +41,9 @@ export default async function TorneoPage({ params }: Props) {
     notFound();
   }
 
-  const [groups, schedule, venues, bracket, teams] = await Promise.all([
+  const [groups, schedule, bracket, teams] = await Promise.all([
     tournamentApi.groups(id).catch(() => []),
     tournamentApi.schedule(id).catch(() => []),
-    tournamentApi.venues(id).catch(() => []),
     tournamentApi.bracket(id).catch(() => []),
     tournamentApi.teams(id).catch(() => []),
   ]);
@@ -92,15 +90,6 @@ export default async function TorneoPage({ params }: Props) {
           eliminatorias={
             <Suspense fallback={<TabSkeleton />}>
               <BracketTree matches={bracket} />
-            </Suspense>
-          }
-          estadios={
-            <Suspense fallback={<TabSkeleton />}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {venues.map((v) => (
-                  <VenueCard key={v.id} venue={v} />
-                ))}
-              </div>
             </Suspense>
           }
         />

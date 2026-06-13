@@ -18,7 +18,14 @@ function TeamCell({
   score?: number | null;
   finished: boolean;
 }) {
-  return (
+  const showScore = finished && score !== null && score !== undefined;
+  const scoreEl = showScore ? (
+    <span className="font-display font-extrabold text-2xl text-neon tabular-nums shrink-0">
+      {score}
+    </span>
+  ) : null;
+
+  const team = (
     <div
       className={cn(
         'flex items-center gap-3 min-w-0',
@@ -34,10 +41,23 @@ function TeamCell({
       >
         {name}
       </span>
-      {finished && score !== null && score !== undefined && (
-        <span className="font-display font-extrabold text-2xl text-neon tabular-nums ml-auto">
-          {score}
-        </span>
+    </div>
+  );
+
+  // El score va siempre del lado interno (junto al bloque central), simétrico
+  // entre local y visitante: local = [equipo][score], visitante = [score][equipo].
+  return (
+    <div className="flex items-center justify-between gap-3 min-w-0">
+      {align === 'left' ? (
+        <>
+          {team}
+          {scoreEl}
+        </>
+      ) : (
+        <>
+          {scoreEl}
+          {team}
+        </>
       )}
     </div>
   );

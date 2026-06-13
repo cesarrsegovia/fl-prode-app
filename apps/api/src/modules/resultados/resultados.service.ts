@@ -1,5 +1,5 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
-import { ActivityType, MatchStatus, NotificationType, Result } from '@prisma/client';
+import { ActivityType, MatchStage, MatchStatus, NotificationType, Result } from '@prisma/client';
 import { WS_EVENTS } from '@prode/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EventsGateway } from '../../websocket/events.gateway';
@@ -8,11 +8,12 @@ import { NotificacionesService } from '../notificaciones/notificaciones.service'
 import { ActivityService } from '../activity/activity.service';
 import { TournamentsService } from '../tournaments/tournaments.service';
 import {
-  ActiveMatch,
+  ActiveMatchWithTeams,
   RemoteResult,
   RESULTS_PROVIDER,
   ResultsProvider,
 } from './providers/results-provider';
+import { matchRemoteToLocal } from './providers/match-remote';
 import { computePredictionOutcome } from './scoring';
 
 @Injectable()
@@ -43,30 +44,114 @@ export class ResultadosService {
         homeScore: true,
         awayScore: true,
         fixtureId: true,
+        stage: true,
+        tournamentId: true,
+        homeTeam: { select: { shortName: true } },
+        awayTeam: { select: { shortName: true } },
       },
     });
     if (!activeMatches.length) return;
 
-    const byExternalId = new Map(activeMatches.map((m) => [m.externalId!, m]));
-    const active: ActiveMatch[] = activeMatches.map((m) => ({
+    const locals: ActiveMatchWithTeams[] = activeMatches.map((m) => ({
       id: m.id,
       externalId: m.externalId!,
       startTime: m.startTime,
+      status: m.status,
+      homeScore: m.homeScore,
+      awayScore: m.awayScore,
+      fixtureId: m.fixtureId,
+      stage: m.stage,
+      tournamentId: m.tournamentId,
+      homeAbbr: m.homeTeam?.shortName ?? null,
+      awayAbbr: m.awayTeam?.shortName ?? null,
     }));
 
-    const remote = await this.provider.fetchResults(active);
+    const remote = await this.provider.fetchResults(locals);
 
     const affectedFixtureIds = new Set<string>();
+    // Torneos cuya fase de grupos cambió: refrescamos su tabla de posiciones.
+    const groupTournamentIds = new Set<string>();
     for (const r of remote) {
-      const local = byExternalId.get(r.externalId);
+      const local = matchRemoteToLocal(locals, r);
       if (!local) continue;
       const becameFinished = await this.applyRemoteResult(local, r);
-      if (becameFinished) affectedFixtureIds.add(local.fixtureId);
+      if (becameFinished) {
+        affectedFixtureIds.add(local.fixtureId);
+        if (local.stage === MatchStage.GROUP) {
+          groupTournamentIds.add(local.tournamentId);
+        }
+      }
     }
 
     for (const fixtureId of affectedFixtureIds) {
       await this.calculatePoints(fixtureId);
     }
+
+    for (const tournamentId of groupTournamentIds) {
+      await this.refreshGroupStandings(tournamentId);
+    }
+  }
+
+  /**
+   * Refresca GroupStanding del torneo con la tabla oficial del proveedor.
+   * Se invoca solo cuando un partido de fase de grupos quedó FINISHED.
+   * Mapea cada equipo remoto por abreviatura (ESPN) a Team.shortName local.
+   */
+  private async refreshGroupStandings(tournamentId: string) {
+    if (!this.provider.fetchStandings) return;
+
+    const remoteGroups = await this.provider.fetchStandings();
+    if (!remoteGroups.length) return;
+
+    const tts = await this.prisma.tournamentTeam.findMany({
+      where: { tournamentId, groupId: { not: null } },
+      select: { groupId: true, team: { select: { id: true, shortName: true } } },
+    });
+    const localByAbbr = new Map<string, { teamId: string; groupId: string }>();
+    for (const tt of tts) {
+      const abbr = tt.team.shortName?.trim().toLowerCase();
+      if (abbr && tt.groupId) {
+        localByAbbr.set(abbr, { teamId: tt.team.id, groupId: tt.groupId });
+      }
+    }
+
+    let updated = 0;
+    for (const group of remoteGroups) {
+      for (const row of group.teams) {
+        const abbr = row.teamAbbr.trim().toLowerCase();
+        const local = localByAbbr.get(abbr);
+        if (!local) {
+          this.logger.warn(
+            `Standings: equipo remoto "${row.teamAbbr}" (${group.groupName}) sin match local; skip.`,
+          );
+          continue;
+        }
+        const data = {
+          played: row.played,
+          won: row.won,
+          drawn: row.drawn,
+          lost: row.lost,
+          goalsFor: row.goalsFor,
+          goalsAgainst: row.goalsAgainst,
+          goalDiff: row.goalDiff,
+          points: row.points,
+          position: row.position,
+        };
+        await this.prisma.groupStanding.upsert({
+          where: {
+            groupId_teamId: { groupId: local.groupId, teamId: local.teamId },
+          },
+          create: { tournamentId, groupId: local.groupId, teamId: local.teamId, ...data },
+          update: data,
+        });
+        updated += 1;
+      }
+    }
+
+    this.logger.log(
+      `Standings actualizadas: ${updated} filas (torneo ${tournamentId})`,
+    );
+    this.events.emitToAll(WS_EVENTS.RANKING_UPDATE, { tournamentId });
   }
 
   /** Aplica el resultado remoto al match local. Devuelve true si quedó FINISHED por primera vez. */

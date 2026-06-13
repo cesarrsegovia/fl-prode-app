@@ -10,8 +10,8 @@ const SAMPLE = {
       competitions: [
         {
           competitors: [
-            { homeAway: 'home', score: '2' },
-            { homeAway: 'away', score: '1' },
+            { homeAway: 'home', score: '2', team: { abbreviation: 'CAN' } },
+            { homeAway: 'away', score: '1', team: { abbreviation: 'BIH' } },
           ],
         },
       ],
@@ -40,6 +40,9 @@ describe('EspnResultsProvider.parseScoreboard', () => {
       status: MatchStatus.FINISHED,
       homeScore: 2,
       awayScore: 1,
+      homeAbbr: 'CAN',
+      awayAbbr: 'BIH',
+      startTime: '2026-06-12T19:00Z',
     });
     const pending = out.find((r) => r.externalId === '760417');
     expect(pending?.status).toBe(MatchStatus.PENDING);
@@ -56,5 +59,80 @@ describe('EspnResultsProvider.parseScoreboard', () => {
   it('JSON vacío -> []', () => {
     expect(EspnResultsProvider.parseScoreboard({})).toEqual([]);
     expect(EspnResultsProvider.parseScoreboard(null)).toEqual([]);
+  });
+});
+
+const STANDINGS_SAMPLE = {
+  children: [
+    {
+      name: 'Group A',
+      standings: {
+        entries: [
+          {
+            team: { abbreviation: 'MEX' },
+            stats: [
+              { name: 'gamesPlayed', value: 2 },
+              { name: 'wins', value: 2 },
+              { name: 'draws', value: 0 },
+              { name: 'losses', value: 0 },
+              { name: 'pointsFor', value: 5 },
+              { name: 'pointsAgainst', value: 1 },
+              { name: 'pointDifferential', value: 4 },
+              { name: 'points', value: 6 },
+              { name: 'rank', value: 1 },
+            ],
+          },
+          {
+            team: { abbreviation: 'CAN' },
+            stats: [
+              { name: 'gamesPlayed', value: 2 },
+              { name: 'wins', value: 0 },
+              { name: 'draws', value: 1 },
+              { name: 'losses', value: 1 },
+              { name: 'pointsFor', value: 1 },
+              { name: 'pointsAgainst', value: 3 },
+              { name: 'pointDifferential', value: -2 },
+              { name: 'points', value: 1 },
+              { name: 'rank', value: 2 },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+};
+
+describe('EspnResultsProvider.parseStandings', () => {
+  it('mapea children/entries a RemoteStandingGroup con stats por name y position=rank', () => {
+    const out = EspnResultsProvider.parseStandings(STANDINGS_SAMPLE);
+    expect(out).toHaveLength(1);
+    expect(out[0].groupName).toBe('Group A');
+    expect(out[0].teams).toContainEqual({
+      teamAbbr: 'MEX',
+      played: 2,
+      won: 2,
+      drawn: 0,
+      lost: 0,
+      goalsFor: 5,
+      goalsAgainst: 1,
+      goalDiff: 4,
+      points: 6,
+      position: 1,
+    });
+    const can = out[0].teams.find((t) => t.teamAbbr === 'CAN');
+    expect(can?.position).toBe(2);
+    expect(can?.goalDiff).toBe(-2);
+  });
+
+  it('JSON vacío / sin children -> []', () => {
+    expect(EspnResultsProvider.parseStandings({})).toEqual([]);
+    expect(EspnResultsProvider.parseStandings(null)).toEqual([]);
+  });
+
+  it('saltea entries sin abbreviation sin romper', () => {
+    const out = EspnResultsProvider.parseStandings({
+      children: [{ name: 'Group B', standings: { entries: [{ team: {}, stats: [] }] } }],
+    });
+    expect(out).toEqual([{ groupName: 'Group B', teams: [] }]);
   });
 });
