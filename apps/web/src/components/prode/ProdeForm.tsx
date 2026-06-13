@@ -300,6 +300,12 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
                       <Check className="size-3.5" />
                       {t('savedThis')}
                     </span>
+                  ) : pickSignature(picks[match.id]) ===
+                    pickSignature(savedPicks[match.id]) ? (
+                    <span className="flex items-center gap-1 text-xs font-bold text-ink-dim">
+                      <Check className="size-3.5" />
+                      {t('savedThis')}
+                    </span>
                   ) : (
                     <button
                       type="button"
