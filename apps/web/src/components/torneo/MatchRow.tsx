@@ -25,44 +25,39 @@ function TeamCell({
     </span>
   ) : null;
 
-  const team = (
-    <div
+  const flag = <TeamFlag size="md" src={flagUrl} alt={name} />;
+  const label = (
+    <span
       className={cn(
-        'flex items-center gap-3 min-w-0',
-        align === 'right' && 'flex-row-reverse',
+        'font-display font-semibold text-sm sm:text-base text-foreground truncate',
+        align === 'right' && 'text-right',
       )}
     >
-      <TeamFlag size="md" src={flagUrl} alt={name} />
-      <span
-        className={cn(
-          'font-display font-semibold text-sm sm:text-base text-foreground truncate',
-          align === 'right' && 'text-right',
-        )}
-      >
-        {name}
-      </span>
-    </div>
+      {name}
+    </span>
   );
 
-  // Ambos equipos se alinean hacia el centro (la hora/estado), espejados:
-  // local pegado a la derecha de su celda, visitante a la izquierda. El score
-  // va siempre del lado interno: local = [equipo][score], visitante = [score][equipo].
+  // Bandera del lado INTERNO (junto a la hora), nombre hacia afuera, espejado:
+  // local = [score][nombre][bandera] alineado a la derecha;
+  // visitante = [bandera][nombre][score] alineado a la izquierda.
   return (
     <div
       className={cn(
-        'flex items-center gap-3 min-w-0',
+        'flex items-center gap-3 min-w-0 w-full',
         align === 'left' ? 'justify-end' : 'justify-start',
       )}
     >
       {align === 'left' ? (
         <>
-          {team}
           {scoreEl}
+          {label}
+          {flag}
         </>
       ) : (
         <>
+          {flag}
+          {label}
           {scoreEl}
-          {team}
         </>
       )}
     </div>
