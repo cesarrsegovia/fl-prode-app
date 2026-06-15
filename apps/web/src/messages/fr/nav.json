@@ -18,12 +18,15 @@
     "count": "{count, plural, one {# nouvelle} other {# nouvelles}}"
   },
   "menu": {
+    "title": "Menu",
+    "close": "Fermer le menu",
     "profile": "Mon profil",
     "myPredictions": "Mes pronostics",
     "notifications": "Notifications",
     "logout": "Se déconnecter",
     "fallbackName": "Moi"
   },
+  "menuTrigger": "Ouvrir le menu",
   "footer": {
     "terms": "Conditions",
     "privacy": "Confidentialité",

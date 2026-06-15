@@ -18,12 +18,15 @@
     "count": "{count, plural, one {# neue} other {# neue}}"
   },
   "menu": {
+    "title": "Menü",
+    "close": "Menü schließen",
     "profile": "Mein Profil",
     "myPredictions": "Meine Tipps",
     "notifications": "Benachrichtigungen",
     "logout": "Abmelden",
     "fallbackName": "Ich"
   },
+  "menuTrigger": "Menü öffnen",
   "footer": {
     "terms": "AGB",
     "privacy": "Datenschutz",

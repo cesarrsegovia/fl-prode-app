@@ -5,10 +5,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from '@/lib/session';
 import { useTranslations } from 'next-intl';
-import { HelpCircle } from 'lucide-react';
+import { HelpCircle, Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
+import { MobileNavSheet } from '@/components/layout/MobileNavSheet';
 import { FaqModal } from '@/components/common/FaqModal';
 import { getInitials, diceBearAvatar } from '@/lib/avatar';
 import { NAV_ITEMS, ADMIN_NAV_ITEM, isNavItemActive } from '@/lib/navigation';
@@ -27,6 +28,7 @@ export function Navbar() {
   const isAuthed = status === 'authenticated';
   const isAdmin = session?.user?.isAdmin === true;
   const [faqOpen, setFaqOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const navItems = isAdmin ? [...NAV_ITEMS, ADMIN_NAV_ITEM] : NAV_ITEMS;
 
   return (
@@ -34,6 +36,22 @@ export function Navbar() {
       aria-label={t('landmarks.primary')}
       className="fixed top-0 inset-x-0 z-50 h-16 px-4 md:px-6 flex items-center justify-end bg-surface/90 backdrop-blur-xl border-b-2 border-brand"
     >
+      {/* Hamburguesa — solo mobile. En desktop la navegación son las pestañas
+          centradas de abajo. Va a la izquierda, fuera del flujo de las acciones. */}
+      {isAuthed && (
+        <button
+          type="button"
+          onClick={() => setMenuOpen(true)}
+          aria-label={t('menuTrigger')}
+          aria-haspopup="dialog"
+          aria-expanded={menuOpen}
+          className="md:hidden absolute left-4 top-1/2 -translate-y-1/2 size-9 rounded-full flex items-center justify-center text-foreground hover:text-brand hover:bg-surface-1 transition-colors"
+        >
+          <Menu className="size-6" />
+        </button>
+      )}
+      <MobileNavSheet open={menuOpen} onOpenChange={setMenuOpen} />
+
       {/* Pestañas centradas (ícono + label), estilo glow dorado. */}
       <div className="absolute inset-x-0 hidden md:flex justify-center pointer-events-none">
         <ul className="flex items-center gap-2 pointer-events-auto">

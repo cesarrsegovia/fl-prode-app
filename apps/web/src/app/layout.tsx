@@ -6,7 +6,6 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { cn } from '@/lib/utils';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
-import { BottomNav } from '@/components/layout/BottomNav';
 import { SessionProvider } from '@/lib/session';
 import { BridgeProvider } from '@/components/providers/BridgeProvider';
 import { RealtimeProvider } from '@/components/providers/RealtimeProvider';
@@ -64,11 +63,10 @@ export default async function RootLayout({
             <BridgeProvider>
               <RealtimeProvider>
                 <Navbar />
-                <div id="main-content" tabIndex={-1} className="flex-1 relative z-10 pb-nav md:pb-0 outline-none">
+                <div id="main-content" tabIndex={-1} className="flex-1 relative z-10 pb-safe outline-none">
                   {children}
                 </div>
                 <Footer />
-                <BottomNav />
               </RealtimeProvider>
             </BridgeProvider>
           </SessionProvider>

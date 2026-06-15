@@ -157,46 +157,47 @@ export function MatchCard({
         isLocked && 'opacity-60',
       )}
     >
-      {flagBreakdown && flagTone && (
-        <div
-          aria-label={t('pointsFlag.aria', { points: flagBreakdown.total })}
-          className={cn(
-            'absolute top-1/2 -translate-y-1/2 left-full ml-2',
-            'flex flex-col items-center justify-center rounded-lg px-3 py-2 shadow-lg',
-            'border',
-            flagTone === 'win' && 'bg-success/20 border-success/60 text-success',
-            flagTone === 'partial' && 'bg-citrus/20 border-citrus/60 text-citrus',
-            flagTone === 'miss' &&
-              'bg-destructive/20 border-destructive/60 text-destructive',
-          )}
-        >
-          <span className="font-display font-extrabold text-2xl leading-none tabular-nums">
-            {flagBreakdown.total}
-          </span>
-          <span className="font-display font-bold text-[10px] uppercase tracking-[0.18em] leading-none mt-0.5">
-            {t('pointsFlag.pts')}
-          </span>
-        </div>
-      )}
       <div className="p-4 sm:p-5">
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-[10px] font-display font-bold uppercase tracking-[0.18em] text-ink-muted">
+        <div className="flex justify-between items-center gap-2 mb-4">
+          <span className="text-[10px] font-display font-bold uppercase tracking-[0.18em] text-ink-muted min-w-0 truncate">
             {kickoffLabel}
           </span>
-          <span
-            className={cn(
-              'px-3 py-1 rounded-full text-[10px] font-display font-extrabold uppercase tracking-[0.18em] flex items-center gap-1.5',
-              statusBadge.tone === 'live' &&
-                'bg-citrus/10 text-citrus animate-pulse',
-              statusBadge.tone === 'done' && 'bg-line/40 text-ink-dim',
-              statusBadge.tone === 'cancelled' &&
-                'bg-destructive/10 text-destructive',
-              statusBadge.tone === 'open' && 'bg-neon/10 text-neon',
-            )}
-          >
-            <span className="size-1.5 rounded-full bg-current" />
-            {t(`status.${statusBadge.key}`)}
-          </span>
+          {/* Partido terminado con pronóstico: chip de puntos obtenidos (coloreado
+              por acierto). En cualquier otro caso, badge de estado. Va dentro del
+              flujo de la card para no generar scroll horizontal en mobile. */}
+          {flagBreakdown && flagTone ? (
+            <span
+              aria-label={t('pointsFlag.aria', { points: flagBreakdown.total })}
+              className={cn(
+                'shrink-0 inline-flex items-baseline gap-1 px-3 py-1 rounded-full border',
+                'font-display font-extrabold uppercase tracking-[0.18em]',
+                flagTone === 'win' && 'bg-success/20 border-success/60 text-success',
+                flagTone === 'partial' && 'bg-citrus/20 border-citrus/60 text-citrus',
+                flagTone === 'miss' &&
+                  'bg-destructive/20 border-destructive/60 text-destructive',
+              )}
+            >
+              <span className="text-sm leading-none tabular-nums">
+                {flagBreakdown.total > 0 ? `+${flagBreakdown.total}` : flagBreakdown.total}
+              </span>
+              <span className="text-[10px] leading-none">{t('pointsFlag.pts')}</span>
+            </span>
+          ) : (
+            <span
+              className={cn(
+                'shrink-0 px-3 py-1 rounded-full text-[10px] font-display font-extrabold uppercase tracking-[0.18em] flex items-center gap-1.5',
+                statusBadge.tone === 'live' &&
+                  'bg-citrus/10 text-citrus animate-pulse',
+                statusBadge.tone === 'done' && 'bg-line/40 text-ink-dim',
+                statusBadge.tone === 'cancelled' &&
+                  'bg-destructive/10 text-destructive',
+                statusBadge.tone === 'open' && 'bg-neon/10 text-neon',
+              )}
+            >
+              <span className="size-1.5 rounded-full bg-current" />
+              {t(`status.${statusBadge.key}`)}
+            </span>
+          )}
         </div>
 
         <div className="flex items-center justify-between gap-2 sm:gap-4">

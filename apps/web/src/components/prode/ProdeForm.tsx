@@ -244,8 +244,8 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl p-4 flex items-center justify-between gap-4 bg-surface-1">
-        <div>
+      <div className="rounded-xl p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 bg-surface-1">
+        <div className="min-w-0">
           <p className="text-xs uppercase tracking-widest text-ink-muted font-bold">
             {t('nextClose')}
           </p>
@@ -255,7 +255,7 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
             <p className="text-sm font-bold text-ink-muted">{t('closed')}</p>
           )}
         </div>
-        <div className="text-right min-w-0">
+        <div className="min-w-0 sm:text-right">
           <p className="text-xs uppercase tracking-widest text-ink-muted font-bold">
             {t('progress')}
           </p>
@@ -267,14 +267,14 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
             max={totalMatches}
             tone="neon"
             label={t('progressValue', { filled: filledCount, total: totalMatches })}
-            className="mt-1 w-32 sm:w-40 ml-auto"
+            className="mt-1 w-full sm:w-40 sm:ml-auto"
           />
         </div>
       </div>
 
       {!allClosed && !isKnockoutFixture && (
-        <div className="rounded-xl p-4 flex items-center justify-between gap-4 bg-surface-1">
-          <div>
+        <div className="rounded-xl p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 bg-surface-1">
+          <div className="min-w-0">
             <p
               id="captain-label"
               className="text-xs uppercase tracking-widest text-ink-muted font-bold"
@@ -284,20 +284,20 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
             <p className="text-sm font-bold text-foreground">{t('captainDesc')}</p>
           </div>
           {captainLocked ? (
-            <div className="flex items-center gap-2 bg-surface-2 rounded-lg py-2 px-3">
-              <span className="text-sm font-bold text-neon">
+            <div className="flex items-center justify-between gap-2 bg-surface-2 rounded-lg py-2 px-3 sm:shrink-0">
+              <span className="text-sm font-bold text-neon min-w-0 truncate">
                 {captainMatch
                   ? `${captainMatch.homeTeamName} vs ${captainMatch.awayTeamName}`
                   : t('captainConfirmed')}
               </span>
-              <span className="text-[10px] uppercase tracking-widest font-bold text-ink-dim">
+              <span className="text-[10px] uppercase tracking-widest font-bold text-ink-dim shrink-0">
                 {t('captainLocked')}
               </span>
             </div>
           ) : (
             <select
               aria-labelledby="captain-label"
-              className="bg-surface-2 text-foreground text-sm rounded-lg py-2 px-3 font-medium focus-visible:ring-2 focus-visible:ring-neon focus-visible:outline-none"
+              className="w-full sm:w-auto sm:shrink-0 bg-surface-2 text-foreground text-sm rounded-lg py-2 px-3 font-medium focus-visible:ring-2 focus-visible:ring-neon focus-visible:outline-none"
               value={captainId ?? ''}
               onChange={(e) => setCaptainId(e.target.value || null)}
             >
