@@ -28,6 +28,7 @@ model User {
   locale         String?
 
   memberships       GroupMember[]
+  scores            UserScore[]
   predictions       Prediction[]
   bracketPicks      BracketPick[]
   topScorerPicks    TopScorerPick[]
@@ -98,6 +99,7 @@ model Tournament {
   squads          SquadEntry[]
   standings       GroupStanding[]
   scores          GroupScore[]
+  userScores      UserScore[]
   bracketPicks    BracketPick[]
   r32Picks        R32QualifierPick[]
   entries         TournamentEntry[]
@@ -376,6 +378,26 @@ model GroupScore {
   tournament Tournament @relation(fields: [tournamentId], references: [id])
 
   @@unique([groupId, userId, tournamentId])
+}
+
+// Puntaje global del usuario por torneo, independiente de grupos.
+// Se actualiza para TODO usuario que suma puntos (tenga grupo o no),
+// y es la fuente del ranking global.
+model UserScore {
+  id           String @id @default(cuid())
+  userId       String
+  tournamentId String
+  total        Int    @default(0)
+  streak       Int    @default(0)
+  correctWinners    Int       @default(0)
+  exactScores       Int       @default(0)
+  exactGoalsSum     Int       @default(0)
+  firstPredictionAt DateTime?
+
+  user       User       @relation(fields: [userId], references: [id])
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
+
+  @@unique([userId, tournamentId])
 }
 
 // ============================================================

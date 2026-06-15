@@ -7,8 +7,13 @@ export class RankingService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getGlobalRanking(tournamentId?: string) {
+    // El ranking global lee UserScore (puntaje por usuario+torneo, independiente
+    // de grupos), de modo que también figuren los jugadores que entran desde el
+    // provider sin unirse a ningún grupo.
+    // Sin tournamentId consolidamos el puntaje del usuario sumando torneos
+    // (una sola fila por usuario), como hacía el ranking anterior.
     const where = tournamentId ? { tournamentId } : {};
-    const scores = await this.prisma.groupScore.groupBy({
+    const scores = await this.prisma.userScore.groupBy({
       by: ['userId'],
       where,
       _sum: {
