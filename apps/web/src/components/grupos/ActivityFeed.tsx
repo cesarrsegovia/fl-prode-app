@@ -3,6 +3,7 @@
 import { useFormatter, useTranslations } from 'next-intl';
 import type { ActivityFeedType, ActivityItem } from '@/lib/endpoints';
 import { UserAvatar } from '@/components/ui/user-avatar';
+import { displayName } from '@/lib/display-name';
 
 const ICONS: Record<ActivityFeedType, string> = {
   MEMBER_JOINED: '👋',
@@ -81,7 +82,7 @@ export function ActivityFeed({
             </p>
           </div>
           <UserAvatar
-            name={item.user.username}
+            name={displayName(item.user.username, item.user.id)}
             image={item.user.avatarUrl}
             size="sm"
           />

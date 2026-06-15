@@ -21,6 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { TeamFlag } from '@/components/torneo/TeamFlag';
 import { PointsBreakdown } from '@/components/prode/PointsBreakdown';
 import { useRoundName } from '@/lib/round-name';
+import { displayName } from '@/lib/display-name';
 
 interface TournamentSummary {
   id: string;
@@ -105,7 +106,7 @@ export default function MemberProdePage({
           {t('eyebrow')}
         </p>
         <h1 className="font-display font-extrabold text-foreground tracking-[-0.03em] text-[clamp(2rem,6vw,3.5rem)]">
-          {user?.username ?? userId}
+          {displayName(user?.username, userId)}
         </h1>
       </header>
 

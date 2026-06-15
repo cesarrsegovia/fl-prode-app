@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import type { RankingEntry } from '@prode/shared';
 import { PositionBadge } from './PositionBadge';
 import { UserAvatar } from '@/components/ui/user-avatar';
+import { displayName } from '@/lib/display-name';
 
 interface Props {
   entries: RankingEntry[];
@@ -40,6 +41,7 @@ export function RankingTable({ entries, isLoading, highlightUserId }: Props) {
     <ul className="space-y-2">
       {entries.map((e) => {
         const isMe = highlightUserId && e.userId === highlightUserId;
+        const name = displayName(e.username, e.userId);
         return (
           <li
             key={e.userId}
@@ -48,9 +50,9 @@ export function RankingTable({ entries, isLoading, highlightUserId }: Props) {
             }`}
           >
             <PositionBadge position={e.position} />
-            <UserAvatar name={e.username} image={e.avatarUrl ?? null} size="default" />
+            <UserAvatar name={name} image={e.avatarUrl ?? null} size="default" />
             <div className="flex-1 min-w-0">
-              <p className="font-bold text-foreground truncate">{e.username}</p>
+              <p className="font-bold text-foreground truncate">{name}</p>
               <div className="hidden sm:flex items-center gap-2 mt-0.5 text-[10px] font-bold text-ink-muted">
                 <span title={t('subStats.correctWinners')}>
                   <span aria-hidden="true">✓</span>

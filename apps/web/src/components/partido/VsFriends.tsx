@@ -17,6 +17,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { UserAvatar } from '@/components/ui/user-avatar';
 import { cn } from '@/lib/utils';
+import { displayName } from '@/lib/display-name';
 
 interface Props {
   matchId: string;
@@ -124,13 +125,13 @@ export function VsFriends({ matchId, homeTeamShort, awayTeamShort }: Props) {
                       className="flex items-center gap-3 py-2"
                     >
                       <UserAvatar
-                        name={m.user.username}
+                        name={displayName(m.user.username, m.user.id)}
                         image={m.user.avatarUrl}
                         size="sm"
                         className="shrink-0"
                       />
                       <span className="font-display font-bold text-sm text-foreground truncate flex-1 min-w-0">
-                        {m.user.username}
+                        {displayName(m.user.username, m.user.id)}
                         {m.prediction?.isCaptain && (
                           <Star className="inline size-3 ml-1 text-citrus fill-citrus" />
                         )}

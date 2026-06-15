@@ -14,6 +14,7 @@ import { ActivityFeed } from '@/components/grupos/ActivityFeed';
 import { Chat } from '@/components/grupos/Chat';
 import { UserAvatar } from '@/components/ui/user-avatar';
 import { buildInviteUrl } from '@/lib/invite-url';
+import { displayName } from '@/lib/display-name';
 
 interface GroupMemberDto {
   id: string;
@@ -346,7 +347,10 @@ function MembersList({
   const t = useTranslations('grupos.members');
   const format = useFormatter();
   const sorted = [...members].sort((a, b) => {
-    if (a.role === b.role) return a.user.username.localeCompare(b.user.username);
+    if (a.role === b.role)
+      return displayName(a.user.username, a.userId).localeCompare(
+        displayName(b.user.username, b.userId),
+      );
     return a.role === 'ADMIN' ? -1 : 1;
   });
 
@@ -362,13 +366,13 @@ function MembersList({
             }`}
           >
             <UserAvatar
-              name={m.user.username}
+              name={displayName(m.user.username, m.userId)}
               image={m.user.avatarUrl}
               size="default"
             />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-foreground truncate">
-                {m.user.username}
+                {displayName(m.user.username, m.userId)}
                 {isMe && (
                   <span className="ml-2 text-xs text-neon">{t('you')}</span>
                 )}

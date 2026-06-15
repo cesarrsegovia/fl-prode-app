@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useGroupChat } from '@/hooks/useGroupChat';
 import type { ChatMessage } from '@/lib/endpoints';
+import { displayName } from '@/lib/display-name';
 
 type OptimisticStatus = 'sending' | 'failed';
 
@@ -185,7 +186,7 @@ export function Chat({
                   >
                     {!mine && (
                       <p className="text-[11px] font-bold opacity-80 mb-0.5">
-                        {m.user.username}
+                        {displayName(m.user.username, m.userId)}
                       </p>
                     )}
                     <p className="text-sm whitespace-pre-wrap wrap-break-word leading-snug">

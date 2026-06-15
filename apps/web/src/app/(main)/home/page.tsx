@@ -19,6 +19,7 @@ import {
 import { MATCH_LEAD_MS } from '@prode/shared';
 import { apiClient } from '@/lib/api';
 import { useRoundName } from '@/lib/round-name';
+import { displayName } from '@/lib/display-name';
 import { Countdown } from '@/components/prode/Countdown';
 import { GroupCard } from '@/components/grupos/GroupCard';
 import { PositionBadge } from '@/components/ranking/PositionBadge';
@@ -95,6 +96,16 @@ export default function HomePage() {
       })
       .finally(() => setIsLoading(false));
   }, []);
+
+  const firstOpenTodayFixtureId = useMemo(
+    () =>
+      todayMatches.find(
+        (m) =>
+          m.status === 'PENDING' &&
+          new Date(m.startTime).getTime() - MATCH_LEAD_MS > Date.now(),
+      )?.fixtureId ?? null,
+    [todayMatches],
+  );
 
   const tourDays = daysUntil(tournament?.startDate ?? null);
   const topRanking = useMemo(() => fullRanking.slice(0, 5), [fullRanking]);
@@ -197,32 +208,32 @@ export default function HomePage() {
                 </Link>
               ) : null;
               return (
-                <div key={m.id}>
-                  {/* Desktop: el CTA va dentro de la card. Mobile: debajo. */}
-                  <MatchRow
-                    match={m}
-                    href={false}
-                    action={
-                      goToPredictions && (
-                        <span className="hidden sm:inline-flex">
-                          {goToPredictions}
-                        </span>
-                      )
-                    }
-                  />
-                  {goToPredictions && (
-                    <div className="sm:hidden mt-2">
-                      <Link
-                        href={`/prode/${m.fixtureId}`}
-                        className="block w-full text-center bg-neon text-primary-foreground font-display font-bold text-xs px-4 py-2.5 rounded-xl active:scale-95 transition-transform"
-                      >
-                        {t('today.goToPredictions')}
-                      </Link>
-                    </div>
-                  )}
-                </div>
+                <MatchRow
+                  key={m.id}
+                  match={m}
+                  href={false}
+                  // Desktop: el CTA va dentro de cada card.
+                  // Mobile: se reemplaza por un único botón al final (ver abajo).
+                  action={
+                    goToPredictions && (
+                      <span className="hidden sm:inline-flex">
+                        {goToPredictions}
+                      </span>
+                    )
+                  }
+                />
               );
             })}
+
+            {/* Mobile: un solo CTA al final que lleva al primer partido abierto. */}
+            {firstOpenTodayFixtureId && (
+              <Link
+                href={`/prode/${firstOpenTodayFixtureId}`}
+                className="sm:hidden block w-full text-center bg-neon text-primary-foreground font-display font-bold text-sm px-4 py-3 rounded-xl active:scale-95 transition-transform mt-3"
+              >
+                {t('today.goToPredictions')}
+              </Link>
+            )}
           </div>
         )}
       </section>
@@ -408,7 +419,7 @@ export default function HomePage() {
                   >
                     <PositionBadge position={e.position} />
                     <span className="flex-1 font-display font-bold text-foreground truncate">
-                      {e.username}
+                      {displayName(e.username, e.userId)}
                     </span>
                     <span className="text-sm font-display font-extrabold text-neon tabular-nums">
                       {t('top5.points', { points: e.total })}

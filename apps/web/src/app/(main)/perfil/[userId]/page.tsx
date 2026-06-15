@@ -26,6 +26,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
 import { cn } from '@/lib/utils';
+import { displayName as toDisplayName } from '@/lib/display-name';
 
 interface UserDto {
   id: string;
@@ -251,7 +252,7 @@ export default function PerfilPage({
     year: 'numeric',
   });
 
-  const displayName = user.username ?? userId;
+  const displayName = toDisplayName(user.username, userId);
   const avatar = user.avatarUrl ?? diceBearAvatar(displayName);
 
   return (
