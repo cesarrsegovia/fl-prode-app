@@ -185,14 +185,14 @@ export default function HomePage() {
                 m.status === 'PENDING' &&
                 new Date(m.startTime).getTime() - MATCH_LEAD_MS > Date.now();
               return (
-                <div key={m.id} className="flex items-stretch gap-2">
+                <div key={m.id} className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
                   <div className="flex-1 min-w-0">
                     <MatchRow match={m} href={false} />
                   </div>
                   {openForPicks && (
                     <Link
                       href={`/prode/${m.fixtureId}`}
-                      className="shrink-0 self-center bg-neon text-primary-foreground font-display font-bold text-xs px-4 py-2 rounded-xl active:scale-95 transition-transform whitespace-nowrap"
+                      className="block w-full text-center sm:w-auto sm:shrink-0 sm:self-center bg-neon text-primary-foreground font-display font-bold text-xs px-4 py-2.5 rounded-xl active:scale-95 transition-transform whitespace-nowrap"
                     >
                       {t('today.goToPredictions')}
                     </Link>
@@ -252,8 +252,8 @@ export default function HomePage() {
                     </span>
                   )}
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm">
+                <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-2 text-sm flex-wrap">
                     {isOpen && (
                       <span className="text-ink-muted">{t('nextFixture.nextClosesIn')}</span>
                     )}
@@ -261,7 +261,7 @@ export default function HomePage() {
                   </div>
                   <Link
                     href={`/prode/${nextFixture.id}`}
-                    className="bg-neon text-primary-foreground font-display font-extrabold text-sm px-5 py-2.5 rounded-xl glow-neon active:scale-95 transition-transform"
+                    className="block w-full text-center sm:w-auto bg-neon text-primary-foreground font-display font-extrabold text-sm px-5 py-2.5 rounded-xl glow-neon active:scale-95 transition-transform"
                   >
                     {t('nextFixture.loadPredictions')}
                   </Link>
