@@ -184,18 +184,37 @@ export default function HomePage() {
               const openForPicks =
                 m.status === 'PENDING' &&
                 new Date(m.startTime).getTime() - MATCH_LEAD_MS > Date.now();
+              const goToPredictions = openForPicks ? (
+                <Link
+                  href={`/prode/${m.fixtureId}`}
+                  className="bg-neon text-primary-foreground font-display font-bold text-xs px-4 py-2.5 rounded-xl active:scale-95 transition-transform whitespace-nowrap"
+                >
+                  {t('today.goToPredictions')}
+                </Link>
+              ) : null;
               return (
-                <div key={m.id} className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
-                  <div className="flex-1 min-w-0">
-                    <MatchRow match={m} href={false} />
-                  </div>
-                  {openForPicks && (
-                    <Link
-                      href={`/prode/${m.fixtureId}`}
-                      className="block w-full text-center sm:w-auto sm:shrink-0 sm:self-center bg-neon text-primary-foreground font-display font-bold text-xs px-4 py-2.5 rounded-xl active:scale-95 transition-transform whitespace-nowrap"
-                    >
-                      {t('today.goToPredictions')}
-                    </Link>
+                <div key={m.id}>
+                  {/* Desktop: el CTA va dentro de la card. Mobile: debajo. */}
+                  <MatchRow
+                    match={m}
+                    href={false}
+                    action={
+                      goToPredictions && (
+                        <span className="hidden sm:inline-flex">
+                          {goToPredictions}
+                        </span>
+                      )
+                    }
+                  />
+                  {goToPredictions && (
+                    <div className="sm:hidden mt-2">
+                      <Link
+                        href={`/prode/${m.fixtureId}`}
+                        className="block w-full text-center bg-neon text-primary-foreground font-display font-bold text-xs px-4 py-2.5 rounded-xl active:scale-95 transition-transform"
+                      >
+                        {t('today.goToPredictions')}
+                      </Link>
+                    </div>
                   )}
                 </div>
               );

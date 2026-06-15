@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -70,9 +71,11 @@ interface Props {
   href?: string | false;
   /** Muestra la columna de fecha también en mobile. Default: false. */
   showDate?: boolean;
+  /** CTA opcional renderizado al final de la fila, dentro de la card. */
+  action?: ReactNode;
 }
 
-export function MatchRow({ match, href, showDate = false }: Props) {
+export function MatchRow({ match, href, showDate = false, action }: Props) {
   const t = useTranslations('torneo');
   const format = useFormatter();
   const kickoff = new Date(match.startTime);
@@ -147,6 +150,8 @@ export function MatchRow({ match, href, showDate = false }: Props) {
             finished={finished}
           />
         </div>
+
+        {action && <div className="shrink-0">{action}</div>}
       </div>
 
       {match.venue && (
