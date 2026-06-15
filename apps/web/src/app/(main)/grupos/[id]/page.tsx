@@ -13,7 +13,6 @@ import { RankingTable } from '@/components/ranking/RankingTable';
 import { ActivityFeed } from '@/components/grupos/ActivityFeed';
 import { Chat } from '@/components/grupos/Chat';
 import { UserAvatar } from '@/components/ui/user-avatar';
-import { buildInviteUrl } from '@/lib/invite-url';
 import { displayName } from '@/lib/display-name';
 
 interface GroupMemberDto {
@@ -76,13 +75,6 @@ export default function GrupoDetailPage({
   const isAdmin =
     !!group && group.members.some((m) => m.userId === myUserId && m.role === 'ADMIN');
 
-  const inviteUrl = group
-    ? buildInviteUrl(group.inviteCode, {
-        appUrl: process.env.NEXT_PUBLIC_APP_URL,
-        origin: typeof window !== 'undefined' ? window.location.origin : '',
-      })
-    : '';
-
   const flashCopied = () => {
     setCopyFailed(false);
     setInviteCopied(true);
@@ -91,10 +83,13 @@ export default function GrupoDetailPage({
 
   const copyInvite = async () => {
     if (!group) return;
+    // Dentro de Gamblor el dominio del deploy no es navegable, así que
+    // compartimos solo el código de invitación (no la URL).
+    const inviteText = group.inviteCode;
     // Preferred: async Clipboard API (requires secure context + permission).
     try {
       if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(inviteUrl);
+        await navigator.clipboard.writeText(inviteText);
         flashCopied();
         return;
       }
@@ -104,7 +99,7 @@ export default function GrupoDetailPage({
     // Fallback: hidden textarea + execCommand for http/insecure contexts.
     try {
       const ta = document.createElement('textarea');
-      ta.value = inviteUrl;
+      ta.value = inviteText;
       ta.style.position = 'fixed';
       ta.style.opacity = '0';
       document.body.appendChild(ta);
@@ -267,12 +262,9 @@ export default function GrupoDetailPage({
             <p className="text-sm text-ink-muted mt-1">
               {t('invite.subtitle')}
             </p>
-            <div className="mt-4 p-3 rounded-lg font-mono text-xs break-all bg-surface-2">
-              {inviteUrl}
+            <div className="mt-4 p-3 rounded-lg font-mono text-base font-bold tracking-wide break-all bg-surface-2 text-foreground text-center select-all">
+              {group.inviteCode}
             </div>
-            <p className="text-[10px] uppercase tracking-widest font-bold text-ink-muted mt-2">
-              {t('invite.codeLabel')} <span className="font-mono normal-case tracking-normal">{group.inviteCode}</span>
-            </p>
             <div className="flex gap-2 mt-3">
               <button
                 onClick={copyInvite}

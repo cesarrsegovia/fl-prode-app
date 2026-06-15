@@ -12,5 +12,43 @@
     "GROUP_INVITE": "Gruppe",
     "ACHIEVEMENT_UNLOCKED": "Erfolg",
     "fallback": "Notif."
+  },
+  "messages": {
+    "matchResult": {
+      "exact": {
+        "0": "Exaktes Ergebnis bei {home} - {away}! Du hast {points} Punkte geholt, weiter so 🎯",
+        "1": "Du hast das Ergebnis von {home} - {away} getroffen! +{points} Punkte für dich 🔥",
+        "2": "Volltreffer bei {home} - {away}! Exaktes Ergebnis und {points} Punkte geholt."
+      },
+      "winner": {
+        "0": "{home} - {away} ist vorbei. Du hast den Sieger getippt und {points} Punkte geholt.",
+        "1": "Gut gemacht! Du hast {home} - {away} richtig getippt: +{points} Punkte.",
+        "2": "{home} - {away} ist beendet und du hast {points} Punkte für den richtigen Sieger geholt."
+      },
+      "miss": {
+        "0": "{home} - {away} ist vorbei. Diesmal keine Punkte — beim nächsten Mal!",
+        "1": "{home} - {away} ist beendet und du lagst daneben. Zeit für Revanche 💪",
+        "2": "{home} - {away} ist gespielt. Diesmal nichts, aber es bleibt noch viel zu spielen."
+      }
+    },
+    "dailySummary": {
+      "points": {
+        "0": "Du hast heute {points} Punkte geholt! Du bist jetzt #{position} in der Rangliste.",
+        "1": "Guter Tag: +{points} Punkte. Du bist #{position} in der Gesamtrangliste.",
+        "2": "Du schließt den Tag mit {points} Punkten ab und bist #{position} in der Rangliste."
+      },
+      "pointsNoRank": {
+        "0": "Du hast heute {points} Punkte geholt! Tippe weiter, um in die Rangliste zu kommen.",
+        "1": "Guter Tag: +{points} Punkte. Auf in der Rangliste!"
+      },
+      "zero": {
+        "0": "Heute keine Punkte. Du bist #{position} in der Rangliste.",
+        "1": "Ein punktloser Tag für dich. Du bleibst #{position} in der Rangliste."
+      },
+      "zeroNoRank": {
+        "0": "Heute keine Punkte. Tippe die nächste Runde, um aufzusteigen!",
+        "1": "Eine punktlose Runde. Die nächste ist deine Chance zurückzukommen."
+      }
+    }
   }
 }

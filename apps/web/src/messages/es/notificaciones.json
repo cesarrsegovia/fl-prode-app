@@ -12,5 +12,43 @@
     "GROUP_INVITE": "Grupo",
     "ACHIEVEMENT_UNLOCKED": "Logro",
     "fallback": "Notif."
+  },
+  "messages": {
+    "matchResult": {
+      "exact": {
+        "0": "¡Resultado exacto en {home} - {away}! Sumaste {points} puntos, seguí así 🎯",
+        "1": "¡Clavaste el marcador de {home} - {away}! +{points} puntos para vos 🔥",
+        "2": "¡Bordaste {home} - {away}! Acertaste el resultado exacto y sumaste {points} puntos."
+      },
+      "winner": {
+        "0": "Finalizó {home} - {away}. Le acertaste al ganador y sumaste {points} puntos.",
+        "1": "¡Bien ahí! Acertaste el resultado de {home} - {away}: +{points} puntos.",
+        "2": "Terminó {home} - {away} y sumaste {points} puntos por acertar el ganador."
+      },
+      "miss": {
+        "0": "Finalizó {home} - {away}. Esta vez no sumaste puntos, ¡a la próxima!",
+        "1": "Terminó {home} - {away} y no acertaste. Se viene la revancha 💪",
+        "2": "{home} - {away} ya terminó. No sumaste en esta, pero queda mucho por jugar."
+      }
+    },
+    "dailySummary": {
+      "points": {
+        "0": "¡Hoy sumaste {points} puntos! Te ubicás en la posición #{position} del ranking.",
+        "1": "Buen día: +{points} puntos. Vas #{position} en el ranking global.",
+        "2": "Cerraste la jornada con {points} puntos y estás #{position} en el ranking."
+      },
+      "pointsNoRank": {
+        "0": "¡Hoy sumaste {points} puntos! Seguí pronosticando para entrar al ranking.",
+        "1": "Buen día: +{points} puntos. ¡A escalar en el ranking!"
+      },
+      "zero": {
+        "0": "Hoy no sumaste puntos. Estás en la posición #{position} del ranking.",
+        "1": "Jornada sin puntos para vos hoy. Seguís #{position} en el ranking."
+      },
+      "zeroNoRank": {
+        "0": "Hoy no sumaste puntos. ¡Pronosticá la próxima fecha para escalar!",
+        "1": "Jornada sin puntos. La próxima es tu oportunidad de remontar."
+      }
+    }
   }
 }

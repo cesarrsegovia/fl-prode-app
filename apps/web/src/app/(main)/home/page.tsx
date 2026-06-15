@@ -20,6 +20,7 @@ import { MATCH_LEAD_MS } from '@prode/shared';
 import { apiClient } from '@/lib/api';
 import { useRoundName } from '@/lib/round-name';
 import { displayName } from '@/lib/display-name';
+import { useNotificationText } from '@/lib/notification-text';
 import { Countdown } from '@/components/prode/Countdown';
 import { GroupCard } from '@/components/grupos/GroupCard';
 import { PositionBadge } from '@/components/ranking/PositionBadge';
@@ -48,6 +49,7 @@ export default function HomePage() {
   const t = useTranslations('home');
   const format = useFormatter();
   const roundName = useRoundName();
+  const notificationText = useNotificationText();
   const { data: session } = useSession();
   const userId = (session?.user as { id?: string } | undefined)?.id;
   const username =
@@ -455,7 +457,7 @@ export default function HomePage() {
                   >
                     <Badge variant="default" className="size-2 p-0 mt-1.5 shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-foreground">{n.message}</p>
+                      <p className="text-sm text-foreground">{notificationText(n)}</p>
                       <p className="text-[10px] uppercase tracking-[0.2em] font-display font-bold text-ink-dim mt-1">
                         {format.dateTime(new Date(n.createdAt), {
                           day: '2-digit',

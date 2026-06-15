@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { NotificationType } from '@prisma/client';
+import { NotificationType, Prisma } from '@prisma/client';
 import { WS_EVENTS } from '@prode/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EventsGateway } from '../../websocket/events.gateway';
@@ -33,16 +33,26 @@ export class NotificacionesService {
     });
   }
 
-  async create(userId: string, type: NotificationType, message: string) {
+  async create(
+    userId: string,
+    type: NotificationType,
+    message: string,
+    payload?: Prisma.InputJsonValue,
+  ) {
     const notification = await this.prisma.notification.create({
-      data: { userId, type, message },
+      data: { userId, type, message, payload },
     });
     this.events.emitToUser(userId, WS_EVENTS.NOTIFICATION_NEW, notification);
     return notification;
   }
 
   async createMany(
-    entries: { userId: string; type: NotificationType; message: string }[],
+    entries: {
+      userId: string;
+      type: NotificationType;
+      message: string;
+      payload?: Prisma.InputJsonValue;
+    }[],
   ) {
     if (!entries.length) return 0;
     const created = await this.prisma.notification.createManyAndReturn({

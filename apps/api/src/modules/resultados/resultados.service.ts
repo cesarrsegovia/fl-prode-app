@@ -1,5 +1,5 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
-import { ActivityType, MatchStage, MatchStatus, NotificationType, Result } from '@prisma/client';
+import { ActivityType, MatchStage, MatchStatus, NotificationType, Prisma, Result } from '@prisma/client';
 import { WS_EVENTS } from '@prode/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EventsGateway } from '../../websocket/events.gateway';
@@ -15,6 +15,13 @@ import {
 } from './providers/results-provider';
 import { matchRemoteToLocal } from './providers/match-remote';
 import { computePredictionOutcome } from './scoring';
+import { matchResultPhrase, dailySummaryPhrase } from './activity-phrases';
+
+/**
+ * Zona horaria canónica del producto para delimitar el "día" del resumen
+ * diario. Debe coincidir con la `timeZone` que usa el front (i18n/request.ts).
+ */
+const PRODUCT_TIME_ZONE = 'America/Argentina/Buenos_Aires';
 
 @Injectable()
 export class ResultadosService {
@@ -228,6 +235,14 @@ export class ResultadosService {
     );
 
     const pointsByUser = new Map<string, number>();
+    // Una notificación por cada partido finalizado, con frase variada según
+    // el resultado del pronóstico del usuario.
+    const matchNotifications: {
+      userId: string;
+      type: NotificationType;
+      message: string;
+      payload: Prisma.InputJsonValue;
+    }[] = [];
 
     for (const pred of finished) {
       const { homeScore, awayScore } = pred.match;
@@ -239,6 +254,21 @@ export class ResultadosService {
       await this.prisma.prediction.update({
         where: { id: pred.id },
         data: { pointsEarned: outcome.points },
+      });
+
+      const matchPhrase = matchResultPhrase({
+        homeTeamName: pred.match.homeTeamName,
+        awayTeamName: pred.match.awayTeamName,
+        points: outcome.points,
+        exactScore: outcome.exactScore === 1,
+        correctWinner: outcome.correctWinner === 1,
+        seed: pred.id,
+      });
+      matchNotifications.push({
+        userId: pred.userId,
+        type: NotificationType.RESULT_CALCULATED,
+        message: matchPhrase.fallback,
+        payload: { key: matchPhrase.key, params: matchPhrase.params },
       });
 
       const delta = {
@@ -274,6 +304,13 @@ export class ResultadosService {
     });
     const usernameById = new Map(users.map((u) => [u.id, u.username]));
 
+    // ¿Esta fue la última fecha del día? Si no quedan partidos por jugar hoy,
+    // emitimos el resumen diario con el total y la posición global.
+    const isEndOfDay = await this.noMoreMatchesToday(tournamentIdOfFixture);
+    const globalPositions = isEndOfDay
+      ? await this.globalPositions(tournamentIdOfFixture)
+      : new Map<string, number>();
+
     for (const userId of affectedUserIds) {
       const points = pointsByUser.get(userId) ?? 0;
       const username = usernameById.get(userId) ?? 'Alguien';
@@ -303,12 +340,24 @@ export class ResultadosService {
       }
 
       await this.gamificacion.evaluateAchievements(userId);
-      await this.notificaciones.create(
-        userId,
-        NotificationType.RESULT_CALCULATED,
-        'Se calcularon tus puntos de la última fecha.',
-      );
+
+      if (isEndOfDay) {
+        const summary = dailySummaryPhrase({
+          points,
+          position: globalPositions.get(userId) ?? null,
+          seed: `${fixtureId}|${userId}`,
+        });
+        matchNotifications.push({
+          userId,
+          type: NotificationType.RANKING_CHANGE,
+          message: summary.fallback,
+          payload: { key: summary.key, params: summary.params },
+        });
+      }
     }
+
+    // Notificaciones por partido + resumen diario, en un solo batch.
+    await this.notificaciones.createMany(matchNotifications);
 
     this.events.emitToAll(WS_EVENTS.RANKING_UPDATE, {
       fixtureId,
@@ -367,6 +416,82 @@ export class ResultadosService {
       counters.set(s.groupId, pos);
       positions.set(`${s.groupId}|${s.userId}`, pos);
     }
+    return positions;
+  }
+
+  /**
+   * True si no quedan más partidos por jugarse "hoy" en el torneo: ningún
+   * partido PENDING o LIVE con kickoff dentro del día actual. Sirve para emitir
+   * el resumen diario al cerrar la última fecha de la jornada.
+   *
+   * El "día" se calcula en la zona horaria canónica del producto (la misma que
+   * usa el front para formatear), no en la del servidor, para que la jornada no
+   * se parta al cruzar la medianoche UTC.
+   */
+  private async noMoreMatchesToday(tournamentId: string): Promise<boolean> {
+    const { start, end } = this.dayRangeInTz(new Date(), PRODUCT_TIME_ZONE);
+
+    const pending = await this.prisma.match.count({
+      where: {
+        tournamentId,
+        startTime: { gte: start, lt: end },
+        status: { in: [MatchStatus.PENDING, MatchStatus.LIVE] },
+      },
+    });
+    return pending === 0;
+  }
+
+  /** Rango [inicio, fin) del día (en `timeZone`) que contiene a `at`, como UTC. */
+  private dayRangeInTz(at: Date, timeZone: string): { start: Date; end: Date } {
+    // Partes de la fecha en la zona objetivo (año/mes/día locales).
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(at);
+    const get = (type: string) => parts.find((p) => p.type === type)?.value;
+    const ymd = `${get('year')}-${get('month')}-${get('day')}`;
+
+    // Offset de la zona respecto a UTC en ese instante (ej. "-03:00").
+    const offset = this.tzOffset(at, timeZone);
+    const start = new Date(`${ymd}T00:00:00.000${offset}`);
+    const end = new Date(start);
+    end.setUTCDate(end.getUTCDate() + 1);
+    return { start, end };
+  }
+
+  /** Offset "+HH:MM" / "-HH:MM" de `timeZone` respecto a UTC en el instante `at`. */
+  private tzOffset(at: Date, timeZone: string): string {
+    const dtf = new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      timeZoneName: 'longOffset',
+    });
+    const name = dtf
+      .formatToParts(at)
+      .find((p) => p.type === 'timeZoneName')?.value;
+    // name viene como "GMT-03:00"; si no, asumimos UTC.
+    const match = name?.match(/GMT([+-]\d{2}:\d{2})/);
+    return match ? match[1] : '+00:00';
+  }
+
+  /** Posición global (1-based) de cada usuario en el torneo, mismo orden que el ranking. */
+  private async globalPositions(
+    tournamentId: string,
+  ): Promise<Map<string, number>> {
+    const scores = await this.prisma.userScore.findMany({
+      where: { tournamentId },
+      orderBy: [
+        { total: 'desc' },
+        { correctWinners: 'desc' },
+        { exactScores: 'desc' },
+        { exactGoalsSum: 'desc' },
+        { firstPredictionAt: 'asc' },
+      ],
+      select: { userId: true },
+    });
+    const positions = new Map<string, number>();
+    scores.forEach((s, idx) => positions.set(s.userId, idx + 1));
     return positions;
   }
 

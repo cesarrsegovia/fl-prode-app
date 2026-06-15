@@ -12,6 +12,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { notificaciones, type NotificationDto } from '@/lib/endpoints';
+import { useNotificationText } from '@/lib/notification-text';
 import { useNotificacionStore } from '@/store/notificacionStore';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -31,6 +32,7 @@ const TYPE_META: Record<
 
 export default function NotificacionesPage() {
   const t = useTranslations('notificaciones');
+  const notificationText = useNotificationText();
   const format = useFormatter();
   const setNotifications = useNotificacionStore((s) => s.setNotifications);
   const markAllReadStore = useNotificacionStore((s) => s.markAllRead);
@@ -163,7 +165,7 @@ export default function NotificacionesPage() {
                             <span className="size-1.5 rounded-full bg-neon animate-pulse" />
                           )}
                         </div>
-                        <p className="text-sm text-foreground">{n.message}</p>
+                        <p className="text-sm text-foreground">{notificationText(n)}</p>
                         <p className="text-[10px] uppercase tracking-[0.18em] font-display text-ink-dim mt-2">
                           {format.relativeTime(new Date(n.createdAt))}
                         </p>

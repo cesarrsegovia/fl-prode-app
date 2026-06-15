@@ -12,5 +12,43 @@
     "GROUP_INVITE": "Group",
     "ACHIEVEMENT_UNLOCKED": "Achievement",
     "fallback": "Notif."
+  },
+  "messages": {
+    "matchResult": {
+      "exact": {
+        "0": "Exact score on {home} - {away}! You earned {points} points, keep it up 🎯",
+        "1": "You nailed the {home} - {away} score! +{points} points for you 🔥",
+        "2": "Spot on for {home} - {away}! You got the exact score and earned {points} points."
+      },
+      "winner": {
+        "0": "{home} - {away} is over. You picked the winner and earned {points} points.",
+        "1": "Nice one! You called {home} - {away}: +{points} points.",
+        "2": "{home} - {away} ended and you earned {points} points for the right winner."
+      },
+      "miss": {
+        "0": "{home} - {away} is over. No points this time — get them next round!",
+        "1": "{home} - {away} ended and you missed it. Time for redemption 💪",
+        "2": "{home} - {away} is done. Nothing this time, but there's plenty left to play."
+      }
+    },
+    "dailySummary": {
+      "points": {
+        "0": "You earned {points} points today! You're now #{position} in the ranking.",
+        "1": "Good day: +{points} points. You're #{position} in the global ranking.",
+        "2": "You closed the day with {points} points and you're #{position} in the ranking."
+      },
+      "pointsNoRank": {
+        "0": "You earned {points} points today! Keep predicting to enter the ranking.",
+        "1": "Good day: +{points} points. Time to climb the ranking!"
+      },
+      "zero": {
+        "0": "No points today. You're #{position} in the ranking.",
+        "1": "A scoreless day for you. You're still #{position} in the ranking."
+      },
+      "zeroNoRank": {
+        "0": "No points today. Predict the next round to climb the ranking!",
+        "1": "A scoreless round. The next one is your chance to bounce back."
+      }
+    }
   }
 }

@@ -12,5 +12,43 @@
     "GROUP_INVITE": "Groupe",
     "ACHIEVEMENT_UNLOCKED": "Succès",
     "fallback": "Notif."
+  },
+  "messages": {
+    "matchResult": {
+      "exact": {
+        "0": "Score exact sur {home} - {away} ! Tu as gagné {points} points, continue comme ça 🎯",
+        "1": "Tu as trouvé le score de {home} - {away} ! +{points} points pour toi 🔥",
+        "2": "En plein dans le mille pour {home} - {away} ! Score exact et {points} points gagnés."
+      },
+      "winner": {
+        "0": "{home} - {away} est terminé. Tu as trouvé le vainqueur et gagné {points} points.",
+        "1": "Bien joué ! Tu as deviné {home} - {away} : +{points} points.",
+        "2": "{home} - {away} est fini et tu as gagné {points} points pour le bon vainqueur."
+      },
+      "miss": {
+        "0": "{home} - {away} est terminé. Pas de points cette fois — à la prochaine !",
+        "1": "{home} - {away} est fini et tu t'es trompé. Place à la revanche 💪",
+        "2": "{home} - {away} est terminé. Rien cette fois, mais il reste beaucoup à jouer."
+      }
+    },
+    "dailySummary": {
+      "points": {
+        "0": "Tu as gagné {points} points aujourd'hui ! Tu es désormais #{position} au classement.",
+        "1": "Belle journée : +{points} points. Tu es #{position} au classement général.",
+        "2": "Tu termines la journée avec {points} points et tu es #{position} au classement."
+      },
+      "pointsNoRank": {
+        "0": "Tu as gagné {points} points aujourd'hui ! Continue à pronostiquer pour entrer au classement.",
+        "1": "Belle journée : +{points} points. À l'assaut du classement !"
+      },
+      "zero": {
+        "0": "Aucun point aujourd'hui. Tu es #{position} au classement.",
+        "1": "Journée sans point pour toi. Tu restes #{position} au classement."
+      },
+      "zeroNoRank": {
+        "0": "Aucun point aujourd'hui. Pronostique la prochaine journée pour grimper !",
+        "1": "Journée blanche. La prochaine sera ta chance de rebondir."
+      }
+    }
   }
 }

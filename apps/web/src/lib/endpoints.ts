@@ -510,6 +510,11 @@ export interface NotificationDto {
   userId: string;
   type: string;
   message: string;
+  /** { key, params } para traducir en el front; si falta, se usa `message`. */
+  payload: {
+    key?: string;
+    params?: Record<string, string | number>;
+  } | null;
   read: boolean;
   createdAt: string;
 }
