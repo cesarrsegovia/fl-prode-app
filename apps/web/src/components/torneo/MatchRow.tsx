@@ -114,6 +114,11 @@ export function MatchRow({ match, href, showDate = false, action }: Props) {
           </span>
         </div>
 
+        {/* Espaciador izquierdo que refleja el ancho de la zona de acción
+            (solo en desktop), para que el bloque central quede centrado en la
+            card haya o no botón de pronosticar. */}
+        {action && <div className="hidden sm:block shrink-0 w-37.5" aria-hidden />}
+
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 flex-1 min-w-0">
           <TeamCell
             name={match.homeTeam?.name ?? match.homeTeamName}
@@ -151,7 +156,11 @@ export function MatchRow({ match, href, showDate = false, action }: Props) {
           />
         </div>
 
-        {action && <div className="shrink-0">{action}</div>}
+        {/* Zona de acción con ancho reservado: así el bloque central de
+            equipos/horario queda igual de centrado haya o no botón. */}
+        {action && (
+          <div className="hidden sm:flex shrink-0 w-37.5 justify-end">{action}</div>
+        )}
       </div>
 
       {match.venue && (

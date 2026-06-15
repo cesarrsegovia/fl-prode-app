@@ -40,14 +40,23 @@ function loadEnvFile(path: string) {
 loadEnvFile(resolve(process.cwd(), '.env'));
 
 /**
- * externalId → startTime correcto (ISO UTC), según ESPN.
- * - wc-m015 SWE vs TUN: real 2026-06-15T02:00Z (estaba 2026-06-16T01:00Z, −23h).
- * - wc-m016 IRN vs NZL: real 2026-06-16T01:00Z (estaba 2026-06-16T04:00Z, −3h).
+ * Correcciones de horario, identificadas por substring de los nombres de equipo
+ * (home + away) en vez de externalId: en prod el externalId ya fue reemplazado
+ * por el event id real de ESPN (db:map-espn-ids), así que el externalId
+ * sintético `wc-mXXX` ya no existe. El nombre de equipo es estable.
+ * `correct` = startTime real según ESPN (ISO UTC).
  */
-const FIXES: Record<string, string> = {
-  'wc-m015': '2026-06-15T02:00:00.000Z',
-  'wc-m016': '2026-06-16T01:00:00.000Z',
-};
+interface Fix {
+  homeContains: string;
+  awayContains: string;
+  correct: string;
+}
+const FIXES: Fix[] = [
+  // SWE vs TUN: real 2026-06-15T02:00Z (estaba 2026-06-16T01:00Z, −23h).
+  { homeContains: 'Suecia', awayContains: 'nez', correct: '2026-06-15T02:00:00.000Z' },
+  // IRN vs NZL: real 2026-06-16T01:00Z (estaba 2026-06-16T04:00Z, −3h).
+  { homeContains: 'Ir', awayContains: 'Zelanda', correct: '2026-06-16T01:00:00.000Z' },
+];
 
 async function main() {
   const apply = process.argv.includes('--apply');
@@ -60,9 +69,12 @@ async function main() {
     let alreadyOk = 0;
     let notFound = 0;
 
-    for (const [externalId, correctIso] of Object.entries(FIXES)) {
-      const match = await prisma.match.findFirst({
-        where: { externalId },
+    for (const fix of FIXES) {
+      const matches = await prisma.match.findMany({
+        where: {
+          homeTeamName: { contains: fix.homeContains, mode: 'insensitive' },
+          awayTeamName: { contains: fix.awayContains, mode: 'insensitive' },
+        },
         select: {
           id: true,
           externalId: true,
@@ -72,27 +84,39 @@ async function main() {
         },
       });
 
-      if (!match) {
-        console.log(`  ? ${externalId}: no existe en esta base — skip`);
+      const wanted = `${fix.homeContains}/${fix.awayContains}`;
+      if (matches.length === 0) {
+        console.log(`  ? ${wanted}: no se encontró el partido — skip`);
+        notFound++;
+        continue;
+      }
+      if (matches.length > 1) {
+        console.log(
+          `  ! ${wanted}: ${matches.length} partidos coinciden — ambiguo, NO se toca. Revisar:`,
+        );
+        matches.forEach((m) =>
+          console.log(`      ${m.homeTeamName} vs ${m.awayTeamName} (extId ${m.externalId})`),
+        );
         notFound++;
         continue;
       }
 
+      const match = matches[0];
       const current = match.startTime.toISOString();
-      const correct = new Date(correctIso).toISOString();
-      const label = `${match.homeTeamName} vs ${match.awayTeamName}`;
+      const correct = new Date(fix.correct).toISOString();
+      const label = `${match.homeTeamName} vs ${match.awayTeamName} (extId ${match.externalId})`;
 
       if (current === correct) {
-        console.log(`  = ${externalId} (${label}): ya correcto (${correct})`);
+        console.log(`  = ${label}: ya correcto (${correct})`);
         alreadyOk++;
         continue;
       }
 
-      console.log(`  ${apply ? '✓' : '→'} ${externalId} (${label}): ${current}  →  ${correct}`);
+      console.log(`  ${apply ? '✓' : '→'} ${label}: ${current}  →  ${correct}`);
       if (apply) {
         await prisma.match.update({
           where: { id: match.id },
-          data: { startTime: new Date(correctIso) },
+          data: { startTime: new Date(fix.correct) },
         });
       }
       changed++;

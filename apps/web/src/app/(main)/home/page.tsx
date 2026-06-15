@@ -56,7 +56,7 @@ export default function HomePage() {
   const [nextFixture, setNextFixture] = useState<FixtureWithMatches | null>(null);
   const [todayMatches, setTodayMatches] = useState<TodayMatchDto[]>([]);
   const [myGroups, setMyGroups] = useState<MyGroupEntry[]>([]);
-  const [topRanking, setTopRanking] = useState<RankingEntry[]>([]);
+  const [fullRanking, setFullRanking] = useState<RankingEntry[]>([]);
   const [recentNotifs, setRecentNotifs] = useState<NotificationDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -89,7 +89,7 @@ export default function HomePage() {
         setTournament(tour);
         setNextFixture(fx[0] ?? null);
         setMyGroups(gs);
-        setTopRanking(rk.slice(0, 5));
+        setFullRanking(rk);
         setRecentNotifs(nt.slice(0, 5));
         setTodayMatches(today);
       })
@@ -97,7 +97,11 @@ export default function HomePage() {
   }, []);
 
   const tourDays = daysUntil(tournament?.startDate ?? null);
-  const myEntry = topRanking.find((e) => e.userId === userId);
+  const topRanking = useMemo(() => fullRanking.slice(0, 5), [fullRanking]);
+  const myEntry = useMemo(
+    () => fullRanking.find((e) => e.userId === userId) ?? null,
+    [fullRanking, userId],
+  );
 
   return (
     <main className="pt-24 pb-24 px-4 md:px-8 max-w-7xl mx-auto">
