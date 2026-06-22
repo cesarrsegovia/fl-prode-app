@@ -209,7 +209,7 @@
     { "externalId": "wc-m019", "stage": "GROUP", "round": 1, "groupName": "J", "venueExternalId": "v-kan", "homeTeamExternalId": "t-ARG", "awayTeamExternalId": "t-ALG", "startTime": "2026-06-17T01:00:00.000Z" },
     { "externalId": "wc-m020", "stage": "GROUP", "round": 1, "groupName": "J", "venueExternalId": "v-sfo", "homeTeamExternalId": "t-AUT", "awayTeamExternalId": "t-JOR", "startTime": "2026-06-17T04:00:00.000Z" },
     { "externalId": "wc-m021", "stage": "GROUP", "round": 1, "groupName": "K", "venueExternalId": "v-hou", "homeTeamExternalId": "t-POR", "awayTeamExternalId": "t-COD", "startTime": "2026-06-17T17:00:00.000Z" },
-    { "externalId": "wc-m022", "stage": "GROUP", "round": 1, "groupName": "K", "venueExternalId": "v-gdl", "homeTeamExternalId": "t-COL", "awayTeamExternalId": "t-UZB", "startTime": "2026-06-17T20:00:00.000Z" },
+    { "externalId": "wc-m022", "stage": "GROUP", "round": 1, "groupName": "K", "venueExternalId": "v-gdl", "homeTeamExternalId": "t-COL", "awayTeamExternalId": "t-UZB", "startTime": "2026-06-18T02:00:00.000Z" },
     { "externalId": "wc-m023", "stage": "GROUP", "round": 1, "groupName": "L", "venueExternalId": "v-dal", "homeTeamExternalId": "t-ENG", "awayTeamExternalId": "t-CRO", "startTime": "2026-06-17T20:00:00.000Z" },
     { "externalId": "wc-m024", "stage": "GROUP", "round": 1, "groupName": "L", "venueExternalId": "v-tor", "homeTeamExternalId": "t-GHA", "awayTeamExternalId": "t-PAN", "startTime": "2026-06-17T23:00:00.000Z" },
 

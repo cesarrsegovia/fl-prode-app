@@ -57,4 +57,11 @@ async function bootstrap() {
   await app.listen(port);
   console.log(`API running on http://localhost:${port}`);
 }
-bootstrap();
+
+bootstrap().catch((err) => {
+  // Si el arranque falla (p. ej. la DB no está lista al despertar en Render Free),
+  // logueamos explícitamente y salimos con exit 1 limpio en vez de morir como
+  // unhandled rejection con un log poco claro.
+  console.error('Fallo al iniciar la API:', err);
+  process.exit(1);
+});

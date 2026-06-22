@@ -56,6 +56,9 @@ const FIXES: Fix[] = [
   { homeContains: 'Suecia', awayContains: 'nez', correct: '2026-06-15T02:00:00.000Z' },
   // IRN vs NZL: real 2026-06-16T01:00Z (estaba 2026-06-16T04:00Z, −3h).
   { homeContains: 'Ir', awayContains: 'Zelanda', correct: '2026-06-16T01:00:00.000Z' },
+  // COL vs UZB: real 2026-06-18T02:00Z (23:00 AR; estaba 2026-06-17T20:00Z, −6h).
+  // Confirmado contra ESPN event 760436.
+  { homeContains: 'Colombia', awayContains: 'Uzbek', correct: '2026-06-18T02:00:00.000Z' },
 ];
 
 async function main() {
