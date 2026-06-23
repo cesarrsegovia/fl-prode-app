@@ -32,14 +32,11 @@ Thumbs.db
 
 # Prisma
 # Las migraciones SE VERSIONAN (el deploy corre `prisma migrate deploy`).
-# Se ignoran SOLO las carpetas locales de dev previas a la baseline squashed
-# 20260603120000_init, que ya refleja ese schema completo. Toda migración
-# nueva (posterior a la baseline) entra al repo automáticamente.
-apps/api/prisma/migrations/20260409151701_init/
-apps/api/prisma/migrations/20260423170925_phase_2_admin_and_external_ids/
-apps/api/prisma/migrations/20260520120000_add_r32_qualifier_picks/
-apps/api/prisma/migrations/20260528120000_group_score_tiebreak_counters/
-apps/api/prisma/migrations/20260528121500_top_scorer_pick/
+# La historia se consolidó en 00000000000000_baseline (refleja el schema ya
+# aplicado en producción); toda migración posterior entra al repo.
+# Backups locales de la consolidación: no se versionan.
+apps/api/prisma/migrations.backup/
+apps/api/_prisma_migrations.backup.json
 
 # Debug
 npm-debug.log*

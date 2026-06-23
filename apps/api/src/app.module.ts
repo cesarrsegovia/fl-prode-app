@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { PrismaModule } from './prisma/prisma.module';
+import { CacheModule } from './common/cache/cache.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsuariosModule } from './modules/usuarios/usuarios.module';
 import { GruposModule } from './modules/grupos/grupos.module';
@@ -26,6 +27,7 @@ import { DbKeepaliveCron } from './jobs/db-keepalive.cron';
 @Module({
   imports: [
     ScheduleModule.forRoot(),
+    CacheModule,
     PrismaModule,
     WebsocketModule,
     AuthModule,

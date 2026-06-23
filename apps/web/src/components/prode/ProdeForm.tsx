@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import type { FixtureWithMatches, Prediction, Result } from '@prode/shared';
 import {
@@ -172,12 +172,17 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
     }
   }, [captainId]);
 
-  const updatePick = (matchId: string, next: MatchPick) => {
+  // Estable entre renders (sin deps): así MatchCard (memoizado) no re-renderiza
+  // por una nueva referencia de onChange. Usamos las formas funcionales de
+  // setState para no depender de `captainId` capturado.
+  const updatePick = useCallback((matchId: string, next: MatchPick) => {
     setPicks((prev) => ({ ...prev, [matchId]: next }));
-    if (next.isCaptain) setCaptainId(matchId);
-    else if (captainId === matchId && next.isCaptain === false)
-      setCaptainId(null);
-  };
+    if (next.isCaptain) {
+      setCaptainId(matchId);
+    } else if (next.isCaptain === false) {
+      setCaptainId((prev) => (prev === matchId ? null : prev));
+    }
+  }, []);
 
   const savePick = async (matchId: string) => {
     const pick = picks[matchId];
@@ -322,7 +327,7 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
                 pick={picks[match.id]}
                 isCaptainOption={false}
                 disabled={closed}
-                onChange={(next) => updatePick(match.id, next)}
+                onChange={updatePick}
               />
               {!closed && picks[match.id]?.result && (
                 <div className="mt-1 flex justify-end">

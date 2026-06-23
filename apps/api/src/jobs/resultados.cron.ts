@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { NotificationType } from '@prisma/client';
+import { NotificationType, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificacionesService } from '../modules/notificaciones/notificaciones.service';
 import { ResultadosService } from '../modules/resultados/resultados.service';
@@ -29,44 +29,44 @@ export class ResultadosCron {
 
     const closingFixtures = await this.prisma.fixture.findMany({
       where: { closeAt: { gt: now, lte: upperBound } },
-      select: { id: true, round: true, closeAt: true },
+      select: { id: true, round: true },
     });
-
     if (!closingFixtures.length) return;
-
-    const usersWithAccount = await this.prisma.user.findMany({
-      select: { id: true },
-    });
 
     const entries: {
       userId: string;
       type: NotificationType;
       message: string;
+      payload: Prisma.InputJsonValue;
     }[] = [];
 
     for (const fixture of closingFixtures) {
-      const existing = await this.prisma.notification.findMany({
-        where: {
-          type: NotificationType.FIXTURE_CLOSING,
-          message: { contains: `#${fixture.id}` },
-        },
-        select: { userId: true },
-      });
-      const alreadyNotified = new Set(existing.map((n) => n.userId));
+      // Conjunto objetivo calculado en la DB: usuarios SIN predicción en esta
+      // fixture y SIN notificación previa de cierre para ella. Antes esto
+      // cargaba TODOS los usuarios a memoria y filtraba con un LIKE sobre el
+      // texto del mensaje (full scan). Ahora es un solo query con anti-joins
+      // sobre índices, y la idempotencia usa payload->>'fixtureId'.
+      const targets = await this.prisma.$queryRaw<{ id: string }[]>`
+        SELECT u.id
+        FROM "User" u
+        WHERE NOT EXISTS (
+          SELECT 1 FROM "Prediction" p
+          WHERE p."userId" = u.id AND p."fixtureId" = ${fixture.id}
+        )
+        AND NOT EXISTS (
+          SELECT 1 FROM "Notification" n
+          WHERE n."userId" = u.id
+            AND n.type = 'FIXTURE_CLOSING'
+            AND n.payload->>'fixtureId' = ${fixture.id}
+        )
+      `;
 
-      const predictionsForFixture = await this.prisma.prediction.findMany({
-        where: { fixtureId: fixture.id },
-        select: { userId: true },
-        distinct: ['userId'],
-      });
-      const withPrediction = new Set(predictionsForFixture.map((p) => p.userId));
-
-      for (const user of usersWithAccount) {
-        if (alreadyNotified.has(user.id) || withPrediction.has(user.id)) continue;
+      for (const t of targets) {
         entries.push({
-          userId: user.id,
+          userId: t.id,
           type: NotificationType.FIXTURE_CLOSING,
-          message: `La fecha ${fixture.round} cierra pronto. #${fixture.id}`,
+          message: `La fecha ${fixture.round} cierra pronto.`,
+          payload: { fixtureId: fixture.id, round: fixture.round },
         });
       }
     }

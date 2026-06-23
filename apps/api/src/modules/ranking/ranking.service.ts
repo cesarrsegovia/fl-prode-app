@@ -1,12 +1,31 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { CacheService } from '../../common/cache/cache.service';
 import { GROUP_SCORE_ORDER_BY } from './ranking-order';
+
+/** TTL del ranking cacheado. El ranking no necesita ser exacto al segundo. */
+const RANKING_TTL_SECONDS = 20;
 
 @Injectable()
 export class RankingService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cache: CacheService,
+  ) {}
+
+  /** Invalida todo el ranking cacheado. La llama el scoring tras recalcular. */
+  async invalidate(): Promise<void> {
+    await this.cache.delByPattern('ranking:*');
+  }
 
   async getGlobalRanking(tournamentId?: string) {
+    const key = `ranking:global:${tournamentId ?? 'all'}`;
+    return this.cache.wrap(key, RANKING_TTL_SECONDS, () =>
+      this.computeGlobalRanking(tournamentId),
+    );
+  }
+
+  private async computeGlobalRanking(tournamentId?: string) {
     // El ranking global lee UserScore (puntaje por usuario+torneo, independiente
     // de grupos), de modo que también figuren los jugadores que entran desde el
     // provider sin unirse a ningún grupo.
@@ -57,12 +76,31 @@ export class RankingService {
     }));
   }
 
-  async getGroupRanking(groupId: string, tournamentId?: string) {
+  async getGroupRanking(
+    groupId: string,
+    tournamentId?: string,
+    take = 100,
+    skip = 0,
+  ) {
+    const key = `ranking:group:${groupId}:${tournamentId ?? 'all'}:${take}:${skip}`;
+    return this.cache.wrap(key, RANKING_TTL_SECONDS, () =>
+      this.computeGroupRanking(groupId, tournamentId, take, skip),
+    );
+  }
+
+  private async computeGroupRanking(
+    groupId: string,
+    tournamentId?: string,
+    take = 100,
+    skip = 0,
+  ) {
     const where: { groupId: string; tournamentId?: string } = { groupId };
     if (tournamentId) where.tournamentId = tournamentId;
     const scores = await this.prisma.groupScore.findMany({
       where,
       orderBy: GROUP_SCORE_ORDER_BY,
+      take,
+      skip,
     });
 
     if (!scores.length) return [];
@@ -76,7 +114,7 @@ export class RankingService {
     const userMap = new Map(users.map((u) => [u.id, u]));
 
     return scores.map((s, idx) => ({
-      position: idx + 1,
+      position: skip + idx + 1,
       userId: s.userId,
       username: userMap.get(s.userId)?.username,
       avatarUrl: userMap.get(s.userId)?.avatarUrl,

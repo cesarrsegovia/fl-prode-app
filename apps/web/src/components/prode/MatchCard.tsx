@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import type { Match } from '@prode/shared';
 import { MatchStatus, Result, POINTS_EXACT_SCORE } from '@prode/shared';
@@ -27,7 +27,9 @@ interface Props {
   pick?: MatchPick;
   isCaptainOption?: boolean;
   disabled?: boolean;
-  onChange: (next: MatchPick) => void;
+  // Recibe el matchId para que el padre pueda pasar UNA referencia estable
+  // (en vez de una closure nueva por match en cada render), habilitando React.memo.
+  onChange: (matchId: string, next: MatchPick) => void;
 }
 
 const RESULT_LABELS: Record<Result, string> = {
@@ -55,7 +57,13 @@ function teamName(match: Match, side: 'home' | 'away') {
   return match.awayTeam?.shortName ?? match.awayTeam?.name ?? match.awayTeamName;
 }
 
-export function MatchCard({
+/**
+ * Memoizado: en una fecha con 4-8 partidos, editar un pick re-renderiza el
+ * ProdeForm; sin memo, los 8 MatchCard se re-renderizaban aunque solo cambió
+ * uno. Con onChange estable (firma (matchId, next)) y props por valor, memo
+ * deja re-renderizar solo la card cuyo `pick` cambió.
+ */
+export const MatchCard = memo(function MatchCard({
   match,
   pick,
   isCaptainOption,
@@ -117,7 +125,7 @@ export function MatchCard({
       pick?.homeScoreGuess,
       pick?.awayScoreGuess,
     );
-    onChange({
+    onChange(match.id, {
       ...pick,
       result,
       homeScoreGuess: home,
@@ -135,7 +143,7 @@ export function MatchCard({
       other,
     );
     const derived = resultFromScore(homeScoreGuess, awayScoreGuess);
-    onChange({
+    onChange(match.id, {
       ...pick,
       homeScoreGuess,
       awayScoreGuess,
@@ -305,7 +313,7 @@ export function MatchCard({
                 className="accent-neon focus-visible:ring-2 focus-visible:ring-neon focus-visible:outline-none"
                 checked={pick?.isCaptain ?? false}
                 onChange={(e) =>
-                  onChange({ ...pick, isCaptain: e.target.checked })
+                  onChange(match.id, { ...pick, isCaptain: e.target.checked })
                 }
               />
               {t('captainCheck')}
@@ -315,7 +323,7 @@ export function MatchCard({
       </div>
     </div>
   );
-}
+});
 
 /**
  * Input de goles con botones [−]/[+] debajo. Se puede tipear o usar los botones.

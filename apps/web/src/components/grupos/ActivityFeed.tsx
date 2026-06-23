@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import type { ActivityFeedType, ActivityItem } from '@/lib/endpoints';
 import { UserAvatar } from '@/components/ui/user-avatar';
@@ -23,6 +24,35 @@ const ACCENTS: Record<ActivityFeedType, string> = {
   ACHIEVEMENT_UNLOCKED: 'border-l-neon',
 };
 
+/**
+ * Item memoizado: cuando llega una actividad nueva por WebSocket y se prepende
+ * a la lista, React.memo evita re-renderizar los items previos (sus props no
+ * cambian). En un feed activo con 100 items, solo se monta el nuevo.
+ */
+const ActivityRow = memo(function ActivityRow({ item }: { item: ActivityItem }) {
+  const format = useFormatter();
+  return (
+    <li
+      className={`flex items-start gap-3 p-3 rounded-xl border-l-4 bg-surface-1 ${ACCENTS[item.type] ?? 'border-l-line'}`}
+    >
+      <span className="text-xl leading-none mt-0.5" aria-hidden>
+        {ICONS[item.type] ?? '•'}
+      </span>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm text-foreground leading-tight">{item.message}</p>
+        <p className="text-xs text-ink-muted mt-1">
+          {format.relativeTime(new Date(item.createdAt))}
+        </p>
+      </div>
+      <UserAvatar
+        name={displayName(item.user.username, item.user.id)}
+        image={item.user.avatarUrl}
+        size="sm"
+      />
+    </li>
+  );
+});
+
 export function ActivityFeed({
   items,
   isLoading,
@@ -33,7 +63,6 @@ export function ActivityFeed({
   error: string | null;
 }) {
   const t = useTranslations('grupos.activity');
-  const format = useFormatter();
 
   if (isLoading) {
     return (
@@ -68,25 +97,7 @@ export function ActivityFeed({
   return (
     <ul className="space-y-2">
       {items.map((item) => (
-        <li
-          key={item.id}
-          className={`flex items-start gap-3 p-3 rounded-xl border-l-4 bg-surface-1 ${ACCENTS[item.type] ?? 'border-l-line'}`}
-        >
-          <span className="text-xl leading-none mt-0.5" aria-hidden>
-            {ICONS[item.type] ?? '•'}
-          </span>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm text-foreground leading-tight">{item.message}</p>
-            <p className="text-xs text-ink-muted mt-1">
-              {format.relativeTime(new Date(item.createdAt))}
-            </p>
-          </div>
-          <UserAvatar
-            name={displayName(item.user.username, item.user.id)}
-            image={item.user.avatarUrl}
-            size="sm"
-          />
-        </li>
+        <ActivityRow key={item.id} item={item} />
       ))}
     </ul>
   );

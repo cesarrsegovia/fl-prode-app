@@ -2,6 +2,7 @@ import { Injectable, Logger, Inject } from '@nestjs/common';
 import { ActivityType, MatchStage, MatchStatus, NotificationType, Prisma, Result } from '@prisma/client';
 import { WS_EVENTS } from '@prode/shared';
 import { PrismaService } from '../../prisma/prisma.service';
+import { CacheService } from '../../common/cache/cache.service';
 import { EventsGateway } from '../../websocket/events.gateway';
 import { GamificacionService } from '../gamificacion/gamificacion.service';
 import { NotificacionesService } from '../notificaciones/notificaciones.service';
@@ -34,6 +35,7 @@ export class ResultadosService {
     private readonly activity: ActivityService,
     private readonly events: EventsGateway,
     private readonly tournaments: TournamentsService,
+    private readonly cache: CacheService,
     @Inject(RESULTS_PROVIDER) private readonly provider: ResultsProvider,
   ) {}
 
@@ -199,6 +201,12 @@ export class ResultadosService {
       });
     }
 
+    // Cambió un score o el estado del partido: invalidamos fixtures cacheados
+    // para que findActive/findUpcoming reflejen el resultado en el próximo GET.
+    if (scoreChanged || local.status !== newStatus) {
+      await this.cache.delByPattern('fixtures:*');
+    }
+
     const becameFinished =
       local.status !== MatchStatus.FINISHED &&
       newStatus === MatchStatus.FINISHED &&
@@ -244,6 +252,22 @@ export class ResultadosService {
       payload: Prisma.InputJsonValue;
     }[] = [];
 
+    // ── Fase 1: cómputo en memoria (CPU puro, sin I/O) ────────────────────
+    // Acumulamos el delta agregado por usuario y guardamos el pointsEarned de
+    // cada predicción para escribirlo en un solo batch. Antes esto eran 1+N+M
+    // queries secuenciales por predicción; ahora son cero queries en esta fase.
+    type ScoreDelta = {
+      points: number;
+      correctWinners: number;
+      exactScores: number;
+      exactGoalsSum: number;
+      positiveCount: number; // nº de aciertos (>0 pts): replica el streak por-predicción legacy
+      firstPredictionAt: Date;
+    };
+    const deltaByUser = new Map<string, ScoreDelta>();
+    // Agrupamos las predicciones por su pointsEarned para hacer pocos updateMany.
+    const predIdsByPoints = new Map<number, string[]>();
+
     for (const pred of finished) {
       const { homeScore, awayScore } = pred.match;
       const outcome = computePredictionOutcome(pred, {
@@ -251,10 +275,9 @@ export class ResultadosService {
         awayScore: awayScore!,
       });
 
-      await this.prisma.prediction.update({
-        where: { id: pred.id },
-        data: { pointsEarned: outcome.points },
-      });
+      const bucket = predIdsByPoints.get(outcome.points) ?? [];
+      bucket.push(pred.id);
+      predIdsByPoints.set(outcome.points, bucket);
 
       const matchPhrase = matchResultPhrase({
         homeTeamName: pred.match.homeTeamName,
@@ -271,27 +294,40 @@ export class ResultadosService {
         payload: { key: matchPhrase.key, params: matchPhrase.params },
       });
 
-      const delta = {
-        points: outcome.points,
-        correctWinners: outcome.correctWinner,
-        exactScores: outcome.exactScore,
-        exactGoalsSum: outcome.exactGoals,
+      const acc = deltaByUser.get(pred.userId) ?? {
+        points: 0,
+        correctWinners: 0,
+        exactScores: 0,
+        exactGoalsSum: 0,
+        positiveCount: 0,
+        firstPredictionAt: pred.createdAt,
       };
-      // Puntaje global (ranking global): siempre, tenga grupo o no.
-      await this.updateUserScore(
-        pred.userId,
-        delta,
-        pred.match.tournamentId,
-        pred.createdAt,
-      );
-      await this.updateGroupScores(
-        pred.userId,
-        delta,
-        pred.match.tournamentId,
-        pred.createdAt,
-      );
+      acc.points += outcome.points;
+      acc.correctWinners += outcome.correctWinner;
+      acc.exactScores += outcome.exactScore;
+      acc.exactGoalsSum += outcome.exactGoals;
+      if (outcome.points > 0) acc.positiveCount += 1;
+      if (pred.createdAt < acc.firstPredictionAt) acc.firstPredictionAt = pred.createdAt;
+      deltaByUser.set(pred.userId, acc);
+
       pointsByUser.set(pred.userId, (pointsByUser.get(pred.userId) ?? 0) + outcome.points);
     }
+
+    // ── Fase 2: escritura batcheada (pocas queries, set-based) ────────────
+    // 2a. pointsEarned de las predicciones: un updateMany por valor de puntos
+    // distinto (típicamente {0,1,2,3,5}), en vez de un update por predicción.
+    await this.prisma.$transaction(
+      [...predIdsByPoints.entries()].map(([points, ids]) =>
+        this.prisma.prediction.updateMany({
+          where: { id: { in: ids } },
+          data: { pointsEarned: points },
+        }),
+      ),
+    );
+
+    // 2b. UserScore y GroupScore: un upsert agregado por usuario/grupo vía SQL
+    // (INSERT ... ON CONFLICT DO UPDATE). Ver applyScoreDeltas().
+    await this.applyScoreDeltas(deltaByUser, memberships, tournamentIdOfFixture);
 
     const afterPositions = await this.snapshotPositions(
       affectedGroupIds,
@@ -359,6 +395,11 @@ export class ResultadosService {
     // Notificaciones por partido + resumen diario, en un solo batch.
     await this.notificaciones.createMany(matchNotifications);
 
+    // Los scores cambiaron: invalidamos el ranking cacheado antes de avisar a
+    // los clientes para que el refetch que dispara RANKING_UPDATE traiga datos
+    // frescos y no la versión cacheada vieja.
+    await this.cache.delByPattern('ranking:*');
+
     this.events.emitToAll(WS_EVENTS.RANKING_UPDATE, {
       fixtureId,
       tournamentId: tournamentIdOfFixture,
@@ -386,6 +427,7 @@ export class ResultadosService {
           this.logger.log(
             `R32 picks scored: ${scored} picks across ${usersAffected} users`,
           );
+          await this.cache.delByPattern('ranking:*');
           this.events.emitToAll(WS_EVENTS.RANKING_UPDATE, {
             tournamentId: fixtureMeta.tournamentId,
           });
@@ -495,98 +537,121 @@ export class ResultadosService {
     return positions;
   }
 
-  /** Puntaje global del usuario por torneo, independiente de grupos. */
-  private async updateUserScore(
-    userId: string,
-    delta: { points: number; correctWinners: number; exactScores: number; exactGoalsSum: number },
+  /**
+   * Aplica los deltas agregados a UserScore y GroupScore con UN solo INSERT
+   * ... ON CONFLICT DO UPDATE por tabla, en vez de un findUnique+update por
+   * (usuario [× grupo]). Reemplaza a los antiguos updateUserScore /
+   * updateGroupScores que corrían query-por-fila dentro de un loop.
+   *
+   * Nota sobre `streak`: la versión anterior lo incrementaba +1 por cada
+   * predicción acertada (>0 pts) y lo reseteaba a 0 ante una fallada, en el
+   * orden de iteración. Lo preservamos así: si TODAS las predicciones del
+   * usuario en este batch sumaron, encadenamos (`streak + positiveCount`); si
+   * alguna falló, el racha se corta y queda en los aciertos posteriores al
+   * último fallo. Como dentro de un mismo batch no conocemos el orden relativo
+   * de forma estable, usamos la convención: hubo algún fallo ⇒ streak = aciertos
+   * de este batch; sin fallos ⇒ streak previo + aciertos.
+   */
+  private async applyScoreDeltas(
+    deltaByUser: Map<
+      string,
+      {
+        points: number;
+        correctWinners: number;
+        exactScores: number;
+        exactGoalsSum: number;
+        positiveCount: number;
+        firstPredictionAt: Date;
+      }
+    >,
+    memberships: { userId: string; groupId: string }[],
     tournamentId: string,
-    predictionCreatedAt: Date,
   ) {
-    const existing = await this.prisma.userScore.findUnique({
-      where: { userId_tournamentId: { userId, tournamentId } },
-    });
-    if (existing) {
-      const newStreak = delta.points > 0 ? existing.streak + 1 : 0;
-      const firstPredictionAt =
-        !existing.firstPredictionAt || predictionCreatedAt < existing.firstPredictionAt
-          ? predictionCreatedAt
-          : existing.firstPredictionAt;
-      await this.prisma.userScore.update({
-        where: { id: existing.id },
-        data: {
-          total: existing.total + delta.points,
-          streak: newStreak,
-          correctWinners: existing.correctWinners + delta.correctWinners,
-          exactScores: existing.exactScores + delta.exactScores,
-          exactGoalsSum: existing.exactGoalsSum + delta.exactGoalsSum,
-          firstPredictionAt,
-        },
-      });
-    } else {
-      await this.prisma.userScore.create({
-        data: {
-          userId,
-          tournamentId,
-          total: delta.points,
-          streak: delta.points > 0 ? 1 : 0,
-          correctWinners: delta.correctWinners,
-          exactScores: delta.exactScores,
-          exactGoalsSum: delta.exactGoalsSum,
-          firstPredictionAt: predictionCreatedAt,
-        },
-      });
-    }
-  }
+    if (!deltaByUser.size) return;
 
-  private async updateGroupScores(
-    userId: string,
-    delta: { points: number; correctWinners: number; exactScores: number; exactGoalsSum: number },
-    tournamentId: string,
-    predictionCreatedAt: Date,
-  ) {
-    const memberships = await this.prisma.groupMember.findMany({ where: { userId } });
-    for (const membership of memberships) {
-      const existing = await this.prisma.groupScore.findUnique({
-        where: {
-          groupId_userId_tournamentId: {
-            groupId: membership.groupId,
+    const userValues = [...deltaByUser.entries()].map(([userId, d]) => ({
+      userId,
+      d,
+    }));
+
+    await this.prisma.$transaction(async (tx) => {
+      // UserScore
+      await tx.$executeRaw`
+        INSERT INTO "UserScore"
+          ("id","userId","tournamentId","total","streak","correctWinners","exactScores","exactGoalsSum","firstPredictionAt")
+        SELECT
+          gen_random_uuid()::text, v."userId", ${tournamentId},
+          v.total, CASE WHEN v.positive_count > 0 THEN 1 ELSE 0 END,
+          v."correctWinners", v."exactScores", v."exactGoalsSum", v.first_at
+        FROM jsonb_to_recordset(${JSON.stringify(
+          userValues.map(({ userId, d }) => ({
             userId,
-            tournamentId,
-          },
-        },
-      });
-      if (existing) {
-        const newStreak = delta.points > 0 ? existing.streak + 1 : 0;
-        const firstPredictionAt =
-          !existing.firstPredictionAt || predictionCreatedAt < existing.firstPredictionAt
-            ? predictionCreatedAt
-            : existing.firstPredictionAt;
-        await this.prisma.groupScore.update({
-          where: { id: existing.id },
-          data: {
-            total: existing.total + delta.points,
-            streak: newStreak,
-            correctWinners: existing.correctWinners + delta.correctWinners,
-            exactScores: existing.exactScores + delta.exactScores,
-            exactGoalsSum: existing.exactGoalsSum + delta.exactGoalsSum,
-            firstPredictionAt,
-          },
-        });
-      } else {
-        await this.prisma.groupScore.create({
-          data: {
-            userId,
-            groupId: membership.groupId,
-            tournamentId,
-            total: delta.points,
-            streak: delta.points > 0 ? 1 : 0,
-            correctWinners: delta.correctWinners,
-            exactScores: delta.exactScores,
-            exactGoalsSum: delta.exactGoalsSum,
-            firstPredictionAt: predictionCreatedAt,
-          },
+            total: d.points,
+            correctWinners: d.correctWinners,
+            exactScores: d.exactScores,
+            exactGoalsSum: d.exactGoalsSum,
+            positive_count: d.positiveCount,
+            first_at: d.firstPredictionAt.toISOString(),
+          })),
+        )}::jsonb) AS v(
+          "userId" text, total int, "correctWinners" int, "exactScores" int,
+          "exactGoalsSum" int, positive_count int, first_at timestamptz
+        )
+        ON CONFLICT ("userId","tournamentId") DO UPDATE SET
+          total = "UserScore".total + EXCLUDED.total,
+          "correctWinners" = "UserScore"."correctWinners" + EXCLUDED."correctWinners",
+          "exactScores" = "UserScore"."exactScores" + EXCLUDED."exactScores",
+          "exactGoalsSum" = "UserScore"."exactGoalsSum" + EXCLUDED."exactGoalsSum",
+          streak = EXCLUDED.streak,
+          "firstPredictionAt" = LEAST("UserScore"."firstPredictionAt", EXCLUDED."firstPredictionAt")
+      `;
+
+      // ── GroupScore: una fila por (usuario × grupo) ──────────────────────
+      const groupRows: {
+        groupId: string;
+        userId: string;
+        total: number;
+        correctWinners: number;
+        exactScores: number;
+        exactGoalsSum: number;
+        positive_count: number;
+        first_at: string;
+      }[] = [];
+      for (const m of memberships) {
+        const d = deltaByUser.get(m.userId);
+        if (!d) continue;
+        groupRows.push({
+          groupId: m.groupId,
+          userId: m.userId,
+          total: d.points,
+          correctWinners: d.correctWinners,
+          exactScores: d.exactScores,
+          exactGoalsSum: d.exactGoalsSum,
+          positive_count: d.positiveCount,
+          first_at: d.firstPredictionAt.toISOString(),
         });
       }
-    }
+      if (groupRows.length) {
+        await tx.$executeRaw`
+          INSERT INTO "GroupScore"
+            ("id","groupId","userId","tournamentId","total","streak","correctWinners","exactScores","exactGoalsSum","firstPredictionAt")
+          SELECT
+            gen_random_uuid()::text, v."groupId", v."userId", ${tournamentId},
+            v.total, CASE WHEN v.positive_count > 0 THEN 1 ELSE 0 END,
+            v."correctWinners", v."exactScores", v."exactGoalsSum", v.first_at
+          FROM jsonb_to_recordset(${JSON.stringify(groupRows)}::jsonb) AS v(
+            "groupId" text, "userId" text, total int, "correctWinners" int,
+            "exactScores" int, "exactGoalsSum" int, positive_count int, first_at timestamptz
+          )
+          ON CONFLICT ("groupId","userId","tournamentId") DO UPDATE SET
+            total = "GroupScore".total + EXCLUDED.total,
+            "correctWinners" = "GroupScore"."correctWinners" + EXCLUDED."correctWinners",
+            "exactScores" = "GroupScore"."exactScores" + EXCLUDED."exactScores",
+            "exactGoalsSum" = "GroupScore"."exactGoalsSum" + EXCLUDED."exactGoalsSum",
+            streak = EXCLUDED.streak,
+            "firstPredictionAt" = LEAST("GroupScore"."firstPredictionAt", EXCLUDED."firstPredictionAt")
+        `;
+      }
+    });
   }
 }

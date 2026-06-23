@@ -303,6 +303,10 @@ model Prediction {
   fixture Fixture @relation(fields: [fixtureId], references: [id])
 
   @@unique([userId, matchId])
+  // calculatePoints filtra por (fixtureId, pointsEarned IS NULL); el cron
+  // de "fixture closing" hace distinct userId por fixtureId.
+  @@index([fixtureId, pointsEarned])
+  @@index([fixtureId, userId])
 }
 
 // Predicción de los 32 equipos que clasifican a R32 (Round of 32 / "16vos de final")
@@ -378,6 +382,10 @@ model GroupScore {
   tournament Tournament @relation(fields: [tournamentId], references: [id])
 
   @@unique([groupId, userId, tournamentId])
+  // getGroupRanking / snapshotPositions ordenan por (groupId, tournamentId).
+  @@index([groupId, tournamentId])
+  // applyScoreDeltas y stats por usuario buscan por (userId, tournamentId).
+  @@index([userId, tournamentId])
 }
 
 // Puntaje global del usuario por torneo, independiente de grupos.
@@ -398,6 +406,8 @@ model UserScore {
   tournament Tournament @relation(fields: [tournamentId], references: [id])
 
   @@unique([userId, tournamentId])
+  // getGlobalRanking / globalPositions ordenan por (tournamentId, total desc).
+  @@index([tournamentId, total])
 }
 
 // ============================================================
@@ -413,6 +423,10 @@ model Notification {
   read      Boolean          @default(false)
   createdAt DateTime         @default(now())
   user      User             @relation(fields: [userId], references: [id])
+
+  // findByUser ordena por createdAt; markAllRead filtra por (userId, read).
+  @@index([userId, createdAt])
+  @@index([userId, read])
 }
 
 model Achievement {

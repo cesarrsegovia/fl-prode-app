@@ -16,7 +16,9 @@
     "db:seed-squads": "ts-node -r tsconfig-paths/register prisma/seed-squads.ts",
     "db:map-espn-ids": "ts-node -r tsconfig-paths/register prisma/map-espn-ids.ts",
     "db:fix-match-times": "ts-node -r tsconfig-paths/register prisma/fix-match-times.ts",
-    "db:audit-match-times": "ts-node -r tsconfig-paths/register prisma/audit-match-times.ts"
+    "db:audit-match-times": "ts-node -r tsconfig-paths/register prisma/audit-match-times.ts",
+    "db:audit-users": "ts-node -r tsconfig-paths/register prisma/audit-users.ts",
+    "db:delete-users": "ts-node -r tsconfig-paths/register prisma/delete-users.ts"
   },
   "prisma": {
     "seed": "ts-node -r tsconfig-paths/register prisma/seed.ts"

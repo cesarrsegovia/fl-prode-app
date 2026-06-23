@@ -47,74 +47,109 @@ export class UsuariosService {
     }
   }
 
-  /** Métricas agregadas del usuario para la página de perfil. */
+  /**
+   * Métricas agregadas del usuario para la página de perfil.
+   *
+   * Antes traía TODAS las predicciones del usuario (con match + fixture
+   * incluidos) y filtraba/agrupaba en JS: O(historial) en memoria por request.
+   * Ahora todo se calcula en la DB con agregaciones e índices: cada métrica es
+   * un COUNT/SUM sobre (userId, …) y la "mejor fecha" es un GROUP BY con LIMIT 1.
+   */
   async getStats(userId: string) {
-    const predictions = await this.prisma.prediction.findMany({
-      where: { userId },
-      include: { match: true, fixture: { select: { id: true, name: true, round: true } } },
-    });
+    // Predicado común de "predicción liquidada": partido FINISHED y con puntos.
+    const settledWhere: Prisma.PredictionWhereInput = {
+      userId,
+      pointsEarned: { not: null },
+      match: { is: { status: MatchStatus.FINISHED } },
+    };
 
-    const settled = predictions.filter(
-      (p) => p.match.status === MatchStatus.FINISHED && p.pointsEarned !== null,
-    );
+    // Lecturas independientes en paralelo. Usamos Promise.all (no $transaction)
+    // porque son métricas read-only: no necesitan atomicidad y así Prisma
+    // conserva el tipo preciso de cada agregación.
+    const [
+      totalPredictions,
+      settledAgg,
+      hits,
+      exactScores,
+      captainPlayed,
+      captainHits,
+      bestFixtureGroup,
+    ] = await Promise.all([
+      this.prisma.prediction.count({ where: { userId } }),
+      this.prisma.prediction.aggregate({
+        where: settledWhere,
+        _count: { _all: true },
+        _sum: { pointsEarned: true },
+      }),
+      this.prisma.prediction.count({
+        where: { ...settledWhere, pointsEarned: { gt: 0 } },
+      }),
+      this.prisma.prediction.count({
+        where: { ...settledWhere, pointsEarned: { gt: POINTS_CORRECT_RESULT } },
+      }),
+      this.prisma.prediction.count({
+        where: { ...settledWhere, isCaptain: true },
+      }),
+      this.prisma.prediction.count({
+        where: { ...settledWhere, isCaptain: true, pointsEarned: { gt: 0 } },
+      }),
+      // Mejor fecha: fixture con mayor suma de puntos. GROUP BY en la DB,
+      // ordenado y limitado a 1 — no traemos las predicciones a memoria.
+      this.prisma.prediction.groupBy({
+        by: ['fixtureId'],
+        where: settledWhere,
+        _sum: { pointsEarned: true },
+        _count: { fixtureId: true },
+        orderBy: { _sum: { pointsEarned: 'desc' } },
+        take: 1,
+      }),
+    ]);
 
-    const exactScores = settled.filter(
-      (p) => (p.pointsEarned ?? 0) > POINTS_CORRECT_RESULT,
-    ).length;
+    const settledCount = settledAgg._count._all;
+    const totalPoints = settledAgg._sum.pointsEarned ?? 0;
 
-    const hits = settled.filter((p) => (p.pointsEarned ?? 0) > 0).length;
-
-    const captainSettled = settled.filter((p) => p.isCaptain);
-    const captainHits = captainSettled.filter(
-      (p) => (p.pointsEarned ?? 0) > 0,
-    ).length;
-
-    const totalPoints = settled.reduce(
-      (acc, p) => acc + (p.pointsEarned ?? 0),
-      0,
-    );
-
-    // Mejor fecha: mayor suma de pointsEarned por fixture
-    const byFixture = new Map<string, { fixture: typeof predictions[number]['fixture']; total: number; hits: number; matches: number }>();
-    for (const p of settled) {
-      const cur = byFixture.get(p.fixtureId) ?? {
-        fixture: p.fixture,
-        total: 0,
-        hits: 0,
-        matches: 0,
-      };
-      cur.total += p.pointsEarned ?? 0;
-      if ((p.pointsEarned ?? 0) > 0) cur.hits++;
-      cur.matches++;
-      byFixture.set(p.fixtureId, cur);
+    let bestFixture: {
+      id: string;
+      name: string;
+      total: number;
+      hits: number;
+      matches: number;
+    } | null = null;
+    const top = bestFixtureGroup[0];
+    if (top) {
+      const fx = await this.prisma.fixture.findUnique({
+        where: { id: top.fixtureId },
+        select: { id: true, name: true, round: true },
+      });
+      const fixtureHits = await this.prisma.prediction.count({
+        where: { ...settledWhere, fixtureId: top.fixtureId, pointsEarned: { gt: 0 } },
+      });
+      if (fx) {
+        bestFixture = {
+          id: fx.id,
+          name: fx.name ?? `Fecha ${fx.round}`,
+          total: top._sum.pointsEarned ?? 0,
+          hits: fixtureHits,
+          matches: top._count.fixtureId,
+        };
+      }
     }
-    const bestFixture = [...byFixture.values()].sort(
-      (a, b) => b.total - a.total,
-    )[0];
 
     return {
-      totalPredictions: predictions.length,
-      settledPredictions: settled.length,
+      totalPredictions,
+      settledPredictions: settledCount,
       hits,
-      hitRate: settled.length ? Math.round((hits / settled.length) * 100) : 0,
+      hitRate: settledCount ? Math.round((hits / settledCount) * 100) : 0,
       exactScores,
       captain: {
-        played: captainSettled.length,
+        played: captainPlayed,
         hits: captainHits,
-        hitRate: captainSettled.length
-          ? Math.round((captainHits / captainSettled.length) * 100)
+        hitRate: captainPlayed
+          ? Math.round((captainHits / captainPlayed) * 100)
           : 0,
       },
       totalPoints,
-      bestFixture: bestFixture
-        ? {
-            id: bestFixture.fixture.id,
-            name: bestFixture.fixture.name ?? `Fecha ${bestFixture.fixture.round}`,
-            total: bestFixture.total,
-            hits: bestFixture.hits,
-            matches: bestFixture.matches,
-          }
-        : null,
+      bestFixture,
     };
   }
 
