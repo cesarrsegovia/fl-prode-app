@@ -36,10 +36,13 @@ services:
       pnpm --filter @prode/shared build &&
       pnpm --filter @prode/api exec prisma generate &&
       pnpm --filter @prode/api build
-    # migrate deploy corre antes de levantar el server (idempotente; falla ruidoso si hay drift)
-    startCommand: >-
-      pnpm --filter @prode/api exec prisma migrate deploy &&
-      pnpm --filter @prode/api run start:prod
+    # NOTA: las migraciones se aplican manualmente (prisma migrate deploy contra la
+    # External URL) tras consolidar la historia en el baseline. NO corremos migrate
+    # deploy en el arranque para que un estado transitorio de _prisma_migrations no
+    # tire abajo el server (el && cortaba antes de start:prod → "no open ports").
+    # Para futuras migraciones: correrlas a mano o reactivar esta línea cuando la
+    # historia esté estable.
+    startCommand: pnpm --filter @prode/api run start:prod
     envVars:
       - key: NODE_VERSION
         value: "20"
