@@ -15,7 +15,11 @@ import {
   ResultsProvider,
 } from './providers/results-provider';
 import { matchRemoteToLocal } from './providers/match-remote';
-import { computePredictionOutcome } from './scoring';
+import {
+  computePredictionOutcome,
+  aggregateScoredPredictions,
+  type ScoredPredictionInput,
+} from './scoring';
 import { matchResultPhrase, dailySummaryPhrase } from './activity-phrases';
 
 /**
@@ -253,31 +257,21 @@ export class ResultadosService {
     }[] = [];
 
     // ── Fase 1: cómputo en memoria (CPU puro, sin I/O) ────────────────────
-    // Acumulamos el delta agregado por usuario y guardamos el pointsEarned de
-    // cada predicción para escribirlo en un solo batch. Antes esto eran 1+N+M
-    // queries secuenciales por predicción; ahora son cero queries en esta fase.
-    type ScoreDelta = {
-      points: number;
-      correctWinners: number;
-      exactScores: number;
-      exactGoalsSum: number;
-      positiveCount: number; // nº de aciertos (>0 pts): replica el streak por-predicción legacy
-      firstPredictionAt: Date;
-    };
-    const deltaByUser = new Map<string, ScoreDelta>();
-    // Agrupamos las predicciones por su pointsEarned para hacer pocos updateMany.
-    const predIdsByPoints = new Map<number, string[]>();
-
+    // Puntuamos cada predicción y, en paralelo, armamos las notificaciones por
+    // partido (dependen de datos del match, por eso no salen de la función pura).
+    const scored: ScoredPredictionInput[] = [];
     for (const pred of finished) {
       const { homeScore, awayScore } = pred.match;
       const outcome = computePredictionOutcome(pred, {
         homeScore: homeScore!,
         awayScore: awayScore!,
       });
-
-      const bucket = predIdsByPoints.get(outcome.points) ?? [];
-      bucket.push(pred.id);
-      predIdsByPoints.set(outcome.points, bucket);
+      scored.push({
+        userId: pred.userId,
+        predictionId: pred.id,
+        createdAt: pred.createdAt,
+        outcome,
+      });
 
       const matchPhrase = matchResultPhrase({
         homeTeamName: pred.match.homeTeamName,
@@ -294,24 +288,11 @@ export class ResultadosService {
         payload: { key: matchPhrase.key, params: matchPhrase.params },
       });
 
-      const acc = deltaByUser.get(pred.userId) ?? {
-        points: 0,
-        correctWinners: 0,
-        exactScores: 0,
-        exactGoalsSum: 0,
-        positiveCount: 0,
-        firstPredictionAt: pred.createdAt,
-      };
-      acc.points += outcome.points;
-      acc.correctWinners += outcome.correctWinner;
-      acc.exactScores += outcome.exactScore;
-      acc.exactGoalsSum += outcome.exactGoals;
-      if (outcome.points > 0) acc.positiveCount += 1;
-      if (pred.createdAt < acc.firstPredictionAt) acc.firstPredictionAt = pred.createdAt;
-      deltaByUser.set(pred.userId, acc);
-
       pointsByUser.set(pred.userId, (pointsByUser.get(pred.userId) ?? 0) + outcome.points);
     }
+
+    // Agregación pura (testeada en scoring.spec.ts): delta por usuario + buckets.
+    const { deltaByUser, predIdsByPoints } = aggregateScoredPredictions(scored);
 
     // ── Fase 2: escritura batcheada (pocas queries, set-based) ────────────
     // 2a. pointsEarned de las predicciones: un updateMany por valor de puntos
