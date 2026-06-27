@@ -363,13 +363,13 @@ export default function HomePage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12 items-start">
         {/* Mis grupos */}
         <section>
-          <h2 className="font-display font-extrabold text-2xl text-foreground tracking-tight mb-4">
-            {t('myGroups.title')}
-          </h2>
-          <div className="flex justify-end mb-3">
+          <div className="flex items-baseline justify-between gap-3 mb-4">
+            <h2 className="font-display font-extrabold text-2xl text-foreground tracking-tight">
+              {t('myGroups.title')}
+            </h2>
             <Link
               href="/grupos"
-              className="text-xs font-display font-bold text-neon hover:underline uppercase tracking-[0.18em]"
+              className="shrink-0 text-xs font-display font-bold text-neon hover:underline uppercase tracking-[0.18em]"
             >
               {t('myGroups.viewAll')}
             </Link>
@@ -431,7 +431,12 @@ export default function HomePage() {
                       {i + 1}
                     </span>
                     <Avatar size="default" className="shrink-0">
-                      <AvatarImage src={s.photoUrl ?? undefined} alt={s.name} />
+                      {/* Foto del jugador si ESPN la tiene; si no, la bandera del país. */}
+                      <AvatarImage
+                        src={s.photoUrl ?? s.flagUrl ?? undefined}
+                        alt={s.name}
+                        className="object-cover"
+                      />
                       <AvatarFallback className="bg-surface-3 text-foreground text-xs font-bold">
                         {getInitials(s.name)}
                       </AvatarFallback>
@@ -441,7 +446,8 @@ export default function HomePage() {
                         {s.name}
                       </p>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                        {s.flagUrl && (
+                        {/* Si el avatar ya es la bandera (no hay foto), no la repetimos acá. */}
+                        {s.photoUrl && s.flagUrl && (
                           <TeamFlag size="xs" src={s.flagUrl} alt={s.teamName ?? ''} />
                         )}
                         <span className="text-[11px] text-ink-muted truncate">
