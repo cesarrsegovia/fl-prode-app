@@ -18,6 +18,7 @@ import { BracketPickDto } from './dto/bracket-pick.dto';
 import { R32QualifierPicksDto } from './dto/r32-picks.dto';
 import { TopScorerPickDto } from './dto/top-scorer-pick.dto';
 import { SetTopScorerDto } from './dto/set-top-scorer.dto';
+import { ConfirmR32ThirdsDto } from './dto/confirm-r32-thirds.dto';
 
 @Controller('tournaments')
 export class TournamentsController {
@@ -201,6 +202,23 @@ export class TournamentsController {
     @Body() body: SetTopScorerDto,
   ) {
     return this.service.setTournamentTopScorer(id, body.playerId ?? null);
+  }
+
+  // ---------- R32: asignación de terceros (admin) ----------
+
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @Get(':id/r32-thirds/proposal')
+  r32ThirdsProposal(@Param('id') id: string) {
+    return this.service.getR32ThirdsProposal(id);
+  }
+
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @Post(':id/r32-thirds/confirm')
+  confirmR32Thirds(
+    @Param('id') id: string,
+    @Body() body: ConfirmR32ThirdsDto,
+  ) {
+    return this.service.confirmR32Thirds(id, body.assignment);
   }
 
   // ---------- TournamentEntry (wallet del padre) ----------

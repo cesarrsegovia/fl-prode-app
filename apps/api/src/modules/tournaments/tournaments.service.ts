@@ -20,6 +20,17 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { ProviderService } from '../provider/provider.service';
 import { ProviderClientError } from '../provider/provider.client';
 import { resolveTopScorerPoints } from './top-scorer';
+import {
+  buildR32Detail,
+  type R32QualifiersDetailed,
+} from './r32-qualifiers';
+import { parseR32Placeholder } from './r32-placeholders';
+import {
+  proposeR32Thirds,
+  R32_THIRD_SLOTS,
+  R32_THIRD_SLOT_CANDIDATES,
+  type R32ThirdSlot,
+} from './r32-thirds';
 
 interface R32PickInputItem {
   teamId: string;
@@ -337,6 +348,18 @@ export class TournamentsService {
    * de grupos terminados.
    */
   async computeR32Qualifiers(tournamentId: string): Promise<Set<string> | null> {
+    const detailed = await this.computeR32QualifiersDetailed(tournamentId);
+    return detailed ? detailed.qualifiers : null;
+  }
+
+  /**
+   * Igual que computeR32Qualifiers pero además expone, para cada clasificado,
+   * su posición (1°/2°/3°) y grupo — necesario para rellenar las llaves de R32.
+   * La lógica de cálculo vive en buildR32Detail (función pura, testeada).
+   */
+  async computeR32QualifiersDetailed(
+    tournamentId: string,
+  ): Promise<R32QualifiersDetailed | null> {
     const groupMatches = await this.prisma.match.findMany({
       where: { tournamentId, stage: MatchStage.GROUP },
       select: {
@@ -346,95 +369,260 @@ export class TournamentsService {
         homeScore: true,
         awayScore: true,
         status: true,
+        group: { select: { name: true } },
       },
     });
     if (!groupMatches.length) return null;
+    // Mantenemos el guard de "todos FINISHED" aquí (buildR32Detail valida los
+    // datos pero no el status); si falta terminar algún partido, no hay nada.
     const allFinished = groupMatches.every(
-      (m) =>
-        m.status === MatchStatus.FINISHED &&
-        m.homeScore !== null &&
-        m.awayScore !== null &&
-        m.homeTeamId &&
-        m.awayTeamId &&
-        m.groupId,
+      (m) => m.status === MatchStatus.FINISHED,
     );
     if (!allFinished) return null;
 
-    interface Stats {
-      teamId: string;
-      groupId: string;
-      points: number;
-      goalsFor: number;
-      goalsAgainst: number;
-      goalDiff: number;
+    const groupIdToName = new Map<string, string>();
+    for (const m of groupMatches) {
+      if (m.groupId && m.group?.name) groupIdToName.set(m.groupId, m.group.name);
     }
-    const stats = new Map<string, Stats>();
-    const ensure = (teamId: string, groupId: string) => {
-      let s = stats.get(teamId);
-      if (!s) {
-        s = {
-          teamId,
-          groupId,
-          points: 0,
-          goalsFor: 0,
-          goalsAgainst: 0,
-          goalDiff: 0,
-        };
-        stats.set(teamId, s);
+
+    return buildR32Detail(
+      groupMatches.map((m) => ({
+        groupId: m.groupId,
+        homeTeamId: m.homeTeamId,
+        awayTeamId: m.awayTeamId,
+        homeScore: m.homeScore,
+        awayScore: m.awayScore,
+      })),
+      groupIdToName,
+    );
+  }
+
+  /**
+   * Rellena las llaves de R32 con los equipos clasificados reales, parseando los
+   * placeholders sembrados ("1° Grupo A", "2° Grupo B", "3° (A/B/C/D/F)").
+   *
+   * - TOP2 (1°/2° de cada grupo): se resuelven y publican automáticamente.
+   * - Terceros: NO se publican solos. Si no hay asignación confirmada por el
+   *   admin, se calcula una PROPUESTA y se guarda en Tournament.r32ThirdsAssignment
+   *   (sin tocar los Match). Solo si r32ThirdsConfirmed=true se escriben los
+   *   lados de tercero en los partidos.
+   *
+   * Idempotente: solo actualiza los lados que cambian.
+   */
+  async fillR32Matches(
+    tournamentId: string,
+  ): Promise<{ filledTop: number; thirdsPending: boolean; thirdsConfirmed: boolean }> {
+    const detailed = await this.computeR32QualifiersDetailed(tournamentId);
+    if (!detailed) return { filledTop: 0, thirdsPending: false, thirdsConfirmed: false };
+
+    const tournament = await this.prisma.tournament.findUnique({
+      where: { id: tournamentId },
+      select: { r32ThirdsAssignment: true, r32ThirdsConfirmed: true },
+    });
+    const thirdsConfirmed = tournament?.r32ThirdsConfirmed ?? false;
+
+    // Asegurar que exista una propuesta de terceros si todavía no hay nada.
+    if (!tournament?.r32ThirdsAssignment) {
+      try {
+        const proposal = proposeR32Thirds(detailed.qualifiedThirdGroups);
+        await this.prisma.tournament.update({
+          where: { id: tournamentId },
+          data: { r32ThirdsAssignment: proposal },
+        });
+      } catch {
+        // Si no se puede proponer (combinación no resoluble), seguimos sin
+        // terceros; el admin puede asignarlos a mano.
       }
-      return s;
+    }
+
+    const matches = await this.prisma.match.findMany({
+      where: { tournamentId, stage: MatchStage.R32 },
+      select: {
+        id: true,
+        externalId: true,
+        homeTeamName: true,
+        awayTeamName: true,
+        homeTeamId: true,
+        awayTeamId: true,
+      },
+    });
+
+    // Mapa teamId -> name real para denormalizar.
+    const teamIds = new Set<string>();
+    for (const t of detailed.qualifiers) teamIds.add(t);
+    const teams = await this.prisma.team.findMany({
+      where: { id: { in: [...teamIds] } },
+      select: { id: true, name: true },
+    });
+    const teamName = new Map(teams.map((t) => [t.id, t.name]));
+
+    // Asignación de terceros vigente (solo si está confirmada).
+    const thirdAssign =
+      (tournament?.r32ThirdsAssignment as Record<string, string> | null) ?? null;
+
+    // Resuelve el teamId de un lado a partir de su placeholder.
+    const resolveSide = (
+      externalId: string | null,
+      placeholder: string,
+    ): string | null => {
+      const parsed = parseR32Placeholder(placeholder);
+      if (parsed.kind === 'TOP') {
+        return detailed.topByGroupPos.get(`${parsed.group}#${parsed.position}`) ?? null;
+      }
+      if (parsed.kind === 'THIRD') {
+        // Solo publicamos terceros si están confirmados por el admin.
+        if (!thirdsConfirmed || !thirdAssign || !externalId) return null;
+        const groupName = thirdAssign[externalId];
+        if (!groupName) return null;
+        return detailed.thirdByGroup.get(groupName) ?? null;
+      }
+      return null;
     };
 
-    for (const m of groupMatches) {
-      const home = ensure(m.homeTeamId!, m.groupId!);
-      const away = ensure(m.awayTeamId!, m.groupId!);
-      const hs = m.homeScore!;
-      const as = m.awayScore!;
-      home.goalsFor += hs;
-      home.goalsAgainst += as;
-      away.goalsFor += as;
-      away.goalsAgainst += hs;
-      if (hs > as) home.points += 3;
-      else if (hs < as) away.points += 3;
-      else {
-        home.points += 1;
-        away.points += 1;
+    const updates: Promise<unknown>[] = [];
+    for (const m of matches) {
+      const homeTeamId = resolveSide(m.externalId, m.homeTeamName);
+      const awayTeamId = resolveSide(m.externalId, m.awayTeamName);
+      const data: {
+        homeTeamId?: string;
+        homeTeamName?: string;
+        awayTeamId?: string;
+        awayTeamName?: string;
+      } = {};
+      if (homeTeamId && homeTeamId !== m.homeTeamId) {
+        data.homeTeamId = homeTeamId;
+        data.homeTeamName = teamName.get(homeTeamId) ?? m.homeTeamName;
+      }
+      if (awayTeamId && awayTeamId !== m.awayTeamId) {
+        data.awayTeamId = awayTeamId;
+        data.awayTeamName = teamName.get(awayTeamId) ?? m.awayTeamName;
+      }
+      if (Object.keys(data).length) {
+        updates.push(this.prisma.match.update({ where: { id: m.id }, data }));
       }
     }
-    for (const s of stats.values()) {
-      s.goalDiff = s.goalsFor - s.goalsAgainst;
+    await Promise.all(updates);
+
+    return {
+      filledTop: updates.length,
+      thirdsPending: !thirdsConfirmed,
+      thirdsConfirmed,
+    };
+  }
+
+  /**
+   * Devuelve la propuesta de asignación de terceros para que el admin la revise
+   * y confirme. Incluye, por slot, el grupo propuesto, el equipo y los grupos
+   * candidatos válidos.
+   */
+  async getR32ThirdsProposal(tournamentId: string) {
+    const detailed = await this.computeR32QualifiersDetailed(tournamentId);
+    if (!detailed) {
+      return { ready: false, slots: [], confirmed: false };
+    }
+    const tournament = await this.prisma.tournament.findUnique({
+      where: { id: tournamentId },
+      select: { r32ThirdsAssignment: true, r32ThirdsConfirmed: true },
+    });
+    let assignment =
+      (tournament?.r32ThirdsAssignment as Record<string, string> | null) ?? null;
+    if (!assignment) {
+      try {
+        assignment = proposeR32Thirds(detailed.qualifiedThirdGroups);
+      } catch {
+        assignment = null;
+      }
     }
 
-    const cmp = (a: Stats, b: Stats) =>
-      b.points - a.points ||
-      b.goalDiff - a.goalDiff ||
-      b.goalsFor - a.goalsFor;
+    const teamIds = [...detailed.thirdByGroup.values()];
+    const teams = await this.prisma.team.findMany({
+      where: { id: { in: teamIds } },
+      select: { id: true, name: true },
+    });
+    const teamName = new Map(teams.map((t) => [t.id, t.name]));
 
-    const byGroup = new Map<string, Stats[]>();
-    for (const s of stats.values()) {
-      if (!byGroup.has(s.groupId)) byGroup.set(s.groupId, []);
-      byGroup.get(s.groupId)!.push(s);
-    }
-    for (const arr of byGroup.values()) arr.sort(cmp);
+    const slots = R32_THIRD_SLOTS.map((slot) => {
+      const group = assignment?.[slot] ?? null;
+      const teamId = group ? detailed.thirdByGroup.get(group) ?? null : null;
+      return {
+        slot,
+        proposedGroup: group,
+        proposedTeamId: teamId,
+        proposedTeamName: teamId ? teamName.get(teamId) ?? null : null,
+        // candidatos válidos = candidatos del slot que efectivamente clasificaron
+        candidateGroups: R32_THIRD_SLOT_CANDIDATES[slot].filter((g) =>
+          detailed.qualifiedThirdGroups.includes(g),
+        ),
+      };
+    });
 
-    const qualifiers = new Set<string>();
-    const thirdPlaced: Stats[] = [];
-    for (const arr of byGroup.values()) {
-      if (arr[0]) qualifiers.add(arr[0].teamId);
-      if (arr[1]) qualifiers.add(arr[1].teamId);
-      if (arr[2]) thirdPlaced.push(arr[2]);
+    return {
+      ready: true,
+      confirmed: tournament?.r32ThirdsConfirmed ?? false,
+      qualifiedThirdGroups: detailed.qualifiedThirdGroups,
+      slots,
+    };
+  }
+
+  /**
+   * Confirma la asignación de terceros (envía el admin). Valida que cada grupo
+   * pertenezca a los candidatos de su slot, que sean 8 grupos distintos y que
+   * todos hayan clasificado como terceros. Luego marca confirmado y rellena las
+   * llaves de tercero en los Match.
+   */
+  async confirmR32Thirds(
+    tournamentId: string,
+    assignment: Record<string, string>,
+  ): Promise<{ filledTop: number; thirdsConfirmed: boolean }> {
+    const detailed = await this.computeR32QualifiersDetailed(tournamentId);
+    if (!detailed) {
+      throw new BadRequestException('La fase de grupos todavía no terminó.');
     }
-    thirdPlaced.sort(cmp);
-    for (const t of thirdPlaced.slice(0, R32_BEST_THIRDS_TOTAL)) {
-      qualifiers.add(t.teamId);
+    const qualified = new Set(detailed.qualifiedThirdGroups);
+    const slots = R32_THIRD_SLOTS;
+    const usedGroups = new Set<string>();
+
+    for (const slot of slots) {
+      const group = assignment[slot];
+      if (!group) {
+        throw new BadRequestException(`Falta asignar el slot ${slot}.`);
+      }
+      if (!R32_THIRD_SLOT_CANDIDATES[slot as R32ThirdSlot].includes(group)) {
+        throw new BadRequestException(
+          `El grupo ${group} no es candidato válido para ${slot}.`,
+        );
+      }
+      if (!qualified.has(group)) {
+        throw new BadRequestException(
+          `El tercero del grupo ${group} no clasificó.`,
+        );
+      }
+      if (usedGroups.has(group)) {
+        throw new BadRequestException(`El grupo ${group} está repetido.`);
+      }
+      usedGroups.add(group);
     }
-    return qualifiers;
+    if (usedGroups.size !== slots.length) {
+      throw new BadRequestException(
+        `Hay que asignar exactamente ${slots.length} terceros distintos.`,
+      );
+    }
+
+    await this.prisma.tournament.update({
+      where: { id: tournamentId },
+      data: { r32ThirdsAssignment: assignment, r32ThirdsConfirmed: true },
+    });
+
+    const { filledTop } = await this.fillR32Matches(tournamentId);
+    return { filledTop, thirdsConfirmed: true };
   }
 
   /**
    * Una vez que terminó la fase de grupos, puntúa los picks R32 que están
    * sin scorear. Suma POINTS_R32_QUALIFIER por cada equipo acertado al total
-   * del usuario en cada GroupScore (sin tocar streak). Idempotente.
+   * del usuario, TANTO en el ranking global (UserScore) como en cada GroupScore
+   * (sin tocar streak). El global cubre también a los usuarios sin grupo.
+   * Idempotente.
    */
   async scoreR32PicksIfReady(
     tournamentId: string,
@@ -471,6 +659,18 @@ export class TournamentsService {
     const userIds = [...pointsByUser.keys()];
     if (!userIds.length) return { scored: unscored.length, usersAffected: 0 };
 
+    // 1) Ranking global (UserScore): por cada usuario que sumó, tenga grupo o no.
+    for (const userId of userIds) {
+      const pts = pointsByUser.get(userId) ?? 0;
+      if (pts <= 0) continue;
+      await this.prisma.userScore.upsert({
+        where: { userId_tournamentId: { userId, tournamentId } },
+        update: { total: { increment: pts } },
+        create: { userId, tournamentId, total: pts, streak: 0 },
+      });
+    }
+
+    // 2) Rankings de grupo (GroupScore): por cada membresía del usuario.
     const memberships = await this.prisma.groupMember.findMany({
       where: { userId: { in: userIds } },
       select: { userId: true, groupId: true },
@@ -478,7 +678,7 @@ export class TournamentsService {
     for (const m of memberships) {
       const pts = pointsByUser.get(m.userId) ?? 0;
       if (pts <= 0) continue;
-      const existing = await this.prisma.groupScore.findUnique({
+      await this.prisma.groupScore.upsert({
         where: {
           groupId_userId_tournamentId: {
             groupId: m.groupId,
@@ -486,23 +686,15 @@ export class TournamentsService {
             tournamentId,
           },
         },
+        update: { total: { increment: pts } },
+        create: {
+          userId: m.userId,
+          groupId: m.groupId,
+          tournamentId,
+          total: pts,
+          streak: 0,
+        },
       });
-      if (existing) {
-        await this.prisma.groupScore.update({
-          where: { id: existing.id },
-          data: { total: existing.total + pts },
-        });
-      } else {
-        await this.prisma.groupScore.create({
-          data: {
-            userId: m.userId,
-            groupId: m.groupId,
-            tournamentId,
-            total: pts,
-            streak: 0,
-          },
-        });
-      }
     }
 
     return { scored: unscored.length, usersAffected: userIds.length };

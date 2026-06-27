@@ -92,6 +92,12 @@ model Tournament {
   topScorerPlayerId String?
   topScorerDeadline DateTime?
 
+  // Asignación de los 8 mejores terceros a los cruces de R32. JSON con forma
+  // { slotExternalId: groupLetter }. Se genera como propuesta al cerrar los
+  // grupos y se publica recién cuando el admin la confirma (r32ThirdsConfirmed).
+  r32ThirdsAssignment Json?
+  r32ThirdsConfirmed  Boolean @default(false)
+
   fixtures        Fixture[]
   matches         Match[]
   groups          TournamentGroup[]

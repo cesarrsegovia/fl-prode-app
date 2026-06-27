@@ -401,6 +401,26 @@ export class ResultadosService {
       select: { round: true, tournamentId: true },
     });
     if (fixtureMeta?.round === 3) {
+      // Rellenar las llaves de R32 con los clasificados reales (TOP2 automático;
+      // terceros solo si el admin ya confirmó). En su propio try/catch: si falla
+      // el relleno, el scoring de abajo igual debe correr.
+      try {
+        const { filledTop, thirdsPending } =
+          await this.tournaments.fillR32Matches(fixtureMeta.tournamentId);
+        if (filledTop > 0) {
+          this.logger.log(
+            `R32 bracket filled: ${filledTop} sides${thirdsPending ? ' (terceros pendientes de confirmación admin)' : ''}`,
+          );
+          await this.cache.delByPattern('fixtures:*');
+          this.events.emitToAll(WS_EVENTS.RANKING_UPDATE, {
+            tournamentId: fixtureMeta.tournamentId,
+          });
+        }
+      } catch (err: any) {
+        this.logger.error(`R32 bracket fill failed: ${err.message}`);
+      }
+
+      // Puntuar los picks de clasificados a R32 (independiente del relleno).
       try {
         const { scored, usersAffected } =
           await this.tournaments.scoreR32PicksIfReady(fixtureMeta.tournamentId);
