@@ -29,6 +29,21 @@ const SAMPLE = {
         },
       ],
     },
+    {
+      // Partido de eliminación definido por penales (datos reales de ESPN:
+      // status STATUS_FINAL_PEN, score = tiempo jugado, shootoutScore = tanda).
+      id: '633850',
+      date: '2026-07-04T19:00Z',
+      status: { type: { state: 'post', name: 'STATUS_FINAL_PEN', completed: true } },
+      competitions: [
+        {
+          competitors: [
+            { homeAway: 'home', score: '3', shootoutScore: 4, team: { abbreviation: 'ARG' } },
+            { homeAway: 'away', score: '3', shootoutScore: 2, team: { abbreviation: 'FRA' } },
+          ],
+        },
+      ],
+    },
   ],
 };
 
@@ -40,6 +55,8 @@ describe('EspnResultsProvider.parseScoreboard', () => {
       status: MatchStatus.FINISHED,
       homeScore: 2,
       awayScore: 1,
+      homePens: null,
+      awayPens: null,
       homeAbbr: 'CAN',
       awayAbbr: 'BIH',
       startTime: '2026-06-12T19:00Z',
@@ -47,6 +64,16 @@ describe('EspnResultsProvider.parseScoreboard', () => {
     const pending = out.find((r) => r.externalId === '760417');
     expect(pending?.status).toBe(MatchStatus.PENDING);
     expect(pending?.homeScore).toBe(0);
+  });
+
+  it('parsea penales (shootoutScore) en partidos de eliminación', () => {
+    const out = EspnResultsProvider.parseScoreboard(SAMPLE);
+    const pen = out.find((r) => r.externalId === '633850');
+    expect(pen?.status).toBe(MatchStatus.FINISHED);
+    expect(pen?.homeScore).toBe(3);
+    expect(pen?.awayScore).toBe(3);
+    expect(pen?.homePens).toBe(4);
+    expect(pen?.awayPens).toBe(2);
   });
 
   it('saltea eventos sin competitors/score sin romper', () => {

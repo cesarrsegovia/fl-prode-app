@@ -22,6 +22,7 @@ interface CreatePronosticoInput {
   homeScoreGuess?: number;
   awayScoreGuess?: number;
   isCaptain?: boolean;
+  penaltyWinner?: Result;
 }
 
 @Injectable()
@@ -81,6 +82,11 @@ export class PronosticosService {
       where: { userId: data.userId, fixtureId: data.fixtureId },
     });
 
+    // El pick de penales solo tiene sentido si el usuario predijo empate; en
+    // cualquier otro caso lo normalizamos a null para no dejar datos colgados.
+    const penaltyWinner =
+      data.result === Result.DRAW ? data.penaltyWinner ?? null : null;
+
     const prediction = await this.prisma.prediction.upsert({
       where: { userId_matchId: { userId: data.userId, matchId: data.matchId } },
       update: {
@@ -88,6 +94,7 @@ export class PronosticosService {
         homeScoreGuess: data.homeScoreGuess ?? null,
         awayScoreGuess: data.awayScoreGuess ?? null,
         isCaptain: data.isCaptain ?? false,
+        penaltyWinner,
       },
       create: {
         userId: data.userId,
@@ -97,6 +104,7 @@ export class PronosticosService {
         homeScoreGuess: data.homeScoreGuess ?? null,
         awayScoreGuess: data.awayScoreGuess ?? null,
         isCaptain: data.isCaptain ?? false,
+        penaltyWinner,
       },
     });
     this.events.emitToUser(data.userId, WS_EVENTS.PREDICTION_UPDATED, prediction);

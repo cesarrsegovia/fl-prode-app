@@ -1,6 +1,7 @@
 import { Result } from '@prisma/client';
 import {
   computePredictionOutcome,
+  computeKnockoutOutcome,
   resultFromScore,
   aggregateScoredPredictions,
   type ScoredPredictionInput,
@@ -56,6 +57,75 @@ describe('computePredictionOutcome', () => {
       { homeScore: 2, awayScore: 2 },
     );
     expect(out).toEqual({ points: 3, correctWinner: 1, exactScore: 0, exactGoals: 0 });
+  });
+});
+
+describe('computeKnockoutOutcome', () => {
+  const base = {
+    homeScoreGuess: null as number | null,
+    awayScoreGuess: null as number | null,
+    isCaptain: false,
+    penaltyWinner: null as Result | null,
+  };
+  const noPens = { homePens: null, awayPens: null };
+
+  it('ganador en juego acertado + exacto: 5 pts', () => {
+    const out = computeKnockoutOutcome(
+      { ...base, result: Result.HOME, homeScoreGuess: 2, awayScoreGuess: 1 },
+      { homeScore: 2, awayScore: 1, ...noPens },
+    );
+    expect(out).toEqual({ points: 5, correctWinner: 1, exactScore: 1, exactGoals: 3 });
+  });
+
+  it('ganador en juego acertado, marcador no exacto: 3 pts', () => {
+    const out = computeKnockoutOutcome(
+      { ...base, result: Result.HOME, homeScoreGuess: 2, awayScoreGuess: 1 },
+      { homeScore: 1, awayScore: 0, ...noPens },
+    );
+    expect(out).toEqual({ points: 3, correctWinner: 1, exactScore: 0, exactGoals: 0 });
+  });
+
+  it('predijo ganador pero fue a penales: 0 de quién avanza (aunque su equipo gane la tanda)', () => {
+    const out = computeKnockoutOutcome(
+      { ...base, result: Result.HOME, homeScoreGuess: 2, awayScoreGuess: 1 },
+      { homeScore: 1, awayScore: 1, homePens: 4, awayPens: 2 },
+    );
+    expect(out.correctWinner).toBe(0);
+    expect(out.points).toBe(0); // marcador 2-1 ≠ 1-1, tampoco exacto
+  });
+
+  it('empate + penales: acierta quién avanza y exacto: 5 pts', () => {
+    const out = computeKnockoutOutcome(
+      { ...base, result: Result.DRAW, homeScoreGuess: 1, awayScoreGuess: 1, penaltyWinner: Result.HOME },
+      { homeScore: 1, awayScore: 1, homePens: 4, awayPens: 2 },
+    );
+    expect(out).toEqual({ points: 5, correctWinner: 1, exactScore: 1, exactGoals: 2 });
+  });
+
+  it('empate + penales: acierta marcador pero falla la tanda: 2 pts (solo exacto)', () => {
+    const out = computeKnockoutOutcome(
+      { ...base, result: Result.DRAW, homeScoreGuess: 1, awayScoreGuess: 1, penaltyWinner: Result.HOME },
+      { homeScore: 1, awayScore: 1, homePens: 2, awayPens: 4 }, // avanza AWAY
+    );
+    expect(out.correctWinner).toBe(0);
+    expect(out.exactScore).toBe(1);
+    expect(out.points).toBe(2);
+  });
+
+  it('predijo empate pero hubo ganador en juego: 0', () => {
+    const out = computeKnockoutOutcome(
+      { ...base, result: Result.DRAW, homeScoreGuess: 1, awayScoreGuess: 1, penaltyWinner: Result.HOME },
+      { homeScore: 2, awayScore: 0, ...noPens },
+    );
+    expect(out.points).toBe(0);
+  });
+
+  it('falla el ganador en juego: 0', () => {
+    const out = computeKnockoutOutcome(
+      { ...base, result: Result.HOME, homeScoreGuess: 1, awayScoreGuess: 0 },
+      { homeScore: 0, awayScore: 2, ...noPens },
+    );
+    expect(out).toEqual({ points: 0, correctWinner: 0, exactScore: 0, exactGoals: 0 });
   });
 });
 

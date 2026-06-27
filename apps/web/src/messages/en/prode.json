@@ -95,6 +95,7 @@
       "open": "Open"
     },
     "scoreBonus": "Score bonus (+{points} pts)",
+    "penaltyWinnerLabel": "Who advances on penalties?",
     "pointsFlag": {
       "pts": "pts",
       "aria": "You earned {points} points with this prediction"

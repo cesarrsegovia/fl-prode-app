@@ -1,6 +1,10 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { ActivityType, MatchStage, MatchStatus, NotificationType, Prisma, Result } from '@prisma/client';
-import { WS_EVENTS } from '@prode/shared';
+import {
+  WS_EVENTS,
+  isKnockoutStage,
+  MatchStage as SharedMatchStage,
+} from '@prode/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CacheService } from '../../common/cache/cache.service';
 import { EventsGateway } from '../../websocket/events.gateway';
@@ -8,6 +12,7 @@ import { GamificacionService } from '../gamificacion/gamificacion.service';
 import { NotificacionesService } from '../notificaciones/notificaciones.service';
 import { ActivityService } from '../activity/activity.service';
 import { TournamentsService } from '../tournaments/tournaments.service';
+import { knockoutWinnerSide } from '../tournaments/knockout-advance';
 import {
   ActiveMatchWithTeams,
   RemoteResult,
@@ -17,6 +22,7 @@ import {
 import { matchRemoteToLocal } from './providers/match-remote';
 import {
   computePredictionOutcome,
+  computeKnockoutOutcome,
   aggregateScoredPredictions,
   type ScoredPredictionInput,
 } from './scoring';
@@ -59,6 +65,8 @@ export class ResultadosService {
         fixtureId: true,
         stage: true,
         tournamentId: true,
+        homeTeamId: true,
+        awayTeamId: true,
         homeTeam: { select: { shortName: true } },
         awayTeam: { select: { shortName: true } },
       },
@@ -75,6 +83,8 @@ export class ResultadosService {
       fixtureId: m.fixtureId,
       stage: m.stage,
       tournamentId: m.tournamentId,
+      homeTeamId: m.homeTeamId,
+      awayTeamId: m.awayTeamId,
       homeAbbr: m.homeTeam?.shortName ?? null,
       awayAbbr: m.awayTeam?.shortName ?? null,
     }));
@@ -92,6 +102,8 @@ export class ResultadosService {
         affectedFixtureIds.add(local.fixtureId);
         if (local.stage === MatchStage.GROUP) {
           groupTournamentIds.add(local.tournamentId);
+        } else if (isKnockoutStage(local.stage as unknown as SharedMatchStage)) {
+          await this.handleKnockoutFinished(local, r);
         }
       }
     }
@@ -102,6 +114,72 @@ export class ResultadosService {
 
     for (const tournamentId of groupTournamentIds) {
       await this.refreshGroupStandings(tournamentId);
+    }
+  }
+
+  /**
+   * Un partido de eliminación quedó FINISHED: propaga el ganador (y perdedor,
+   * para el 3er puesto) a las rondas siguientes, y si fue la final dispara el
+   * scoring de los picks de campeón. En try/catch: un fallo acá no debe romper
+   * el cálculo de puntos del partido.
+   */
+  private async handleKnockoutFinished(
+    local: ActiveMatchWithTeams,
+    r: RemoteResult,
+  ) {
+    try {
+      const { updated } = await this.tournaments.propagateKnockoutResult(
+        local.tournamentId,
+        {
+          externalId: local.externalId,
+          homeTeamId: local.homeTeamId,
+          awayTeamId: local.awayTeamId,
+          homeScore: r.homeScore,
+          awayScore: r.awayScore,
+          homePens: r.homePens ?? null,
+          awayPens: r.awayPens ?? null,
+        },
+      );
+      if (updated > 0) {
+        await this.cache.delByPattern('fixtures:*');
+        this.events.emitToAll(WS_EVENTS.RANKING_UPDATE, {
+          tournamentId: local.tournamentId,
+        });
+      }
+
+      // La final define el campeón → puntuar BracketPicks.
+      if (local.stage === MatchStage.FINAL) {
+        const winnerSide = knockoutWinnerSide(
+          r.homeScore,
+          r.awayScore,
+          r.homePens ?? null,
+          r.awayPens ?? null,
+        );
+        const championTeamId =
+          winnerSide === 'HOME'
+            ? local.homeTeamId
+            : winnerSide === 'AWAY'
+              ? local.awayTeamId
+              : null;
+        if (championTeamId) {
+          const { scored, usersAffected } =
+            await this.tournaments.setTournamentChampion(
+              local.tournamentId,
+              championTeamId,
+            );
+          if (scored > 0) {
+            this.logger.log(
+              `Champion scored: ${scored} bracket picks across ${usersAffected} users`,
+            );
+            await this.cache.delByPattern('ranking:*');
+            this.events.emitToAll(WS_EVENTS.RANKING_UPDATE, {
+              tournamentId: local.tournamentId,
+            });
+          }
+        }
+      }
+    } catch (err: any) {
+      this.logger.error(`Knockout propagation failed: ${err.message}`);
     }
   }
 
@@ -262,10 +340,21 @@ export class ResultadosService {
     const scored: ScoredPredictionInput[] = [];
     for (const pred of finished) {
       const { homeScore, awayScore } = pred.match;
-      const outcome = computePredictionOutcome(pred, {
-        homeScore: homeScore!,
-        awayScore: awayScore!,
-      });
+      // En eliminación se puntúa por "quién avanza" (con penales) + marcador
+      // exacto; en grupos, por resultado + exacto. Ver scoring.ts.
+      const outcome = isKnockoutStage(
+        pred.match.stage as unknown as SharedMatchStage,
+      )
+        ? computeKnockoutOutcome(pred, {
+            homeScore: homeScore!,
+            awayScore: awayScore!,
+            homePens: pred.match.homePens,
+            awayPens: pred.match.awayPens,
+          })
+        : computePredictionOutcome(pred, {
+            homeScore: homeScore!,
+            awayScore: awayScore!,
+          });
       scored.push({
         userId: pred.userId,
         predictionId: pred.id,

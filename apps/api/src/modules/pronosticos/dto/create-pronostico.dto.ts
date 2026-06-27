@@ -24,4 +24,9 @@ export class CreatePronosticoDto {
   @IsOptional()
   @IsBoolean()
   isCaptain?: boolean;
+
+  // Solo eliminación: si result=DRAW, a qué equipo hace avanzar por penales.
+  @IsOptional()
+  @IsEnum(Result)
+  penaltyWinner?: Result;
 }

@@ -38,6 +38,9 @@ export interface ActiveMatchWithTeams extends ActiveMatch {
   awayAbbr: string | null;
   stage: MatchStage;
   tournamentId: string;
+  /** Solo para propagación de eliminación. */
+  homeTeamId: string | null;
+  awayTeamId: string | null;
 }
 
 /** Fila de la tabla de posiciones de un grupo, normalizada. */

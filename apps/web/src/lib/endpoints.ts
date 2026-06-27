@@ -38,6 +38,8 @@ export interface CreatePronosticoPayload {
   homeScoreGuess?: number;
   awayScoreGuess?: number;
   isCaptain?: boolean;
+  /** Solo eliminación: a quién hace avanzar por penales si result=DRAW. */
+  penaltyWinner?: Result;
 }
 
 export const pronosticos = {

@@ -92,6 +92,10 @@ model Tournament {
   topScorerPlayerId String?
   topScorerDeadline DateTime?
 
+  // Campeón del torneo (ganador de la final). Lo setea la propagación al
+  // terminar la final, o el admin a mano. Dispara el scoring de BracketPick.
+  championTeamId String?
+
   // Asignación de los 8 mejores terceros a los cruces de R32. JSON con forma
   // { slotExternalId: groupLetter }. Se genera como propuesta al cerrar los
   // grupos y se publica recién cuando el admin la confirma (r32ThirdsConfirmed).
@@ -301,6 +305,9 @@ model Prediction {
   homeScoreGuess Int?
   awayScoreGuess Int?
   isCaptain      Boolean  @default(false)
+  // Solo eliminación: si el usuario predijo empate (result=DRAW), a qué equipo
+  // hace avanzar por penales (HOME/AWAY). null en grupos o si no predijo empate.
+  penaltyWinner  Result?
   pointsEarned   Int?
   createdAt      DateTime @default(now())
 

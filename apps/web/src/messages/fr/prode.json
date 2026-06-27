@@ -95,6 +95,7 @@
       "open": "Ouvert"
     },
     "scoreBonus": "Bonus score (+{points} pts)",
+    "penaltyWinnerLabel": "Qui se qualifie aux tirs au but ?",
     "pointsFlag": {
       "pts": "pts",
       "aria": "Vous avez gagné {points} points avec ce pronostic"

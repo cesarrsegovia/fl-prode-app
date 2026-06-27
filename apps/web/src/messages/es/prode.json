@@ -95,6 +95,7 @@
       "open": "Abierto"
     },
     "scoreBonus": "Bonus marcador (+{points} pts)",
+    "penaltyWinnerLabel": "¿Quién avanza por penales?",
     "pointsFlag": {
       "pts": "pts",
       "aria": "Sumaste {points} puntos con este pronóstico"

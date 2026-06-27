@@ -52,11 +52,17 @@ export class EspnResultsProvider implements ResultsProvider {
       const away = competitors.find((c) => c?.homeAway === 'away');
       if (!home || !away) continue;
       const type = ev?.status?.type ?? {};
+      // Penales: en partidos definidos por tanda, ESPN trae `shootoutScore` en
+      // cada competidor (y status.type.name = STATUS_FINAL_PEN). El `score`
+      // sigue siendo el del tiempo jugado (90' o 120'). Si no hubo penales,
+      // shootoutScore viene null/undefined.
       out.push({
         externalId: String(ev.id),
         status: statusFromEspn(type.state ?? '', type.name ?? '', !!type.completed),
         homeScore: toInt(home.score),
         awayScore: toInt(away.score),
+        homePens: toInt(home.shootoutScore),
+        awayPens: toInt(away.shootoutScore),
         homeAbbr: home.team?.abbreviation ?? null,
         awayAbbr: away.team?.abbreviation ?? null,
         startTime: ev.date ?? null,

@@ -3,7 +3,7 @@
 import { memo, useMemo } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import type { Match } from '@prode/shared';
-import { MatchStatus, Result, POINTS_EXACT_SCORE } from '@prode/shared';
+import { MatchStatus, Result, POINTS_EXACT_SCORE, isKnockoutStage } from '@prode/shared';
 import { Minus, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { pointsBreakdown } from '@/lib/points-breakdown';
@@ -20,6 +20,8 @@ export interface MatchPick {
   homeScoreGuess?: number;
   awayScoreGuess?: number;
   isCaptain?: boolean;
+  /** Solo eliminación: si result=DRAW, a quién hace avanzar por penales. */
+  penaltyWinner?: Result;
 }
 
 interface Props {
@@ -130,6 +132,8 @@ export const MatchCard = memo(function MatchCard({
       result,
       homeScoreGuess: home,
       awayScoreGuess: away,
+      // El pick de penales solo aplica al empate: si deja de serlo, se limpia.
+      penaltyWinner: result === Result.DRAW ? pick?.penaltyWinner : undefined,
     });
   };
 
@@ -143,12 +147,19 @@ export const MatchCard = memo(function MatchCard({
       other,
     );
     const derived = resultFromScore(homeScoreGuess, awayScoreGuess);
+    const nextResult = derived ?? pick?.result;
     onChange(match.id, {
       ...pick,
       homeScoreGuess,
       awayScoreGuess,
-      result: derived ?? pick?.result,
+      result: nextResult,
+      penaltyWinner:
+        nextResult === Result.DRAW ? pick?.penaltyWinner : undefined,
     });
+  };
+
+  const setPenaltyWinner = (winner: Result) => {
+    onChange(match.id, { ...pick, penaltyWinner: winner });
   };
 
   const adjustScore = (side: 'home' | 'away', delta: number) => {
@@ -301,6 +312,35 @@ export const MatchCard = memo(function MatchCard({
                 onType={(raw) => setScore('away', raw)}
                 onStep={(delta) => adjustScore('away', delta)}
               />
+            </div>
+          </div>
+        )}
+
+        {!isLocked && isKnockoutStage(match.stage) && pick?.result === Result.DRAW && (
+          <div className="mt-4 pt-4 border-t border-line/40">
+            <p className="text-[10px] font-display font-extrabold uppercase tracking-[0.18em] text-ink-muted mb-2">
+              {t('penaltyWinnerLabel')}
+            </p>
+            <div className="grid grid-cols-2 gap-2" role="group" aria-label={t('penaltyWinnerLabel')}>
+              {([Result.HOME, Result.AWAY] as const).map((side) => {
+                const active = pick?.penaltyWinner === side;
+                return (
+                  <button
+                    key={side}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setPenaltyWinner(side)}
+                    className={cn(
+                      'h-10 rounded-lg font-display font-bold text-xs uppercase tracking-wide transition-all truncate px-2',
+                      active
+                        ? 'bg-neon text-primary-foreground glow-neon'
+                        : 'bg-surface-2 text-foreground hover:bg-surface-3',
+                    )}
+                  >
+                    {teamName(match, side === Result.HOME ? 'home' : 'away')}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}

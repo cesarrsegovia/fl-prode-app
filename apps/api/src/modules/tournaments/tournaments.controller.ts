@@ -19,6 +19,7 @@ import { R32QualifierPicksDto } from './dto/r32-picks.dto';
 import { TopScorerPickDto } from './dto/top-scorer-pick.dto';
 import { SetTopScorerDto } from './dto/set-top-scorer.dto';
 import { ConfirmR32ThirdsDto } from './dto/confirm-r32-thirds.dto';
+import { SetChampionDto } from './dto/set-champion.dto';
 
 @Controller('tournaments')
 export class TournamentsController {
@@ -219,6 +220,22 @@ export class TournamentsController {
     @Body() body: ConfirmR32ThirdsDto,
   ) {
     return this.service.confirmR32Thirds(id, body.assignment);
+  }
+
+  // ---------- Eliminación: propagación y campeón (admin) ----------
+
+  /** Backfill: recorre los knockout FINISHED y propaga ganadores a las rondas siguientes. */
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @Post(':id/knockout/propagate')
+  propagateKnockout(@Param('id') id: string) {
+    return this.service.propagateAllKnockoutResults(id);
+  }
+
+  /** Setea el campeón a mano y dispara el scoring de los picks de campeón. */
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @Patch(':id/champion')
+  setChampion(@Param('id') id: string, @Body() body: SetChampionDto) {
+    return this.service.setTournamentChampion(id, body.teamId ?? null);
   }
 
   // ---------- TournamentEntry (wallet del padre) ----------

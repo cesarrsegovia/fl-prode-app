@@ -95,6 +95,7 @@
       "open": "Offen"
     },
     "scoreBonus": "Ergebnis-Bonus (+{points} Pkt.)",
+    "penaltyWinnerLabel": "Wer kommt im Elfmeterschießen weiter?",
     "pointsFlag": {
       "pts": "Pkt.",
       "aria": "Du hast {points} Punkte mit dieser Vorhersage erzielt"

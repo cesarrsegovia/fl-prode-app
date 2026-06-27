@@ -7,6 +7,8 @@ export interface Prediction {
   homeScoreGuess: number | null;
   awayScoreGuess: number | null;
   isCaptain: boolean;
+  /** Solo eliminación: a quién hace avanzar por penales si predijo empate. */
+  penaltyWinner: Result | null;
   pointsEarned: number | null;
   createdAt: Date;
 }

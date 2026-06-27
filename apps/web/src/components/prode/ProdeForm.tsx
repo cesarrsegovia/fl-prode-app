@@ -38,6 +38,7 @@ function buildInitialPicks(preds?: Prediction[]): PickMap {
       homeScoreGuess: home,
       awayScoreGuess: away,
       isCaptain: p.isCaptain,
+      penaltyWinner: p.penaltyWinner ?? undefined,
     };
     return acc;
   }, {});
@@ -46,7 +47,7 @@ function buildInitialPicks(preds?: Prediction[]): PickMap {
 /** Firma estable de un pick para comparar lo cargado contra lo guardado. */
 function pickSignature(p?: MatchPick): string {
   if (!p?.result) return '';
-  return `${p.result}|${p.homeScoreGuess ?? ''}|${p.awayScoreGuess ?? ''}|${p.isCaptain ? '1' : '0'}`;
+  return `${p.result}|${p.homeScoreGuess ?? ''}|${p.awayScoreGuess ?? ''}|${p.isCaptain ? '1' : '0'}|${p.penaltyWinner ?? ''}`;
 }
 
 export function ProdeForm({ fixture, initialPredictions }: Props) {
@@ -197,6 +198,7 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
         homeScoreGuess: pick.homeScoreGuess,
         awayScoreGuess: pick.awayScoreGuess,
         isCaptain: pick.isCaptain,
+        penaltyWinner: pick.penaltyWinner,
       });
       setSavedPicks((prev) => ({ ...prev, [matchId]: { ...pick } }));
       flashSaved([matchId]);
@@ -228,6 +230,7 @@ export function ProdeForm({ fixture, initialPredictions }: Props) {
           homeScoreGuess: pick.homeScoreGuess,
           awayScoreGuess: pick.awayScoreGuess,
           isCaptain: pick.isCaptain,
+          penaltyWinner: pick.penaltyWinner,
         });
       }
       setSavedPicks((prev) => {

@@ -26,6 +26,12 @@ import {
 } from './r32-qualifiers';
 import { parseR32Placeholder } from './r32-placeholders';
 import {
+  parseAdvancePlaceholder,
+  knockoutWinnerSide,
+  knockoutLoserSide,
+} from './knockout-advance';
+import { resolveChampionPoints } from './champion';
+import {
   proposeR32Thirds,
   R32_THIRD_SLOTS,
   R32_THIRD_SLOT_CANDIDATES,
@@ -511,6 +517,152 @@ export class TournamentsService {
   }
 
   /**
+   * Propaga el resultado de un partido de eliminación ya terminado a las rondas
+   * siguientes: ubica al ganador (y al perdedor, para el 3er puesto) en los
+   * cruces que lo referencian por placeholder ("Ganador R32-3", "Perdedor SF-1").
+   * Idempotente: solo escribe si el lado cambia. El caller se encarga de
+   * invalidar cache y emitir eventos (este service no los tiene inyectados).
+   */
+  async propagateKnockoutResult(
+    tournamentId: string,
+    finished: {
+      externalId: string | null;
+      homeTeamId: string | null;
+      awayTeamId: string | null;
+      homeScore: number | null;
+      awayScore: number | null;
+      homePens: number | null;
+      awayPens: number | null;
+    },
+  ): Promise<{ updated: number }> {
+    if (!finished.externalId) return { updated: 0 };
+
+    const winnerSide = knockoutWinnerSide(
+      finished.homeScore,
+      finished.awayScore,
+      finished.homePens,
+      finished.awayPens,
+    );
+    if (!winnerSide) return { updated: 0 };
+    const loserSide = knockoutLoserSide(winnerSide);
+
+    const winnerTeamId =
+      winnerSide === 'HOME' ? finished.homeTeamId : finished.awayTeamId;
+    const loserTeamId =
+      loserSide === 'HOME' ? finished.homeTeamId : finished.awayTeamId;
+    if (!winnerTeamId) return { updated: 0 };
+
+    // Candidatos: cualquier knockout del torneo con placeholders todavía sin
+    // resolver (pocas filas; se recorre en memoria).
+    const matches = await this.prisma.match.findMany({
+      where: {
+        tournamentId,
+        stage: {
+          in: [
+            MatchStage.R16,
+            MatchStage.QUARTERFINAL,
+            MatchStage.SEMIFINAL,
+            MatchStage.THIRD_PLACE,
+            MatchStage.FINAL,
+          ],
+        },
+      },
+      select: {
+        id: true,
+        homeTeamName: true,
+        awayTeamName: true,
+        homeTeamId: true,
+        awayTeamId: true,
+      },
+    });
+
+    const teamIds = [winnerTeamId];
+    if (loserTeamId) teamIds.push(loserTeamId);
+    const teams = await this.prisma.team.findMany({
+      where: { id: { in: teamIds } },
+      select: { id: true, name: true },
+    });
+    const teamName = new Map(teams.map((t) => [t.id, t.name]));
+
+    const resolveSide = (
+      placeholder: string,
+    ): { teamId: string; name: string } | null => {
+      const ref = parseAdvancePlaceholder(placeholder);
+      if (!ref || ref.sourceExternalId !== finished.externalId) return null;
+      const teamId = ref.kind === 'WINNER' ? winnerTeamId : loserTeamId;
+      if (!teamId) return null;
+      return { teamId, name: teamName.get(teamId) ?? placeholder };
+    };
+
+    const updates: Promise<unknown>[] = [];
+    for (const m of matches) {
+      const data: {
+        homeTeamId?: string;
+        homeTeamName?: string;
+        awayTeamId?: string;
+        awayTeamName?: string;
+      } = {};
+
+      const home = resolveSide(m.homeTeamName);
+      if (home && home.teamId !== m.homeTeamId) {
+        data.homeTeamId = home.teamId;
+        data.homeTeamName = home.name;
+      }
+      const away = resolveSide(m.awayTeamName);
+      if (away && away.teamId !== m.awayTeamId) {
+        data.awayTeamId = away.teamId;
+        data.awayTeamName = away.name;
+      }
+      if (Object.keys(data).length) {
+        updates.push(this.prisma.match.update({ where: { id: m.id }, data }));
+      }
+    }
+    await Promise.all(updates);
+    return { updated: updates.length };
+  }
+
+  /**
+   * Backfill: recorre todos los knockout FINISHED del torneo y propaga sus
+   * resultados. Sirve para reparar o para partidos terminados antes de tener
+   * la propagación automática. Devuelve cuántos lados se llenaron.
+   */
+  async propagateAllKnockoutResults(
+    tournamentId: string,
+  ): Promise<{ updated: number; processed: number }> {
+    const finishedMatches = await this.prisma.match.findMany({
+      where: {
+        tournamentId,
+        status: MatchStatus.FINISHED,
+        stage: {
+          in: [
+            MatchStage.R32,
+            MatchStage.R16,
+            MatchStage.QUARTERFINAL,
+            MatchStage.SEMIFINAL,
+          ],
+        },
+      },
+      orderBy: { startTime: 'asc' },
+      select: {
+        externalId: true,
+        homeTeamId: true,
+        awayTeamId: true,
+        homeScore: true,
+        awayScore: true,
+        homePens: true,
+        awayPens: true,
+      },
+    });
+
+    let updated = 0;
+    for (const m of finishedMatches) {
+      const r = await this.propagateKnockoutResult(tournamentId, m);
+      updated += r.updated;
+    }
+    return { updated, processed: finishedMatches.length };
+  }
+
+  /**
    * Devuelve la propuesta de asignación de terceros para que el admin la revise
    * y confirme. Incluye, por slot, el grupo propuesto, el equipo y los grupos
    * candidatos válidos.
@@ -937,11 +1089,7 @@ export class TournamentsService {
         data: { pointsEarned: points },
       });
       if (points > 0) {
-        await this.applyExtraPointsToGroupScores(
-          pick.userId,
-          points,
-          tournamentId,
-        );
+        await this.applyExtraPoints(pick.userId, points, tournamentId);
         usersAffected.add(pick.userId);
       }
       scored++;
@@ -950,15 +1098,65 @@ export class TournamentsService {
   }
 
   /**
-   * Suma puntos extra (campeón, goleador) al total del GroupScore. No toca los
-   * contadores de desempate por partido (esos solo aplican a Predictions).
+   * Admin: marca el campeón del torneo y dispara el scoring de los BracketPick.
+   * También lo llama automáticamente el flujo de resultados cuando termina la
+   * final. Idempotente (solo puntúa picks con pointsEarned null).
    */
-  private async applyExtraPointsToGroupScores(
+  async setTournamentChampion(tournamentId: string, teamId: string | null) {
+    await this.prisma.tournament.update({
+      where: { id: tournamentId },
+      data: { championTeamId: teamId },
+    });
+    if (teamId) {
+      return this.scoreBracketPicks(tournamentId, teamId);
+    }
+    return { scored: 0, usersAffected: 0 };
+  }
+
+  async scoreBracketPicks(tournamentId: string, championTeamId: string) {
+    const picks = await this.prisma.bracketPick.findMany({
+      where: { tournamentId, pointsEarned: null },
+    });
+
+    let scored = 0;
+    const usersAffected = new Set<string>();
+
+    for (const pick of picks) {
+      const points = resolveChampionPoints(pick.champTeamId, championTeamId);
+      await this.prisma.bracketPick.update({
+        where: { id: pick.id },
+        data: { pointsEarned: points },
+      });
+      if (points > 0) {
+        await this.applyExtraPoints(pick.userId, points, tournamentId);
+        usersAffected.add(pick.userId);
+      }
+      scored++;
+    }
+    return { scored, usersAffected: usersAffected.size };
+  }
+
+  /**
+   * Suma puntos extra (campeón, goleador) al ranking GLOBAL (UserScore) y a
+   * cada GroupScore del usuario. No toca contadores de desempate por partido
+   * (esos solo aplican a Predictions). El global cubre también a usuarios sin
+   * grupo.
+   */
+  private async applyExtraPoints(
     userId: string,
     points: number,
     tournamentId: string,
   ) {
     if (points <= 0) return;
+
+    // Ranking global.
+    await this.prisma.userScore.upsert({
+      where: { userId_tournamentId: { userId, tournamentId } },
+      update: { total: { increment: points } },
+      create: { userId, tournamentId, total: points, streak: 0 },
+    });
+
+    // Rankings por grupo.
     const memberships = await this.prisma.groupMember.findMany({
       where: { userId },
     });
