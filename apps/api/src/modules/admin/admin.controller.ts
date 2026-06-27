@@ -37,6 +37,14 @@ export class AdminController {
     });
   }
 
+  @Get('users/:id/prode')
+  userProde(
+    @Param('id') id: string,
+    @Query('tournamentId') tournamentId?: string,
+  ) {
+    return this.adminService.getUserProde(id, tournamentId);
+  }
+
   @Patch('users/:id/admin')
   setUserAdmin(
     @CurrentUser() user: { userId: string },

@@ -1,6 +1,8 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { TournamentsService } from '../tournaments/tournaments.service';
+import { UsuariosService } from '../usuarios/usuarios.service';
 
 interface ListOpts {
   search?: string;
@@ -10,7 +12,47 @@ interface ListOpts {
 
 @Injectable()
 export class AdminService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly tournaments: TournamentsService,
+    private readonly usuarios: UsuariosService,
+  ) {}
+
+  /**
+   * Prode completo de un usuario para la vista de admin: NO exige compartir
+   * grupo (el AdminGuard ya autorizó). Reúne campeón, goleador, clasificados a
+   * R32 e historial visible de picks de partido. Si no se pasa tournamentId,
+   * usa el torneo activo.
+   */
+  async getUserProde(userId: string, tournamentId?: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, username: true, email: true, avatarUrl: true, isAdmin: true },
+    });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+
+    const tid =
+      tournamentId ??
+      (
+        await this.prisma.tournament.findFirst({
+          where: { isActive: true },
+          select: { id: true },
+        })
+      )?.id;
+
+    if (!tid) {
+      return { user, tournamentId: null, champion: null, topScorer: null, r32: [], history: { items: [], nextCursor: null } };
+    }
+
+    const [champion, topScorer, r32, history] = await Promise.all([
+      this.tournaments.getMyBracketPick(tid, userId),
+      this.tournaments.getMyTopScorerPick(tid, userId),
+      this.tournaments.getMyR32Picks(tid, userId),
+      this.usuarios.getVisiblePredictionsHistory(userId, { take: 100 }),
+    ]);
+
+    return { user, tournamentId: tid, champion, topScorer, r32, history };
+  }
 
   async listUsers(opts: ListOpts = {}) {
     const take = Math.min(Math.max(opts.take ?? 30, 1), 100);

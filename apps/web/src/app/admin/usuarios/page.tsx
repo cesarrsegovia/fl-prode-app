@@ -1,9 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useSession } from '@/lib/session';
 import { useFormatter, useTranslations } from 'next-intl';
-import { Loader2, Search, ShieldCheck, ShieldOff } from 'lucide-react';
+import { ChevronRight, Loader2, Search, ShieldCheck, ShieldOff } from 'lucide-react';
 import { admin, type AdminUserItem } from '@/lib/endpoints';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -113,7 +114,11 @@ export default function AdminUsuariosPage() {
           {items.map((u) => (
             <Card key={u.id} className="bg-surface-1 border-line">
               <CardContent className="p-4 flex items-center gap-4 flex-wrap">
-                <div className="flex items-center gap-3 flex-1 min-w-0">
+                <Link
+                  href={`/admin/usuarios/${u.id}`}
+                  className="group flex items-center gap-3 flex-1 min-w-0 rounded-lg -m-1 p-1 hover:bg-surface-2 transition-colors"
+                  title={t('viewProde')}
+                >
                   <UserAvatar name={u.username} image={u.avatarUrl} size="default" />
                   <div className="min-w-0">
                     <p className="font-display font-bold text-sm text-foreground truncate">
@@ -126,7 +131,8 @@ export default function AdminUsuariosPage() {
                     </p>
                     <p className="text-xs text-ink-muted truncate">{u.email}</p>
                   </div>
-                </div>
+                  <ChevronRight className="size-4 text-ink-dim shrink-0 ml-auto opacity-0 group-hover:opacity-100 transition-opacity sm:hidden" />
+                </Link>
 
                 <div className="hidden sm:flex items-center gap-4 text-[10px] uppercase tracking-[0.18em] font-display font-bold text-ink-dim">
                   <span>{t('preds', { count: u._count.predictions })}</span>

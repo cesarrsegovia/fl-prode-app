@@ -334,9 +334,30 @@ export interface AdminOverview {
   activities: number;
 }
 
+export interface AdminUserProde {
+  user: {
+    id: string;
+    username: string | null;
+    email: string | null;
+    avatarUrl: string | null;
+    isAdmin: boolean;
+  };
+  tournamentId: string | null;
+  champion: BracketPickResponse | null;
+  topScorer: TopScorerPickResponse | null;
+  r32: R32PickResponse[];
+  history: { items: PredictionHistoryItem[]; nextCursor: string | null };
+}
+
 export const admin = {
   overview: () =>
     apiClient.get<AdminOverview>('/admin/overview').then((r) => r.data),
+  userProde: (userId: string, tournamentId?: string) =>
+    apiClient
+      .get<AdminUserProde>(`/admin/users/${userId}/prode`, {
+        params: tournamentId ? { tournamentId } : undefined,
+      })
+      .then((r) => r.data),
   users: (params: { search?: string; cursor?: string; take?: number } = {}) =>
     apiClient
       .get<{ items: AdminUserItem[]; nextCursor: string | null }>(

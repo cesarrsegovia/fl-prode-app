@@ -32,6 +32,7 @@
     "since": "seit {date}",
     "admin": "Admin",
     "member": "Mitglied",
+    "viewProde": "Tipps ansehen",
     "selfDemoteError": "Du kannst dir nicht selbst die Admin-Rolle entziehen.",
     "updateError": "Aktualisierung fehlgeschlagen"
   },

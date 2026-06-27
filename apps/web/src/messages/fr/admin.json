@@ -32,6 +32,7 @@
     "since": "depuis {date}",
     "admin": "Admin",
     "member": "Membre",
+    "viewProde": "Voir les pronos",
     "selfDemoteError": "Vous ne pouvez pas retirer votre propre rôle admin.",
     "updateError": "Impossible de mettre à jour"
   },

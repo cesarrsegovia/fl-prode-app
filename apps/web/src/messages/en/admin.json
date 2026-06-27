@@ -32,6 +32,7 @@
     "since": "since {date}",
     "admin": "Admin",
     "member": "Member",
+    "viewProde": "View predictions",
     "selfDemoteError": "You can't remove your own admin role.",
     "updateError": "Couldn't update"
   },

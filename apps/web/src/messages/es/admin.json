@@ -32,6 +32,7 @@
     "since": "desde {date}",
     "admin": "Admin",
     "member": "Miembro",
+    "viewProde": "Ver prode",
     "selfDemoteError": "No podés quitarte el rol admin a vos mismo.",
     "updateError": "No se pudo actualizar"
   },
