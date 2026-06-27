@@ -40,6 +40,11 @@
     "empty": "Sin datos todavía.",
     "points": "{points, number} pts"
   },
+  "topScorers": {
+    "title": "Goleadores",
+    "empty": "Sin datos todavía.",
+    "goals": "{count, number} G"
+  },
   "activity": {
     "title": "Actividad reciente",
     "empty": "Sin novedades por ahora."

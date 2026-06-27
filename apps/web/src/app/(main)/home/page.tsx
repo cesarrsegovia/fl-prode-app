@@ -12,14 +12,18 @@ import {
   matchesApi,
   notificaciones,
   ranking,
+  topScorers,
   type MyGroupEntry,
   type NotificationDto,
   type TodayMatchDto,
+  type TopScorerDto,
 } from '@/lib/endpoints';
 import { MATCH_LEAD_MS } from '@prode/shared';
 import { apiClient } from '@/lib/api';
 import { useRoundName } from '@/lib/round-name';
 import { displayName } from '@/lib/display-name';
+import { getInitials } from '@/lib/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useNotificationText } from '@/lib/notification-text';
 import { Countdown } from '@/components/prode/Countdown';
 import { GroupCard } from '@/components/grupos/GroupCard';
@@ -61,6 +65,7 @@ export default function HomePage() {
   const [myGroups, setMyGroups] = useState<MyGroupEntry[]>([]);
   const [fullRanking, setFullRanking] = useState<RankingEntry[]>([]);
   const [recentNotifs, setRecentNotifs] = useState<NotificationDto[]>([]);
+  const [scorers, setScorers] = useState<TopScorerDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const nextOpenDeadline = useMemo(() => {
@@ -87,14 +92,16 @@ export default function HomePage() {
       ranking.global().catch(() => []),
       notificaciones.list().catch(() => []),
       matchesApi.today().catch(() => []),
+      topScorers.list(5).catch(() => []),
     ])
-      .then(([tour, fx, gs, rk, nt, today]) => {
+      .then(([tour, fx, gs, rk, nt, today, sc]) => {
         setTournament(tour);
         setNextFixture(fx[0] ?? null);
         setMyGroups(gs);
         setFullRanking(rk);
         setRecentNotifs(nt.slice(0, 5));
         setTodayMatches(today);
+        setScorers(sc);
       })
       .finally(() => setIsLoading(false));
   }, []);
@@ -352,48 +359,106 @@ export default function HomePage() {
         </Card>
       </div>
 
-      {/* Mis grupos */}
-      <section className="mb-12">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display font-extrabold text-2xl text-foreground tracking-tight">
+      {/* Mis grupos + Goleadores */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12 items-start">
+        {/* Mis grupos */}
+        <section>
+          <h2 className="font-display font-extrabold text-2xl text-foreground tracking-tight mb-4">
             {t('myGroups.title')}
           </h2>
-          <Link
-            href="/grupos"
-            className="text-xs font-display font-bold text-neon hover:underline uppercase tracking-[0.18em]"
-          >
-            {t('myGroups.viewAll')}
-          </Link>
-        </div>
+          <div className="flex justify-end mb-3">
+            <Link
+              href="/grupos"
+              className="text-xs font-display font-bold text-neon hover:underline uppercase tracking-[0.18em]"
+            >
+              {t('myGroups.viewAll')}
+            </Link>
+          </div>
 
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-32" />
-            ))}
-          </div>
-        ) : myGroups.length === 0 ? (
-          <Card className="bg-surface-1 border-line">
-            <CardContent className="p-8 text-center">
-              <p className="text-sm text-ink-muted mb-3">
-                {t('myGroups.empty')}
-              </p>
-              <Link
-                href="/grupos"
-                className="text-sm font-display font-bold text-neon hover:underline"
-              >
-                {t('myGroups.createOrJoin')}
-              </Link>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {myGroups.slice(0, 3).map((entry) => (
-              <GroupCard key={entry.group.id} entry={entry} />
-            ))}
-          </div>
-        )}
-      </section>
+          {isLoading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <Skeleton key={i} className="h-32" />
+              ))}
+            </div>
+          ) : myGroups.length === 0 ? (
+            <Card className="bg-surface-1 border-line">
+              <CardContent className="p-8 text-center">
+                <p className="text-sm text-ink-muted mb-3">
+                  {t('myGroups.empty')}
+                </p>
+                <Link
+                  href="/grupos"
+                  className="text-sm font-display font-bold text-neon hover:underline"
+                >
+                  {t('myGroups.createOrJoin')}
+                </Link>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {myGroups.slice(0, 3).map((entry) => (
+                <GroupCard key={entry.group.id} entry={entry} />
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Goleadores del torneo (ESPN) */}
+        <Card className="bg-surface-1 border-line">
+          <CardHeader>
+            <h3 className="font-display font-extrabold text-lg text-foreground">
+              {t('topScorers.title')}
+            </h3>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="space-y-2">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} className="h-12" />
+                ))}
+              </div>
+            ) : scorers.length === 0 ? (
+              <p className="text-sm text-ink-muted">{t('topScorers.empty')}</p>
+            ) : (
+              <ul className="space-y-2">
+                {scorers.map((s, i) => (
+                  <li
+                    key={`${s.name}-${i}`}
+                    className="flex items-center gap-3 p-2.5 rounded-lg bg-surface-2"
+                  >
+                    <span className="font-display font-extrabold text-sm text-ink-dim tabular-nums w-4 text-center shrink-0">
+                      {i + 1}
+                    </span>
+                    <Avatar size="default" className="shrink-0">
+                      <AvatarImage src={s.photoUrl ?? undefined} alt={s.name} />
+                      <AvatarFallback className="bg-surface-3 text-foreground text-xs font-bold">
+                        {getInitials(s.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-display font-bold text-sm text-foreground truncate">
+                        {s.name}
+                      </p>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        {s.flagUrl && (
+                          <TeamFlag size="xs" src={s.flagUrl} alt={s.teamName ?? ''} />
+                        )}
+                        <span className="text-[11px] text-ink-muted truncate">
+                          {s.teamName ?? s.teamShortName ?? ''}
+                        </span>
+                      </div>
+                    </div>
+                    <span className="font-display font-extrabold text-base text-neon tabular-nums shrink-0">
+                      {t('topScorers.goals', { count: s.goals })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Top + Actividad */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -163,3 +163,70 @@ describe('EspnResultsProvider.parseStandings', () => {
     expect(out).toEqual([{ groupName: 'Group B', teams: [] }]);
   });
 });
+
+const STATS_SAMPLE = {
+  stats: [
+    {
+      name: 'goalsLeaders',
+      displayName: 'Goals',
+      leaders: [
+        {
+          displayValue: 'Matches: 2, Goals: 5',
+          value: 5,
+          athlete: {
+            displayName: 'Lionel Messi',
+            headshot: { href: 'https://img/messi.png' },
+            team: { abbreviation: 'ARG', displayName: 'Argentina' },
+          },
+        },
+        {
+          displayValue: 'Matches: 3, Goals: 4',
+          value: 4,
+          athlete: {
+            displayName: 'Kylian Mbappé',
+            headshot: { href: 'https://img/mbappe.png' },
+            team: { abbreviation: 'FRA', displayName: 'France' },
+          },
+        },
+        {
+          displayValue: 'Matches: 3, Goals: 4',
+          value: 4,
+          athlete: { displayName: 'Erling Haaland', team: { abbreviation: 'NOR', displayName: 'Norway' } },
+        },
+      ],
+    },
+    { name: 'assistsLeaders', leaders: [] },
+  ],
+};
+
+describe('EspnResultsProvider.parseTopScorers', () => {
+  it('extrae los goleadores de goalsLeaders con goles, partidos, equipo y foto', () => {
+    const out = EspnResultsProvider.parseTopScorers(STATS_SAMPLE, 5);
+    expect(out[0]).toEqual({
+      name: 'Lionel Messi',
+      goals: 5,
+      played: 2,
+      teamAbbr: 'ARG',
+      teamName: 'Argentina',
+      photoUrl: 'https://img/messi.png',
+    });
+    expect(out[2]).toEqual({
+      name: 'Erling Haaland',
+      goals: 4,
+      played: 3,
+      teamAbbr: 'NOR',
+      teamName: 'Norway',
+      photoUrl: null,
+    });
+  });
+
+  it('respeta el límite', () => {
+    expect(EspnResultsProvider.parseTopScorers(STATS_SAMPLE, 2)).toHaveLength(2);
+  });
+
+  it('JSON vacío / sin goalsLeaders -> []', () => {
+    expect(EspnResultsProvider.parseTopScorers({})).toEqual([]);
+    expect(EspnResultsProvider.parseTopScorers(null)).toEqual([]);
+    expect(EspnResultsProvider.parseTopScorers({ stats: [{ name: 'other', leaders: [] }] })).toEqual([]);
+  });
+});

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ResultadosService } from './resultados.service';
+import { ResultadosController } from './resultados.controller';
 import { GamificacionModule } from '../gamificacion/gamificacion.module';
 import { NotificacionesModule } from '../notificaciones/notificaciones.module';
 import { ActivityModule } from '../activity/activity.module';
@@ -15,6 +16,7 @@ import { ApiFootballResultsProvider } from './providers/api-football.provider';
     ActivityModule,
     TournamentsModule,
   ],
+  controllers: [ResultadosController],
   providers: [
     ResultadosService,
     EspnResultsProvider,

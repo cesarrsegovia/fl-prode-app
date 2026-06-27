@@ -66,6 +66,21 @@ export interface RemoteStandingGroup {
   teams: RemoteStandingTeam[];
 }
 
+/** Goleador del torneo según el proveedor (sin mapear a nuestra DB). */
+export interface RemoteTopScorer {
+  /** Nombre del jugador tal cual lo reporta el proveedor. */
+  name: string;
+  goals: number;
+  /** Partidos jugados, si el proveedor lo expone. */
+  played: number | null;
+  /** Abreviatura del equipo (matchea Team.shortName local). */
+  teamAbbr: string | null;
+  /** Nombre del equipo según el proveedor (fallback si no mapea). */
+  teamName: string | null;
+  /** URL de la foto del jugador, si la hay. */
+  photoUrl: string | null;
+}
+
 export interface ResultsProvider {
   /** Trae los resultados remotos de los partidos activos dados. */
   fetchResults(activeMatches: ActiveMatch[]): Promise<RemoteResult[]>;
@@ -75,6 +90,12 @@ export interface ResultsProvider {
    * proveedor. Opcional: no todos los providers la implementan.
    */
   fetchStandings?(): Promise<RemoteStandingGroup[]>;
+
+  /**
+   * Trae los máximos goleadores del torneo. Opcional: no todos los providers
+   * la implementan.
+   */
+  fetchTopScorers?(limit?: number): Promise<RemoteTopScorer[]>;
 }
 
 /** Token DI para inyectar el provider seleccionado. */

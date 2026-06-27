@@ -461,6 +461,23 @@ export const users = {
     ).then((r) => r.data),
 };
 
+export interface TopScorerDto {
+  name: string;
+  goals: number;
+  played: number | null;
+  photoUrl: string | null;
+  teamName: string | null;
+  teamShortName: string | null;
+  flagUrl: string | null;
+}
+
+export const topScorers = {
+  list: (limit = 5) =>
+    apiClient
+      .get<TopScorerDto[]>('/resultados/top-scorers', { params: { limit } })
+      .then((r) => r.data),
+};
+
 export const stats = {
   user: (userId: string) =>
     apiClient.get<UserStats>(`/users/${userId}/stats`).then((r) => r.data),

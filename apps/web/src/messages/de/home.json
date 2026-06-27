@@ -40,6 +40,11 @@
     "empty": "Noch keine Daten.",
     "points": "{points, number} Pkt."
   },
+  "topScorers": {
+    "title": "Torschützen",
+    "empty": "Noch keine Daten.",
+    "goals": "{count, number} T"
+  },
   "activity": {
     "title": "Letzte Aktivität",
     "empty": "Nichts Neues im Moment."

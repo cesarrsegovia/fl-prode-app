@@ -40,6 +40,11 @@
     "empty": "No data yet.",
     "points": "{points, number} pts"
   },
+  "topScorers": {
+    "title": "Top scorers",
+    "empty": "No data yet.",
+    "goals": "{count, number} G"
+  },
   "activity": {
     "title": "Recent activity",
     "empty": "Nothing new for now."

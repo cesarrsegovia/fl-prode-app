@@ -528,6 +528,55 @@ export class ResultadosService {
     }
   }
 
+  /**
+   * Máximos goleadores del torneo (del proveedor), mapeados a nuestros equipos
+   * para mostrar bandera + nombre localizado. Cacheado 10 min para no pegarle
+   * al proveedor en cada visita al home. Si el provider no expone goleadores o
+   * falla, devuelve [].
+   */
+  async getTopScorers(limit = 5): Promise<
+    Array<{
+      name: string;
+      goals: number;
+      played: number | null;
+      photoUrl: string | null;
+      teamName: string | null;
+      teamShortName: string | null;
+      flagUrl: string | null;
+    }>
+  > {
+    if (!this.provider.fetchTopScorers) return [];
+    return this.cache.wrap(`top-scorers:${limit}`, 600, async () => {
+      const remote = await this.provider.fetchTopScorers!(limit);
+      if (!remote.length) return [];
+
+      // Mapear abreviaturas a nuestros equipos (bandera + nombre localizado).
+      const abbrs = [...new Set(remote.map((s) => s.teamAbbr).filter(Boolean) as string[])];
+      const teams = abbrs.length
+        ? await this.prisma.team.findMany({
+            where: { shortName: { in: abbrs } },
+            select: { name: true, shortName: true, flagUrl: true },
+          })
+        : [];
+      const byAbbr = new Map(
+        teams.map((t) => [t.shortName?.toLowerCase() ?? '', t]),
+      );
+
+      return remote.map((s) => {
+        const local = s.teamAbbr ? byAbbr.get(s.teamAbbr.toLowerCase()) : undefined;
+        return {
+          name: s.name,
+          goals: s.goals,
+          played: s.played,
+          photoUrl: s.photoUrl,
+          teamName: local?.name ?? s.teamName,
+          teamShortName: local?.shortName ?? s.teamAbbr,
+          flagUrl: local?.flagUrl ?? null,
+        };
+      });
+    });
+  }
+
   private async snapshotPositions(groupIds: string[], tournamentId: string) {
     if (!groupIds.length) return new Map<string, number>();
     const scores = await this.prisma.groupScore.findMany({

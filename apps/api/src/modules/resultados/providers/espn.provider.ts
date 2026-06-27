@@ -5,6 +5,7 @@ import {
   RemoteResult,
   RemoteStandingGroup,
   RemoteStandingTeam,
+  RemoteTopScorer,
   ResultsProvider,
 } from './results-provider';
 import { statusFromEspn } from './espn.util';
@@ -100,6 +101,32 @@ export class EspnResultsProvider implements ResultsProvider {
     return out;
   }
 
+  /**
+   * Parseo puro del JSON de /statistics de ESPN a RemoteTopScorer[].
+   * La lista de goleadores vive en la categoría `goalsLeaders` de `stats`.
+   */
+  static parseTopScorers(json: any, limit = 5): RemoteTopScorer[] {
+    const stats: any[] = json?.stats ?? [];
+    const goals = stats.find((s) => s?.name === 'goalsLeaders');
+    const leaders: any[] = goals?.leaders ?? [];
+    const out: RemoteTopScorer[] = [];
+    for (const l of leaders) {
+      const ath = l?.athlete ?? {};
+      const team = ath?.team ?? {};
+      // displayValue p.ej. "Matches: 2, Goals: 5" — extraemos Matches.
+      const playedMatch = /Matches:\s*(\d+)/i.exec(l?.displayValue ?? '');
+      out.push({
+        name: ath?.displayName ?? '',
+        goals: toInt(l?.value) ?? 0,
+        played: playedMatch ? Number(playedMatch[1]) : null,
+        teamAbbr: team?.abbreviation ?? null,
+        teamName: team?.displayName ?? team?.name ?? null,
+        photoUrl: ath?.headshot?.href ?? null,
+      });
+    }
+    return out.filter((s) => s.name).slice(0, limit);
+  }
+
   async fetchStandings(): Promise<RemoteStandingGroup[]> {
     try {
       const res = await axios.get(`${this.standingsBase}/standings`, {
@@ -109,6 +136,19 @@ export class EspnResultsProvider implements ResultsProvider {
       return EspnResultsProvider.parseStandings(res.data);
     } catch (err: any) {
       this.logger.error(`ESPN standings fetch failed: ${err.message}`);
+      return [];
+    }
+  }
+
+  async fetchTopScorers(limit = 5): Promise<RemoteTopScorer[]> {
+    try {
+      const res = await axios.get(`${this.base}/statistics`, {
+        headers: { 'User-Agent': UA },
+        timeout: 10_000,
+      });
+      return EspnResultsProvider.parseTopScorers(res.data, limit);
+    } catch (err: any) {
+      this.logger.error(`ESPN top scorers fetch failed: ${err.message}`);
       return [];
     }
   }
