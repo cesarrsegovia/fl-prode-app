@@ -8,6 +8,7 @@ import { TournamentsModule } from '../tournaments/tournaments.module';
 import { RESULTS_PROVIDER } from './providers/results-provider';
 import { EspnResultsProvider } from './providers/espn.provider';
 import { ApiFootballResultsProvider } from './providers/api-football.provider';
+import { AdminGuard } from '../../common/guards/admin.guard';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { ApiFootballResultsProvider } from './providers/api-football.provider';
   controllers: [ResultadosController],
   providers: [
     ResultadosService,
+    AdminGuard,
     EspnResultsProvider,
     ApiFootballResultsProvider,
     {

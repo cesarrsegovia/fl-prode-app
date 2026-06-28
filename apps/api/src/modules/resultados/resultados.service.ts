@@ -577,6 +577,87 @@ export class ResultadosService {
     });
   }
 
+  /**
+   * Sincroniza los equipos de los cruces de R32 desde el proveedor (ESPN),
+   * que ya tiene las llaves cerradas y oficiales. Resuelve tanto los mejores
+   * terceros como cualquier slot mal asignado por el cómputo interno. Adopta la
+   * orientación local/visitante del proveedor (lo que ve el usuario en ESPN).
+   *
+   * Mapea la abreviatura del proveedor a nuestro Team por shortName. Marca el
+   * torneo como r32ThirdsConfirmed=true (llaves publicadas). Idempotente.
+   */
+  async syncR32FromEspn(
+    tournamentId?: string,
+  ): Promise<{ updated: number; unmapped: string[]; tournamentId: string | null }> {
+    const tid =
+      tournamentId ??
+      (await this.prisma.tournament.findFirst({ where: { isActive: true }, select: { id: true } }))?.id ??
+      null;
+    if (!tid) return { updated: 0, unmapped: [], tournamentId: null };
+
+    const matches = await this.prisma.match.findMany({
+      where: { tournamentId: tid, stage: MatchStage.R32 },
+      select: {
+        id: true,
+        externalId: true,
+        startTime: true,
+        homeTeamId: true,
+        awayTeamId: true,
+      },
+    });
+    const active = matches
+      .filter((m) => m.externalId)
+      .map((m) => ({ id: m.id, externalId: m.externalId!, startTime: m.startTime }));
+    if (!active.length) return { updated: 0, unmapped: [], tournamentId: tid };
+
+    const remote = await this.provider.fetchResults(active);
+    const byExt = new Map(remote.map((r) => [r.externalId, r]));
+
+    const abbrs = new Set<string>();
+    for (const r of remote) {
+      if (r.homeAbbr) abbrs.add(r.homeAbbr);
+      if (r.awayAbbr) abbrs.add(r.awayAbbr);
+    }
+    const teams = await this.prisma.team.findMany({
+      where: { shortName: { in: [...abbrs] } },
+      select: { id: true, name: true, shortName: true },
+    });
+    const byAbbr = new Map(teams.map((t) => [t.shortName?.toLowerCase() ?? '', t]));
+
+    const unmapped = new Set<string>();
+    let updated = 0;
+    for (const m of matches) {
+      const r = m.externalId ? byExt.get(m.externalId) : undefined;
+      if (!r || !r.homeAbbr || !r.awayAbbr) continue;
+      const h = byAbbr.get(r.homeAbbr.toLowerCase());
+      const a = byAbbr.get(r.awayAbbr.toLowerCase());
+      if (!h) unmapped.add(r.homeAbbr);
+      if (!a) unmapped.add(r.awayAbbr);
+      if (!h || !a) continue;
+      if (m.homeTeamId === h.id && m.awayTeamId === a.id) continue;
+      await this.prisma.match.update({
+        where: { id: m.id },
+        data: {
+          homeTeamId: h.id,
+          homeTeamName: h.name,
+          awayTeamId: a.id,
+          awayTeamName: a.name,
+        },
+      });
+      updated += 1;
+    }
+
+    await this.prisma.tournament.update({
+      where: { id: tid },
+      data: { r32ThirdsConfirmed: true },
+    });
+
+    await this.cache.delByPattern('fixtures:*');
+    this.events.emitToAll(WS_EVENTS.RANKING_UPDATE, { tournamentId: tid });
+
+    return { updated, unmapped: [...unmapped], tournamentId: tid };
+  }
+
   private async snapshotPositions(groupIds: string[], tournamentId: string) {
     if (!groupIds.length) return new Map<string, number>();
     const scores = await this.prisma.groupScore.findMany({

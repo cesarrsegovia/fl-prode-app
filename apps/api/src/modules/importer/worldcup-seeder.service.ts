@@ -62,7 +62,7 @@ const ROUND_NAMES: Record<number, string> = {
   1: 'Fase de Grupos · Fecha 1',
   2: 'Fase de Grupos · Fecha 2',
   3: 'Fase de Grupos · Fecha 3',
-  4: 'Treintaidosavos de Final',
+  4: 'Dieciseisavos de Final',
   5: 'Octavos de Final',
   6: 'Cuartos de Final',
   7: 'Semifinales',
