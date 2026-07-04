@@ -31,6 +31,9 @@ import {
   knockoutLoserSide,
 } from './knockout-advance';
 import { resolveChampionPoints } from './champion';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+import { planBracketRelink, type RelinkAssignment } from './bracket-relink';
 import {
   proposeR32Thirds,
   R32_THIRD_SLOTS,
@@ -445,7 +448,10 @@ export class TournamentsService {
       where: { tournamentId, stage: MatchStage.R32 },
       select: {
         id: true,
-        externalId: true,
+        // code (id estable de siembra), NO externalId: db:map-espn-ids pisa
+        // externalId con el event id de ESPN y r32ThirdsAssignment está keyed
+        // por el id de siembra (wc-r32-03).
+        code: true,
         homeTeamName: true,
         awayTeamName: true,
         homeTeamId: true,
@@ -468,7 +474,7 @@ export class TournamentsService {
 
     // Resuelve el teamId de un lado a partir de su placeholder.
     const resolveSide = (
-      externalId: string | null,
+      code: string | null,
       placeholder: string,
     ): string | null => {
       const parsed = parseR32Placeholder(placeholder);
@@ -477,8 +483,9 @@ export class TournamentsService {
       }
       if (parsed.kind === 'THIRD') {
         // Solo publicamos terceros si están confirmados por el admin.
-        if (!thirdsConfirmed || !thirdAssign || !externalId) return null;
-        const groupName = thirdAssign[externalId];
+        // r32ThirdsAssignment está keyed por el code de siembra (wc-r32-03).
+        if (!thirdsConfirmed || !thirdAssign || !code) return null;
+        const groupName = thirdAssign[code];
         if (!groupName) return null;
         return detailed.thirdByGroup.get(groupName) ?? null;
       }
@@ -487,8 +494,8 @@ export class TournamentsService {
 
     const updates: Promise<unknown>[] = [];
     for (const m of matches) {
-      const homeTeamId = resolveSide(m.externalId, m.homeTeamName);
-      const awayTeamId = resolveSide(m.externalId, m.awayTeamName);
+      const homeTeamId = resolveSide(m.code, m.homeTeamName);
+      const awayTeamId = resolveSide(m.code, m.awayTeamName);
       const data: {
         homeTeamId?: string;
         homeTeamName?: string;
@@ -520,13 +527,15 @@ export class TournamentsService {
    * Propaga el resultado de un partido de eliminación ya terminado a las rondas
    * siguientes: ubica al ganador (y al perdedor, para el 3er puesto) en los
    * cruces que lo referencian por placeholder ("Ganador R32-3", "Perdedor SF-1").
+   * Los placeholders se resuelven contra `code` (id estable de siembra, p.ej.
+   * "wc-r32-03"), no contra externalId (que db:map-espn-ids puede sobrescribir).
    * Idempotente: solo escribe si el lado cambia. El caller se encarga de
    * invalidar cache y emitir eventos (este service no los tiene inyectados).
    */
   async propagateKnockoutResult(
     tournamentId: string,
     finished: {
-      externalId: string | null;
+      code: string | null;
       homeTeamId: string | null;
       awayTeamId: string | null;
       homeScore: number | null;
@@ -535,7 +544,7 @@ export class TournamentsService {
       awayPens: number | null;
     },
   ): Promise<{ updated: number }> {
-    if (!finished.externalId) return { updated: 0 };
+    if (!finished.code) return { updated: 0 };
 
     const winnerSide = knockoutWinnerSide(
       finished.homeScore,
@@ -588,7 +597,7 @@ export class TournamentsService {
       placeholder: string,
     ): { teamId: string; name: string } | null => {
       const ref = parseAdvancePlaceholder(placeholder);
-      if (!ref || ref.sourceExternalId !== finished.externalId) return null;
+      if (!ref || ref.sourceCode !== finished.code) return null;
       const teamId = ref.kind === 'WINNER' ? winnerTeamId : loserTeamId;
       if (!teamId) return null;
       return { teamId, name: teamName.get(teamId) ?? placeholder };
@@ -644,7 +653,7 @@ export class TournamentsService {
       },
       orderBy: { startTime: 'asc' },
       select: {
-        externalId: true,
+        code: true,
         homeTeamId: true,
         awayTeamId: true,
         homeScore: true,
@@ -660,6 +669,62 @@ export class TournamentsService {
       updated += r.updated;
     }
     return { updated, processed: finishedMatches.length };
+  }
+
+  /**
+   * Reasigna Match.code en torneos donde db:map-espn-ids pisó los externalId
+   * de siembra (prod). Lee el JSON de siembra y matchea por stage + horario
+   * más cercano. Idempotente; aborta sin escribir ante ambigüedad.
+   */
+  async relinkBracketCodes(
+    tournamentId: string,
+  ): Promise<{ total: number; assigned: number; alreadySet: number }> {
+    const KO_STAGES = [
+      MatchStage.R32,
+      MatchStage.R16,
+      MatchStage.QUARTERFINAL,
+      MatchStage.SEMIFINAL,
+      MatchStage.THIRD_PLACE,
+      MatchStage.FINAL,
+    ];
+
+    const path = resolve(process.cwd(), 'prisma', 'data', 'worldcup-2026.json');
+    const data = JSON.parse(readFileSync(path, 'utf-8')) as {
+      matches: Array<{ externalId: string; stage: string; startTime: string }>;
+    };
+    const seedMatches = data.matches
+      .filter((m) => (KO_STAGES as string[]).includes(m.stage))
+      .map((m) => ({
+        code: m.externalId,
+        stage: m.stage as MatchStage,
+        startTime: new Date(m.startTime),
+      }));
+
+    const dbMatches = await this.prisma.match.findMany({
+      where: { tournamentId, stage: { in: KO_STAGES } },
+      select: { id: true, stage: true, startTime: true, code: true },
+    });
+
+    let plan: RelinkAssignment[];
+    try {
+      plan = planBracketRelink(seedMatches, dbMatches);
+    } catch (err) {
+      throw new ConflictException((err as Error).message);
+    }
+    const toWrite = plan.filter((a) => !a.alreadySet);
+    await this.prisma.$transaction(
+      toWrite.map((a) =>
+        this.prisma.match.update({
+          where: { id: a.matchId },
+          data: { code: a.code },
+        }),
+      ),
+    );
+    return {
+      total: plan.length,
+      assigned: toWrite.length,
+      alreadySet: plan.length - toWrite.length,
+    };
   }
 
   /**

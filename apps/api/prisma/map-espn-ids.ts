@@ -4,6 +4,8 @@
  * - Grupos: matchea por (abbr home + abbr away + fecha UTC).
  * - KO: matchea por (fecha UTC + hora exacta) — ESPN usa placeholders con la misma fecha.
  * Idempotente. No toca picks/scores. Loguea los partidos sin match.
+ * Solo escribe Match.externalId; NUNCA toca Match.code (el id estable de
+ * siembra que usa la propagación del bracket).
  */
 import { readFileSync } from 'fs';
 import { resolve } from 'path';

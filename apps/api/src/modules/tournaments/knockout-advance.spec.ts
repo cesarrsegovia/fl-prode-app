@@ -8,33 +8,33 @@ describe('parseAdvancePlaceholder', () => {
   it('mapea Ganador R32-N -> wc-r32-NN', () => {
     expect(parseAdvancePlaceholder('Ganador R32-3')).toEqual({
       kind: 'WINNER',
-      sourceExternalId: 'wc-r32-03',
+      sourceCode: 'wc-r32-03',
     });
     expect(parseAdvancePlaceholder('Ganador R32-16')).toEqual({
       kind: 'WINNER',
-      sourceExternalId: 'wc-r32-16',
+      sourceCode: 'wc-r32-16',
     });
   });
 
   it('mapea CF -> qf y SF -> sf', () => {
     expect(parseAdvancePlaceholder('Ganador CF-2')).toEqual({
       kind: 'WINNER',
-      sourceExternalId: 'wc-qf-02',
+      sourceCode: 'wc-qf-02',
     });
     expect(parseAdvancePlaceholder('Ganador SF-1')).toEqual({
       kind: 'WINNER',
-      sourceExternalId: 'wc-sf-01',
+      sourceCode: 'wc-sf-01',
     });
     expect(parseAdvancePlaceholder('Ganador R16-8')).toEqual({
       kind: 'WINNER',
-      sourceExternalId: 'wc-r16-08',
+      sourceCode: 'wc-r16-08',
     });
   });
 
   it('reconoce Perdedor (3er puesto)', () => {
     expect(parseAdvancePlaceholder('Perdedor SF-2')).toEqual({
       kind: 'LOSER',
-      sourceExternalId: 'wc-sf-02',
+      sourceCode: 'wc-sf-02',
     });
   });
 

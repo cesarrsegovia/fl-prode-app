@@ -41,6 +41,8 @@ export interface ActiveMatchWithTeams extends ActiveMatch {
   /** Solo para propagación de eliminación. */
   homeTeamId: string | null;
   awayTeamId: string | null;
+  /** Id estable de siembra (Match.code); la propagación matchea por él. */
+  code: string | null;
 }
 
 /** Fila de la tabla de posiciones de un grupo, normalizada. */

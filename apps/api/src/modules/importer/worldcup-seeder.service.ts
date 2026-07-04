@@ -322,6 +322,8 @@ export class WorldCupSeederService {
           : (m.awayTeamName ?? '');
 
         const fields: Prisma.MatchUncheckedUpdateInput = {
+          // code = id estable de siembra (ej. wc-r32-03); lo usa la propagación del bracket
+          code: m.externalId,
           tournamentId,
           fixtureId,
           stage: MatchStage[m.stage],

@@ -1,7 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { MatchStatus } from '@prisma/client';
 import { MATCH_LEAD_MS } from '@prode/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CacheService } from '../../common/cache/cache.service';
+import { ResultadosService } from '../resultados/resultados.service';
 import { CreateFixtureDto } from './dto/create-fixture.dto';
 import { UpdateFixtureDto } from './dto/update-fixture.dto';
 import { UpdateMatchDto } from './dto/update-match.dto';
@@ -21,9 +23,12 @@ const FIXTURES_TTL_SECONDS = 30;
 
 @Injectable()
 export class FixturesService {
+  private readonly logger = new Logger(FixturesService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly cache: CacheService,
+    private readonly resultados: ResultadosService,
   ) {}
 
   /** Invalida fixtures cacheados. La llama el scoring cuando cambia un match. */
@@ -110,6 +115,24 @@ export class FixturesService {
     if (!match) throw new NotFoundException('Partido no encontrado');
     const updated = await this.prisma.match.update({ where: { id: matchId }, data });
     await this.invalidate();
+
+    // Carga manual del admin: al pasar a FINISHED con marcador cargado dispara
+    // la misma cadena que el poller (puntos + standings/propagación/campeón).
+    // Un fallo acá no debe romper el PATCH: el resultado ya quedó guardado.
+    // (Si luego se agregan penales a un partido ya FINISHED, la transición no
+    // se vuelve a detectar; para eso está el endpoint admin knockout/propagate.)
+    const becameFinished =
+      match.status !== MatchStatus.FINISHED &&
+      updated.status === MatchStatus.FINISHED &&
+      updated.homeScore !== null &&
+      updated.awayScore !== null;
+    if (becameFinished) {
+      try {
+        await this.resultados.onMatchFinished(updated);
+      } catch (err: any) {
+        this.logger.error(`Post-FINISHED hook falló para ${matchId}: ${err.message}`);
+      }
+    }
     return updated;
   }
 

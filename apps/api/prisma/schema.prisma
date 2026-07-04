@@ -233,6 +233,10 @@ model Fixture {
 model Match {
   id           String     @id @default(cuid())
   externalId   String?    @unique
+  // Id estable de siembra (wc-r32-03, wc-qf-01, ...). Identifica el partido
+  // dentro del bracket; los placeholders "Ganador R32-3" se resuelven contra
+  // él. Ningún script lo pisa (db:map-espn-ids solo toca externalId).
+  code         String?
   tournamentId String
   fixtureId    String
   stage        MatchStage @default(GROUP)
@@ -267,6 +271,8 @@ model Match {
   homeTeam    Team?            @relation("HomeTeamMatches", fields: [homeTeamId], references: [id])
   awayTeam    Team?            @relation("AwayTeamMatches", fields: [awayTeamId], references: [id])
   predictions Prediction[]
+
+  @@unique([tournamentId, code])
 }
 
 // Standings de grupo (cacheado, recalculado al cerrar partidos)

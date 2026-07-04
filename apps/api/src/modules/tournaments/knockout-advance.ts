@@ -7,18 +7,18 @@
  *   R16: "Ganador R32-3"   QF: "Ganador R16-1"   SF: "Ganador CF-2"
  *   3º:  "Perdedor SF-1"    Final: "Ganador SF-2"
  *
- * Cada placeholder se resuelve al `externalId` del partido de origen
+ * Cada placeholder se resuelve al `code` del partido de origen
  * (wc-r32-03, wc-qf-01, wc-sf-02, ...). Cuando ese partido termina, el ganador
  * (o perdedor, para el 3er puesto) ocupa el lado correspondiente.
  */
 
 export type AdvanceRef = {
   kind: 'WINNER' | 'LOSER';
-  /** externalId del partido de origen, p. ej. "wc-r32-03". */
-  sourceExternalId: string;
+  /** code del partido de origen, p. ej. "wc-r32-03". */
+  sourceCode: string;
 };
 
-// Prefijo del placeholder -> segmento del externalId.
+// Prefijo del placeholder -> segmento del code.
 const PREFIX_TO_SEGMENT: Record<string, string> = {
   R32: 'r32',
   R16: 'r16',
@@ -41,7 +41,7 @@ export function parseAdvancePlaceholder(name: string): AdvanceRef | null {
   const num = String(Number(m[3])).padStart(2, '0');
   return {
     kind: m[1] === 'Ganador' ? 'WINNER' : 'LOSER',
-    sourceExternalId: `wc-${segment}-${num}`,
+    sourceCode: `wc-${segment}-${num}`,
   };
 }
 

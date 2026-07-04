@@ -231,6 +231,13 @@ export class TournamentsController {
     return this.service.propagateAllKnockoutResults(id);
   }
 
+  /** Reasigna Match.code desde el JSON de siembra (repara BDs con externalId remapeado). */
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @Post(':id/bracket/relink-codes')
+  relinkBracketCodes(@Param('id') id: string) {
+    return this.service.relinkBracketCodes(id);
+  }
+
   /** Setea el campeón a mano y dispara el scoring de los picks de campeón. */
   @UseGuards(AuthGuard('jwt'), AdminGuard)
   @Patch(':id/champion')

@@ -34,6 +34,20 @@ import { matchResultPhrase, dailySummaryPhrase } from './activity-phrases';
  */
 const PRODUCT_TIME_ZONE = 'America/Argentina/Buenos_Aires';
 
+/** Datos mínimos de un partido recién FINISHED para disparar la cadena post-resultado. */
+export interface FinishedMatchInfo {
+  fixtureId: string;
+  tournamentId: string;
+  stage: MatchStage;
+  code: string | null;
+  homeTeamId: string | null;
+  awayTeamId: string | null;
+  homeScore: number | null;
+  awayScore: number | null;
+  homePens: number | null;
+  awayPens: number | null;
+}
+
 @Injectable()
 export class ResultadosService {
   private readonly logger = new Logger(ResultadosService.name);
@@ -67,6 +81,7 @@ export class ResultadosService {
         tournamentId: true,
         homeTeamId: true,
         awayTeamId: true,
+        code: true,
         homeTeam: { select: { shortName: true } },
         awayTeam: { select: { shortName: true } },
       },
@@ -85,6 +100,7 @@ export class ResultadosService {
       tournamentId: m.tournamentId,
       homeTeamId: m.homeTeamId,
       awayTeamId: m.awayTeamId,
+      code: m.code,
       homeAbbr: m.homeTeam?.shortName ?? null,
       awayAbbr: m.awayTeam?.shortName ?? null,
     }));
@@ -103,7 +119,18 @@ export class ResultadosService {
         if (local.stage === MatchStage.GROUP) {
           groupTournamentIds.add(local.tournamentId);
         } else if (isKnockoutStage(local.stage as unknown as SharedMatchStage)) {
-          await this.handleKnockoutFinished(local, r);
+          await this.handleKnockoutFinished({
+            fixtureId: local.fixtureId,
+            tournamentId: local.tournamentId,
+            stage: local.stage,
+            code: local.code,
+            homeTeamId: local.homeTeamId,
+            awayTeamId: local.awayTeamId,
+            homeScore: r.homeScore,
+            awayScore: r.awayScore,
+            homePens: r.homePens ?? null,
+            awayPens: r.awayPens ?? null,
+          });
         }
       }
     }
@@ -123,48 +150,45 @@ export class ResultadosService {
    * scoring de los picks de campeón. En try/catch: un fallo acá no debe romper
    * el cálculo de puntos del partido.
    */
-  private async handleKnockoutFinished(
-    local: ActiveMatchWithTeams,
-    r: RemoteResult,
-  ) {
+  private async handleKnockoutFinished(m: FinishedMatchInfo) {
     try {
       const { updated } = await this.tournaments.propagateKnockoutResult(
-        local.tournamentId,
+        m.tournamentId,
         {
-          externalId: local.externalId,
-          homeTeamId: local.homeTeamId,
-          awayTeamId: local.awayTeamId,
-          homeScore: r.homeScore,
-          awayScore: r.awayScore,
-          homePens: r.homePens ?? null,
-          awayPens: r.awayPens ?? null,
+          code: m.code,
+          homeTeamId: m.homeTeamId,
+          awayTeamId: m.awayTeamId,
+          homeScore: m.homeScore,
+          awayScore: m.awayScore,
+          homePens: m.homePens,
+          awayPens: m.awayPens,
         },
       );
       if (updated > 0) {
         await this.cache.delByPattern('fixtures:*');
         this.events.emitToAll(WS_EVENTS.RANKING_UPDATE, {
-          tournamentId: local.tournamentId,
+          tournamentId: m.tournamentId,
         });
       }
 
       // La final define el campeón → puntuar BracketPicks.
-      if (local.stage === MatchStage.FINAL) {
+      if (m.stage === MatchStage.FINAL) {
         const winnerSide = knockoutWinnerSide(
-          r.homeScore,
-          r.awayScore,
-          r.homePens ?? null,
-          r.awayPens ?? null,
+          m.homeScore,
+          m.awayScore,
+          m.homePens,
+          m.awayPens,
         );
         const championTeamId =
           winnerSide === 'HOME'
-            ? local.homeTeamId
+            ? m.homeTeamId
             : winnerSide === 'AWAY'
-              ? local.awayTeamId
+              ? m.awayTeamId
               : null;
         if (championTeamId) {
           const { scored, usersAffected } =
             await this.tournaments.setTournamentChampion(
-              local.tournamentId,
+              m.tournamentId,
               championTeamId,
             );
           if (scored > 0) {
@@ -173,13 +197,27 @@ export class ResultadosService {
             );
             await this.cache.delByPattern('ranking:*');
             this.events.emitToAll(WS_EVENTS.RANKING_UPDATE, {
-              tournamentId: local.tournamentId,
+              tournamentId: m.tournamentId,
             });
           }
         }
       }
     } catch (err: any) {
       this.logger.error(`Knockout propagation failed: ${err.message}`);
+    }
+  }
+
+  /**
+   * Cadena post-FINISHED para resultados cargados a mano por el admin
+   * (PATCH fixtures/matches/:id): la misma que dispara el poller — puntos del
+   * fixture, standings si es grupos, propagación/campeón si es eliminación.
+   */
+  async onMatchFinished(m: FinishedMatchInfo): Promise<void> {
+    await this.calculatePoints(m.fixtureId);
+    if (m.stage === MatchStage.GROUP) {
+      await this.refreshGroupStandings(m.tournamentId);
+    } else if (isKnockoutStage(m.stage as unknown as SharedMatchStage)) {
+      await this.handleKnockoutFinished(m);
     }
   }
 
