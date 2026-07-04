@@ -152,24 +152,10 @@ export class ResultadosService {
    */
   private async handleKnockoutFinished(m: FinishedMatchInfo) {
     try {
-      const { updated } = await this.tournaments.propagateKnockoutResult(
-        m.tournamentId,
-        {
-          code: m.code,
-          homeTeamId: m.homeTeamId,
-          awayTeamId: m.awayTeamId,
-          homeScore: m.homeScore,
-          awayScore: m.awayScore,
-          homePens: m.homePens,
-          awayPens: m.awayPens,
-        },
-      );
-      if (updated > 0) {
-        await this.cache.delByPattern('fixtures:*');
-        this.events.emitToAll(WS_EVENTS.RANKING_UPDATE, {
-          tournamentId: m.tournamentId,
-        });
-      }
+      // Fuente autoritativa de los cruces KO: ESPN por externalId. Reemplaza a la
+      // propagación por placeholders del seed (cableado que no coincide con la
+      // llave oficial de FIFA). Ya invalida cache y emite RANKING_UPDATE.
+      await this.syncKnockoutFromEspn(m.tournamentId);
 
       // La final define el campeón → puntuar BracketPicks.
       if (m.stage === MatchStage.FINAL) {
@@ -689,6 +675,105 @@ export class ResultadosService {
       where: { id: tid },
       data: { r32ThirdsConfirmed: true },
     });
+
+    await this.cache.delByPattern('fixtures:*');
+    this.events.emitToAll(WS_EVENTS.RANKING_UPDATE, { tournamentId: tid });
+
+    return { updated, unmapped: [...unmapped], tournamentId: tid };
+  }
+
+  /**
+   * Sincronización AUTORITATIVA de los cruces de TODAS las rondas de eliminación
+   * desde el proveedor (ESPN), matcheando cada partido por su `externalId` (que
+   * en KO es el event id real de ESPN). Reemplaza a la propagación por
+   * placeholders del seed (que dependía de un cableado de llaves que NO coincide
+   * con la llave oficial de FIFA, por lo que era poco confiable).
+   *
+   * Por cada lado (local/visitante), SOLO escribe un equipo cuando ESPN provee un
+   * equipo real para ese lado (abreviatura presente y mapeable a un Team). Si el
+   * lado de ESPN sigue siendo un placeholder pendiente (sin abreviatura, p.ej.
+   * "Round of 32 15 Winner"), NO toca ese lado en la DB: se preserva nuestro
+   * placeholder y jamás se escribe la etiqueta en inglés de ESPN. Adopta la
+   * orientación local/visitante del proveedor para los lados que sí resuelve.
+   *
+   * Idempotente: solo actualiza un lado cuando el equipo resuelto difiere del
+   * actual. Mapea abreviatura → Team por shortName (case-insensitive).
+   */
+  async syncKnockoutFromEspn(
+    tournamentId?: string,
+  ): Promise<{ updated: number; unmapped: string[]; tournamentId: string | null }> {
+    const tid =
+      tournamentId ??
+      (await this.prisma.tournament.findFirst({ where: { isActive: true }, select: { id: true } }))?.id ??
+      null;
+    if (!tid) return { updated: 0, unmapped: [], tournamentId: null };
+
+    const KO_STAGES = [
+      MatchStage.R32,
+      MatchStage.R16,
+      MatchStage.QUARTERFINAL,
+      MatchStage.SEMIFINAL,
+      MatchStage.THIRD_PLACE,
+      MatchStage.FINAL,
+    ];
+
+    const matches = await this.prisma.match.findMany({
+      where: { tournamentId: tid, stage: { in: KO_STAGES } },
+      select: {
+        id: true,
+        externalId: true,
+        startTime: true,
+        homeTeamId: true,
+        awayTeamId: true,
+      },
+    });
+    const active = matches
+      .filter((m) => m.externalId)
+      .map((m) => ({ id: m.id, externalId: m.externalId!, startTime: m.startTime }));
+    if (!active.length) return { updated: 0, unmapped: [], tournamentId: tid };
+
+    const remote = await this.provider.fetchResults(active);
+    const byExt = new Map(remote.map((r) => [r.externalId, r]));
+
+    const abbrs = new Set<string>();
+    for (const r of remote) {
+      if (r.homeAbbr) abbrs.add(r.homeAbbr);
+      if (r.awayAbbr) abbrs.add(r.awayAbbr);
+    }
+    const teams = await this.prisma.team.findMany({
+      where: { shortName: { in: [...abbrs] } },
+      select: { id: true, name: true, shortName: true },
+    });
+    const byAbbr = new Map(teams.map((t) => [t.shortName?.toLowerCase() ?? '', t]));
+
+    const unmapped = new Set<string>();
+    let updated = 0;
+    for (const m of matches) {
+      const r = m.externalId ? byExt.get(m.externalId) : undefined;
+      if (!r) continue;
+
+      // Resolvemos cada lado de forma independiente: solo escribimos un lado
+      // cuando ESPN trae una abreviatura real que mapea a un Team nuestro. Un
+      // lado sin abreviatura (placeholder pendiente) se deja intacto.
+      const h = r.homeAbbr ? byAbbr.get(r.homeAbbr.toLowerCase()) : undefined;
+      const a = r.awayAbbr ? byAbbr.get(r.awayAbbr.toLowerCase()) : undefined;
+      if (r.homeAbbr && !h) unmapped.add(r.homeAbbr);
+      if (r.awayAbbr && !a) unmapped.add(r.awayAbbr);
+
+      const data: Prisma.MatchUncheckedUpdateInput = {};
+      if (h && m.homeTeamId !== h.id) {
+        data.homeTeamId = h.id;
+        data.homeTeamName = h.name;
+      }
+      if (a && m.awayTeamId !== a.id) {
+        data.awayTeamId = a.id;
+        data.awayTeamName = a.name;
+      }
+      if (Object.keys(data).length === 0) continue;
+
+      await this.prisma.match.update({ where: { id: m.id }, data });
+      updated += 1;
+    }
 
     await this.cache.delByPattern('fixtures:*');
     this.events.emitToAll(WS_EVENTS.RANKING_UPDATE, { tournamentId: tid });

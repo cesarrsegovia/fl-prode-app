@@ -122,6 +122,26 @@ ruta a `m.code`. `syncR32FromEspn` NO tiene el bug: usa `externalId` como id del
 proveedor (rol legítimo) para traer las llaves oficiales de ESPN por
 abreviatura.
 
+## Giro de diseño: ESPN como fuente autoritativa de cruces (post-implementación)
+
+Al desplegar en prod se descubrió que **el cableado de la llave en
+`worldcup-2026.json` NO coincide con la llave oficial de FIFA**: los placeholders
+"Ganador R32-N vs Ganador R32-M" emparejan los partidos equivocados, porque la
+numeración cronológica del seed difiere de la numeración de ESPN (ej.: ESPN dice
+que Suiza juega contra "R32-15 winner" = ganador de Colombia-Ghana, pero en el
+seed `wc-r32-15` = Argentina). La propagación por placeholders del seed —aunque
+el código funcione— produce cruces incorrectos, y no se puede reparar remapeando
+números.
+
+**Solución adoptada:** `ResultadosService.syncKnockoutFromEspn(tournamentId?)`
+—generalización de `syncR32FromEspn` a todas las rondas KO— sincroniza los
+equipos de cada cruce desde ESPN por `externalId` (id real del evento). Solo
+escribe un lado cuando ESPN trae el equipo real; deja los lados pendientes
+intactos. El poller (`handleKnockoutFinished`) ahora llama a este sync en vez de
+`propagateKnockoutResult`. La propagación por placeholders + `relink` + `code`
+quedan como fallback admin, pero el camino automático es ESPN. Endpoint admin:
+`POST resultados/sync-knockout-espn`.
+
 ## Notas operativas (prod)
 
 - **No re-seedear en prod** tras el remap: el seeder upserta por `externalId`;

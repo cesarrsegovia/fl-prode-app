@@ -23,4 +23,11 @@ export class ResultadosController {
   syncR32(@Query('tournamentId') tournamentId?: string) {
     return this.resultados.syncR32FromEspn(tournamentId);
   }
+
+  /** Admin: sincroniza los cruces de TODAS las rondas KO desde ESPN (fuente autoritativa por externalId). */
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @Post('sync-knockout-espn')
+  syncKnockout(@Query('tournamentId') tournamentId?: string) {
+    return this.resultados.syncKnockoutFromEspn(tournamentId);
+  }
 }
