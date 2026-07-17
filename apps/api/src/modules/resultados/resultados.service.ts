@@ -142,6 +142,68 @@ export class ResultadosService {
     for (const tournamentId of groupTournamentIds) {
       await this.refreshGroupStandings(tournamentId);
     }
+
+    // Catch-up de llaves: si una ronda ya terminó pero el cruce siguiente aún
+    // no se llenó (ESPN suele publicar la llave con unos minutos de retraso),
+    // reintentamos el sync este ciclo. Se apaga solo al completarse el cruce.
+    if (await this.koHasFillablePendingSide()) {
+      try {
+        await this.syncKnockoutFromEspn();
+      } catch (err: any) {
+        this.logger.error(`KO resync catch-up falló: ${err.message}`);
+      }
+    }
+  }
+
+  /**
+   * True si existe algún cruce KO con un lado sin definir (teamId null) cuya
+   * ronda previa ya terminó por completo — es decir, el cruce YA debería poder
+   * resolverse desde ESPN pero todavía no se llenó (típico desfasaje: ESPN
+   * tarda unos minutos en publicar la llave siguiente tras cerrarse una ronda).
+   * Sirve de guarda para reintentar el sync sin depender de otra transición a
+   * FINISHED. Se apaga sola apenas el cruce queda completo.
+   */
+  private async koHasFillablePendingSide(): Promise<boolean> {
+    // Ronda previa de cada ronda KO (la que la alimenta).
+    const PREV: Partial<Record<MatchStage, MatchStage>> = {
+      [MatchStage.R16]: MatchStage.R32,
+      [MatchStage.QUARTERFINAL]: MatchStage.R16,
+      [MatchStage.SEMIFINAL]: MatchStage.QUARTERFINAL,
+      [MatchStage.THIRD_PLACE]: MatchStage.SEMIFINAL,
+      [MatchStage.FINAL]: MatchStage.SEMIFINAL,
+    };
+    const pending = await this.prisma.match.findMany({
+      where: {
+        // Solo el torneo activo: syncKnockoutFromEspn() (sin arg) resuelve el
+        // activo, así que limitamos el guard a lo que el sync puede llenar. Un
+        // torneo histórico con una llave incompleta no debe dispararlo cada ciclo.
+        tournament: { isActive: true },
+        stage: {
+          in: [
+            MatchStage.R16,
+            MatchStage.QUARTERFINAL,
+            MatchStage.SEMIFINAL,
+            MatchStage.THIRD_PLACE,
+            MatchStage.FINAL,
+          ],
+        },
+        OR: [{ homeTeamId: null }, { awayTeamId: null }],
+      },
+      select: { stage: true, tournamentId: true },
+    });
+    for (const m of pending) {
+      const prev = PREV[m.stage];
+      if (!prev) continue;
+      const unfinishedPrev = await this.prisma.match.count({
+        where: {
+          tournamentId: m.tournamentId,
+          stage: prev,
+          status: { not: MatchStatus.FINISHED },
+        },
+      });
+      if (unfinishedPrev === 0) return true;
+    }
+    return false;
   }
 
   /**
