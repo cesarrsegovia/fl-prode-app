@@ -67,13 +67,19 @@ export class TournamentsService {
 
   /** Torneo activo principal (Mundial 2026 una vez importado). */
   async findActive() {
-    return this.prisma.tournament.findFirst({
+    const t = await this.prisma.tournament.findFirst({
       where: { isActive: true },
       include: {
         _count: { select: { teams: true, matches: true } },
+        // El goleador ganador SÍ tiene relación en el schema (TournamentTopScorer).
+        topScorerWinner: true,
       },
       orderBy: { startDate: 'desc' },
     });
+    if (!t) return null;
+    // championTeam NO tiene relación en el schema: se resuelve a mano.
+    const championTeam = await this.resolveChampionTeam(t.championTeamId);
+    return { ...t, championTeam };
   }
 
   async findOne(id: string) {
@@ -82,10 +88,26 @@ export class TournamentsService {
       include: {
         groups: { orderBy: { name: 'asc' } },
         _count: { select: { teams: true, matches: true } },
+        // El goleador ganador SÍ tiene relación en el schema (TournamentTopScorer).
+        topScorerWinner: true,
       },
     });
     if (!t) throw new NotFoundException('Torneo no encontrado');
-    return t;
+    // championTeam NO tiene relación en el schema: se resuelve a mano.
+    const championTeam = await this.resolveChampionTeam(t.championTeamId);
+    return { ...t, championTeam };
+  }
+
+  /**
+   * Resuelve el equipo campeón manualmente. No hay relación FK en el schema para
+   * championTeamId, así que se consulta el Team por separado (evita migración).
+   */
+  private async resolveChampionTeam(championTeamId: string | null) {
+    if (!championTeamId) return null;
+    return this.prisma.team.findUnique({
+      where: { id: championTeamId },
+      select: { id: true, name: true, flagUrl: true },
+    });
   }
 
   /** Grupos con sus equipos + standings actuales. */

@@ -48,5 +48,14 @@
   "activity": {
     "title": "Actividad reciente",
     "empty": "Sin novedades por ahora."
+  },
+  "finished": {
+    "eyebrow": "Torneo finalizado",
+    "title": "¡Felicitaciones a los campeones!",
+    "congrats": "El Mundial 2026 terminó. Estos son los mejores del prode.",
+    "podium": "Podio",
+    "champion": "Campeón",
+    "topScorer": "Goleador",
+    "points": "{points, number} pts"
   }
 }

@@ -48,5 +48,14 @@
   "activity": {
     "title": "Letzte Aktivität",
     "empty": "Nichts Neues im Moment."
+  },
+  "finished": {
+    "eyebrow": "Turnier beendet",
+    "title": "Glückwunsch an die Champions!",
+    "congrats": "Die WM 2026 ist vorbei. Das sind die Besten des Tippspiels.",
+    "podium": "Podium",
+    "champion": "Champion",
+    "topScorer": "Torschützenkönig",
+    "points": "{points, number} Pkt."
   }
 }

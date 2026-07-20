@@ -48,5 +48,14 @@
   "activity": {
     "title": "Recent activity",
     "empty": "Nothing new for now."
+  },
+  "finished": {
+    "eyebrow": "Tournament finished",
+    "title": "Congratulations to the champions!",
+    "congrats": "The 2026 World Cup is over. These are the top players of the pool.",
+    "podium": "Podium",
+    "champion": "Champion",
+    "topScorer": "Top scorer",
+    "points": "{points, number} pts"
   }
 }

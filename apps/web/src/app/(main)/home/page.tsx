@@ -30,6 +30,7 @@ import { GroupCard } from '@/components/grupos/GroupCard';
 import { PositionBadge } from '@/components/ranking/PositionBadge';
 import { TeamFlag } from '@/components/torneo/TeamFlag';
 import { MatchRow } from '@/components/torneo/MatchRow';
+import { TournamentFinishedCard } from '@/components/torneo/TournamentFinishedCard';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
@@ -40,6 +41,9 @@ interface TournamentSummary {
   startDate: string | null;
   endDate: string | null;
   country: string | null;
+  championTeamId?: string | null;
+  championTeam?: { id: string; name: string; flagUrl: string | null } | null;
+  topScorerWinner?: { id: string; name: string; photoUrl: string | null } | null;
   _count?: { teams?: number; matches?: number };
 }
 
@@ -116,6 +120,8 @@ export default function HomePage() {
     [todayMatches],
   );
 
+  // El torneo se considera finalizado cuando ya se definió el campeón.
+  const isFinished = !!tournament?.championTeamId;
   const tourDays = daysUntil(tournament?.startDate ?? null);
   const topRanking = useMemo(() => fullRanking.slice(0, 5), [fullRanking]);
   const myEntry = useMemo(
@@ -185,7 +191,17 @@ export default function HomePage() {
         </Link>
       ) : null}
 
+      {/* Celebración: torneo finalizado (reemplaza "Partidos de hoy"). */}
+      {isFinished && tournament && (
+        <TournamentFinishedCard
+          top3={fullRanking.slice(0, 3)}
+          championTeam={tournament.championTeam ?? null}
+          topScorerWinner={tournament.topScorerWinner ?? null}
+        />
+      )}
+
       {/* Partidos de hoy */}
+      {!isFinished && (
       <section className="mb-12">
         <h2 className="font-display font-extrabold text-2xl text-foreground tracking-tight mb-4">
           {t('today.title')}
@@ -246,6 +262,7 @@ export default function HomePage() {
           </div>
         )}
       </section>
+      )}
 
       {/* Próxima fecha + mi ranking */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
