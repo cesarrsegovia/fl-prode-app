@@ -1,7 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { Trophy } from 'lucide-react';
+import { Trophy, ChevronRight } from 'lucide-react';
 import type { RankingEntry } from '@prode/shared';
 import { PositionBadge } from '@/components/ranking/PositionBadge';
 import { UserAvatar } from '@/components/ui/user-avatar';
@@ -11,6 +12,7 @@ import { displayName } from '@/lib/display-name';
 import { getInitials } from '@/lib/avatar';
 
 interface Props {
+  tournamentId: string;
   top3: RankingEntry[];
   championTeam: { id: string; name: string; flagUrl: string | null } | null;
   topScorerWinner: { id: string; name: string; photoUrl: string | null } | null;
@@ -22,6 +24,7 @@ interface Props {
  * equipo campeón y el goleador ganador.
  */
 export function TournamentFinishedCard({
+  tournamentId,
   top3,
   championTeam,
   topScorerWinner,
@@ -126,6 +129,17 @@ export function TournamentFinishedCard({
             )}
           </div>
         )}
+
+        {/* Acceso al detalle del torneo (reemplaza el CTA del hero oculto). */}
+        <div className="mt-6">
+          <Link
+            href={`/torneo/${tournamentId}`}
+            className="inline-flex items-center gap-1 text-xs font-display font-bold text-foreground hover:text-neon transition-colors"
+          >
+            {t('tournament.view')}
+            <ChevronRight className="size-3" />
+          </Link>
+        </div>
       </div>
     </section>
   );

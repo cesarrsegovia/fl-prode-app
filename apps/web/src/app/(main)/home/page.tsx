@@ -137,10 +137,11 @@ export default function HomePage() {
         </p>
       </header>
 
-      {/* Hero del Mundial */}
+      {/* Hero del Mundial (se oculta si el torneo ya finalizó; lo reemplaza la
+          card de celebración más abajo). */}
       {isLoading ? (
         <Skeleton className="h-64 w-full rounded-2xl mb-10" />
-      ) : tournament ? (
+      ) : tournament && !isFinished ? (
         <Link
           href={`/torneo/${tournament.id}`}
           className="group block mb-12 relative overflow-hidden rounded-2xl border border-neon/30 bg-gradient-to-br from-surface-1 via-surface-1 to-surface-2 p-8 transition-all hover:border-neon hover:shadow-[0_0_48px_oklch(86%_0.25_152/0.25)]"
@@ -194,6 +195,7 @@ export default function HomePage() {
       {/* Celebración: torneo finalizado (reemplaza "Partidos de hoy"). */}
       {isFinished && tournament && (
         <TournamentFinishedCard
+          tournamentId={tournament.id}
           top3={fullRanking.slice(0, 3)}
           championTeam={tournament.championTeam ?? null}
           topScorerWinner={tournament.topScorerWinner ?? null}
